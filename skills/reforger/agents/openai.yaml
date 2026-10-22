@@ -1,0 +1,4 @@
+interface:
+  display_name: "reforger"
+  short_description: "Build and debug Arma Reforger mods"
+  default_prompt: "Use $reforger to build and test an Arma Reforger mod feature."

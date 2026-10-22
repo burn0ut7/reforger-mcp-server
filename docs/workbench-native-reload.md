@@ -1,0 +1,51 @@
+# Native Workbench adapter maintenance
+
+`src/ReforgerMcp/NativeWorkbench.cs` is the sole native dispatcher for script reload, world opening, [Play sessions](workbench-play.md), accessible UI actions and [multiplayer plugins](workbench-multiplayer.md). Its private ABI profile is intentionally exact. MCP exposes named operations, not arbitrary addresses or memory writes. The world-specific call profile is documented in [world opening](workbench-worlds.md).
+
+## Current profile
+
+| Item | Identity / RVA |
+| --- | --- |
+| Workbench | ArmaReforgerWorkbenchSteamDiag.exe 1.8.0.13 |
+| Workbench SHA-256 | `7dd36ca1f662b0c13669a4f2f7f10e3c461c2906b021e742272d64b3ab7e9798` |
+| Qt6Core.dll | 6.8.3.0 |
+| Qt SHA-256 | `0cc62e841959fb8f6d366ea116c6f6bbc273e30f0ef90d8aa2e4adeb81fd63f8` |
+| App singleton pointer | `0x3DB6598` |
+| Arma4WorkbenchApp vtable | `0x2B922C8` |
+| Reload busy byte | `0x3DB65E5` |
+| Full reload routine | `0x222C70`, low-byte bool `(app, parentWidget)` |
+| Qt four-argument invokeMethodImpl | `0x20980`, `(QObject*, QSlotObjectBase*, ConnectionType, void*)` |
+
+Addresses are relocated from actual loaded module bases. For reload/world opening the app's `+0x164E` state byte must be clear. Play operations allow this flag, which can be set during simulation, and use the full native Play action's checks. Before allocation, the server checks both file hashes, live app vtable, busy bytes, main-window thread and live entry-point bytes against the files. This is a compatibility guard, not proof of every engine invariant. Reload readiness rejects editors other than Resource Manager/Script Editor. World opening additionally permits an idle, clean World Editor.
+
+Ghidra found that the native Reload WB Scripts callback at RVA `0x2957B0` passes a null parent and jumps to the full routine. The routine validates scripts, honors editor vetoes, unloads/reloads modules, recreates the game and restores editor state. Calling only the inner compiler would skip necessary lifecycle work.
+
+## Dispatch and lifetime
+
+The C# adapter allocates a data page and an executable thunk page in the configured Workbench process. Code is written as RW, then changed to RX and flushed; the data page stays RW. It registers x64 unwind metadata. The main callback reserves 48 bytes (shadow space plus two stack arguments); helper and queue routines reserve 32 bytes, each with matching unwind records. A short remote thread calls Qt's thread-safe queued invocation API with the app singleton as receiver. The reload itself runs inside the Qt event loop, checks the actual thread ID against the main window's thread and calls the full native routine. It never runs the reload on the remote thread.
+
+The Qt 6.8.3 slot layout has a 32-bit reference count at offset 0 and callback pointer at offset 8. Its callback operations are Destroy=0 and Call=1; a queued invocation transfers ownership to the event. Our Destroy callback restores its stack and tail-jumps through a memory operand into the system SetEvent function. Once the event is signaled, no instruction or return address points into the thunk. The server also waits for the queue thread to exit before deregistering unwind data and freeing memory. Merely setting a flag before a callback returns would not make freeing its code safe.
+
+The same named event is an operation claim keyed by PID and process start time, shared by reload, world opening, Play and multiplayer operations. Its historical `NativeReload` name is retained so older server processes cannot bypass it. A duplicated handle in Workbench keeps it alive after server interruption. Uncertain execution retains the allocations/claim until Workbench exit; the server never kills a native thread or blindly replays an operation.
+
+Primary ABI references: [Qt slot implementation, tag v6.8.3](https://github.com/qt/qtbase/blob/v6.8.3/src/corelib/kernel/qobjectdefs_impl.h), [queued invocation ownership](https://github.com/qt/qtbase/blob/v6.8.3/src/corelib/kernel/qmetaobject.cpp), [four-argument compatibility wrapper](https://github.com/qt/qtbase/blob/v6.8.3/src/corelib/compat/removed_api.cpp), and [Microsoft x64 prolog/epilog rules](https://learn.microsoft.com/en-us/cpp/build/prolog-and-epilog).
+
+## Runtime profile setup
+
+`NativeWorkbench.RuntimeSetup.cs` extends the same dispatcher for runtime setup. On the pinned Workbench binary it resolves `$profile:` through the filesystem owner (`0x1E90630`, virtual slot `0x140`). It reads the Workbench settings object at `app+0x1600`, checks its vtable (`0x3221A60`) and NET API field IDs (8 enabled, 9 port), and uses its ordinary value accessors (`0x128` read, `0x120` mutable). Enablement sets only field 8 and calls the named NET API server owner `0x22A320(app,"NetAPI")`; this routine is also reached from the Options apply lifecycle. It does not invoke the Options dialog.
+
+Persistence uses `0x22C230` with an engine-allocated one-element field-ID array; its `0x22C310` serializer saves only the selected setting through Workbench's QSettings. Both array allocations are consumed by the save lifecycle. The port and other settings are preserved. Native return alone does not establish readiness: C# verifies the PID-owned TCP listener, built-in compilation status, current installed bytes and the adapter's build/profile handshake. Existing binary/thread/allocation-lifetime guards apply. Revalidate these private interfaces after engine updates; no registry/UI fallback is provided.
+
+Research and validation are retained in `.temp/local/evidence/profile-setup-20261022/`: full Ghidra decompilations, first profile deployment, actual disabled-to-enabled transition, registry value comparison, restart persistence, repeat installation and failure tests. These artifacts are local evidence, not a runtime dependency. An initial research query failed because Ghidra rejects dot-prefixed project paths; a temporary filesystem alias was used for read-only inspection of the existing analysis, without introducing another analysis backend.
+
+## Updating after Workbench changes
+
+1. Keep the unsupported-binary rejection in place. Record hashes and loaded module versions for the new installation.
+2. Use the existing Ghidra backend to retrace the native menu callback, full reload lifecycle, singleton/vtable and busy fields. Reconfirm the exact installed Qt ABI against its source tag and exports.
+3. Update this isolated profile and any affected thunk/lifetime contract. Do not carry old addresses forward based on version strings or scan-and-call a guessed match. There is no fallback backend.
+4. Verify a harmless main-thread callback before a real reload, then run the real script suite: changed Game and WorkbenchGame CRCs, initialization, invalid-source failure, recovery, repeat calls, foreground observations and cleanup. Review cancellation/uncertain ownership separately; never induce a hung operation in a user's unsaved project.
+5. Obtain independent review and package the server. No persistent engine patch or project bridge needs reapplying.
+
+Local development evidence is retained outside distribution: `.temp/local/evidence/native-hook-*` and Ghidra queries under `.temp/artifacts/native-index/queries/`. Ghidra's full reload decompilation is query `4b7bb9d698054b28994777e58a192c6d`; the singleton getter is `a29b67b519fb441ab8d8ffb3a4c3aeca`. Research artifacts contain installation-specific data and are not shipped.
+
+

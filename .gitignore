@@ -1,0 +1,56 @@
+# Disposable workspace: tests, research, datasets, evidence and packages
+/.temp/
+# Ignore legacy locations too; new scratch work belongs in .temp
+/.local/
+/artifacts/
+/evidence/
+/.codex/
+/.vs/
+**/bin/
+**/obj/
+**/__pycache__/
+*.pyc
+*.tmp
+*.log
+*.dmp
+*.zip
+*.7z
+*.rar
+
+# Private configuration and credentials; distribute examples only
+configuration*.json
+!configuration.example.json
+*.local.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+
+# Installed game/SDK binaries, archives, derived analysis and asset copies
+*.exe
+*.dll
+*.pdb
+*.pak
+*.ebo
+*.gproj
+*.gpr
+*.rep/
+*.gdt
+*.gzf
+*.c
+*.ent
+*.et
+*.layer
+*.meta
+*.edds
+*.xob
+*.txa
+*.anm
+*.wav
+*.ogg
+*.snd
+
+# Authored runtime adapter is source
+!adapters/workbench/Scripts/WorkbenchGame/RST_Runtime.c

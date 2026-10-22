@@ -1,0 +1,39 @@
+{
+  "ghidraHome": "C:/Tools/ghidra_12.1.4_PUBLIC",
+  "javaHome": "C:/Tools/jdk-21",
+  "dataDirectory": "%LOCALAPPDATA%/ReforgerMcp",
+  "pakDirectories": {
+    "game": "D:/SteamLibrary/steamapps/common/Arma Reforger/addons",
+    "server": "E:/DedicatedServers/Reforger/addons",
+    "workbench": "D:/SteamLibrary/steamapps/common/Arma Reforger Tools/Workbench/addons",
+    "addons": "${Documents}/My Games/ArmaReforger/addons"
+  },
+  "targets": {
+    "game": "D:/SteamLibrary/steamapps/common/Arma Reforger/ArmaReforgerSteam.exe",
+    "diagnostic": "D:/SteamLibrary/steamapps/common/Arma Reforger/ArmaReforgerSteamDiag.exe",
+    "workbench": "D:/SteamLibrary/steamapps/common/Arma Reforger Tools/Workbench/ArmaReforgerWorkbenchSteamDiag.exe",
+    "server": "E:/DedicatedServers/Reforger/ArmaReforgerServer.exe"
+  },
+  "analysisTimeoutSeconds": 1800,
+  "queryTimeoutSeconds": 120,
+  "analysisCpuCount": 2,
+  "javaHeapMegabytes": 4096,
+  "logDirectories": {
+    "workbench": "${Documents}/My Games/ArmaReforgerWorkbench/logs",
+    "peer1": "${Documents}/My Games/PeerPlugin1/logs",
+    "peer2": "${Documents}/My Games/PeerPlugin2/logs",
+    "server": "${Documents}/My Games/ArmaReforger/logs"
+  },
+  "workbench": {
+    "executable": "D:/SteamLibrary/steamapps/common/Arma Reforger Tools/Workbench/ArmaReforgerWorkbenchSteamDiag.exe",
+    "addonDirectories": [
+      "D:/SteamLibrary/steamapps/common/Arma Reforger/addons"
+    ],
+    "runtimePort": null
+  },
+  "captureExecutables": {
+    "game": "D:/SteamLibrary/steamapps/common/Arma Reforger/ArmaReforgerSteam.exe",
+    "diagnostic": "D:/SteamLibrary/steamapps/common/Arma Reforger/ArmaReforgerSteamDiag.exe"
+  },
+  "unpackedDirectories": {}
+}
