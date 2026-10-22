@@ -506,7 +506,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
         var result = new { revision = s.Revision, entry, sha256 = Hash(bytes), file = path,
             archive = s.Archives.SingleOrDefault(a => a.Source == entry.Source && a.Archive == entry.Archive),
             looseFile = entry.Storage == "loose" ? s.LooseFiles.Single(f => f.Source == entry.Source && f.Path == entry.Path) : null,
-            meaning = "Original extracted bytes. No conversion, audio decoding, native decompilation, or repacking." };
+            meaning = "Original file bytes exported without transformation." };
         await Save(Path.Combine(directory, "provenance.json"), result, ct);
         return result;
     }, ct);

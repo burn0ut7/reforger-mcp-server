@@ -33,8 +33,8 @@ try
         builder.Services.AddMcpServer(options => options.ServerInstructions =
             "Reforger modding tools over standard MCP. Follow each tool's schema, prerequisites and reported state. " +
             "Use research_mod for unfamiliar modding questions, then verify declarations and usage in installed sources. " +
-            "Wiki captures, disk indexes, native decompilation and live Workbench observations are distinct evidence; " +
-            "preserve their provenance and revision tokens. Decompiled code is not a supported scripting API. " +
+            "Wiki captures, disk indexes, native analysis and live Workbench observations are distinct evidence; " +
+            "preserve their provenance and revision tokens. Inferred native code is not a supported scripting API. " +
             "Select the intended project/addon and edit scope explicitly; preserve unrelated files and editor settings. " +
             "Preparation is explicit. Never substitute stale data or another execution backend for a failed operation. " +
             "Poll pending operation IDs on the same connection; inspect state and logs after uncertainty, never blindly replay mutations. " +

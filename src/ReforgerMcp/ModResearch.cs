@@ -95,6 +95,6 @@ public sealed class ModResearch(WikiStore wiki, PakStore paks)
         if (path.Length == 0 || path.Contains('\\') || path.Contains('|') || path.Contains(':') ||
             path.Split('/').Any(p => p is "" or "." or "..") || path.Any(char.IsControl))
             return new(url, null, null, "unsupported");
-        return new(url, path, line, "path-only; addon identity and historical line are not verified", addon);
+        return new(url, path, line, "path-only; addon identity and linked line number are not verified", addon);
     }
 }

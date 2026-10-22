@@ -134,7 +134,7 @@ public class ReforgerBridge extends HeadlessScript {
         out.addProperty("signatureSource",f.getSignatureSource().toString());
         out.addProperty("bodyBytes",f.getBody().getNumAddresses());
         out.addProperty("section",section);
-        out.addProperty("caution","Reconstructed evidence, not original C++ or a supported Enforce API. Types may be inferred; indirect targets may remain unknown.");
+        out.addProperty("caution","Inferred native code; not original C++ or a supported Enforce API. Types may be inferred; indirect targets may remain unknown.");
         Page page = new Page();
         if (section.equals("callers") || section.equals("callees")) {
             Set<Function> functions = section.equals("callers") ? f.getCallingFunctions(monitor) : f.getCalledFunctions(monitor);
@@ -173,20 +173,20 @@ public class ReforgerBridge extends HeadlessScript {
                 if (!decompiler.openProgram(currentProgram)) throw new IllegalStateException(decompiler.getLastMessage());
                 DecompileResults result = decompiler.decompileFunction(f,30,monitor);
                 if (!result.decompileCompleted() || result.getDecompiledFunction() == null)
-                    throw new IllegalStateException("Decompilation incomplete: " + result.getErrorMessage());
+                    throw new IllegalStateException("Function analysis incomplete: " + result.getErrorMessage());
                 out.addProperty("decompileCompleted",true); value(out,"diagnostics",result.getErrorMessage());
                 value(out,"inferredSignature",result.getDecompiledFunction().getSignature());
                 String completeCode = result.getDecompiledFunction().getC();
                 byte[] codeBytes = completeCode.getBytes(StandardCharsets.UTF_8);
                 String codeHash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(codeBytes));
-                // Each query owns a fresh evidence directory. Retain one complete result:
-                // independent decompilations can infer different signatures and line counts.
+                // Each query saves its complete result in a separate evidence directory.
+                // Signatures and line counts can differ between analysis runs.
                 Path codeFile = Path.of(getScriptArgs()[1]).resolveSibling("decompilation.c");
                 Files.write(codeFile, codeBytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
                 out.addProperty("codeArtifact", "decompilation.c");
                 out.addProperty("codeSha256", codeHash);
                 out.addProperty("codeBytes", codeBytes.length);
-                out.addProperty("paginationCaution", "Independent decompilations may differ. Combine code pages only when codeSha256 matches; the complete single-run text is retained in codeArtifact under evidenceDirectory.");
+                out.addProperty("paginationCaution", "Independent analysis results may differ. Combine code pages only when codeSha256 matches; the complete single-run text is retained in codeArtifact under evidenceDirectory.");
                 String[] lines = completeCode.split("\\R",-1);
                 JsonArray warnings = new JsonArray();
                 for (String line : lines) if (line.contains("WARNING:")) warnings.add(clip(line));
@@ -214,8 +214,8 @@ public class ReforgerBridge extends HeadlessScript {
         Address selected = toAddr(address.replaceFirst("(?i)^0x", ""));
         out.addProperty("selectedAddress", selected.toString());
         JsonArray outgoing = new JsonArray();
-        // A bounded database-memory preview makes referenced constants inspectable
-        // without another binary reader or an inferred decompiler value.
+        // Read referenced constants directly from the analysis database.
+        // The preview is bounded to the selected memory block.
         JsonObject memory = new JsonObject();
         var block = currentProgram.getMemory().getBlock(selected);
         if (block == null || !block.isInitialized()) {

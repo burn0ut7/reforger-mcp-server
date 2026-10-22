@@ -13,7 +13,7 @@ public sealed class WorkbenchScriptTools(WorkbenchSession scripts)
         catch (Exception ex) when (ex is not (McpException or OperationCanceledException)) { throw new McpException(ex.Message); }
     }
     [McpServerTool(Name = "workbench_script_status", ReadOnly = true, OpenWorld = false)]
-    [Description("Read the configured Workbench process identity, native editor windows/dialogs and current compiler output. Output may be historical; this is not reload completion or project verification. No scripted bridge. Requires an accessible Windows desktop editor.")]
+    [Description("Read the configured Workbench process identity, native editor windows/dialogs and current compiler output. Output reflects the editor buffer; it does not confirm reload completion or project readiness. No scripted bridge. Requires an accessible Windows desktop editor.")]
     public Task<object> Status(CancellationToken cancellationToken = default) => Report(() => scripts.Status(cancellationToken));
 
     [McpServerTool(Name = "workbench_reload_scripts", ReadOnly = false, Destructive = true, OpenWorld = false)]
