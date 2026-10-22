@@ -114,8 +114,6 @@ public sealed partial class WorkbenchSession
             var configuredPort = configuration.Workbench!.RuntimePort;
             if (action != "status" && configuredPort != native.Port)
                 throw new InvalidOperationException($"Set workbench.runtimePort to Workbench's current NET API port {native.Port}. No port/settings/files were changed.");
-            if (action != "status") RuntimeNet.VerifyPortAvailableOrOwned(native.Port, process.Id);
-            if (action == "install") logs.BeginReload(process, token); // Check log provenance before writing/reloading.
             var changed = false;
             var wasEnabled = native.Enabled;
             if (action == "install") changed = RuntimeAdapter.Install(native.ProfileDirectory);
@@ -156,8 +154,6 @@ public sealed partial class WorkbenchSession
                 adapter = RuntimeAdapter.Handshake(native.Port, native.ProfileDirectory);
             }
             catch (Exception ex) when (ex is not OperationCanceledException) { problem = ex.Message; }
-            if (configuredPort != native.Port) problem = $"workbench.runtimePort must match the observed editor port {native.Port}. " + problem;
-            if (!native.Enabled) problem = "NET API is disabled in Workbench. " + problem;
             var ready = native.Enabled && installed && configuredPort == native.Port && adapter is not null;
             return new { state = ready ? "ready" : "not_ready", processId, profileDirectory = native.ProfileDirectory,
                 adapterPath = target, adapterBuild = RuntimeAdapter.Build, installedSha256 = RuntimeAdapter.InstalledHash,
