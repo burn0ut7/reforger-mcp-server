@@ -14,6 +14,7 @@ if (Test-Path -LiteralPath (Join-Path $root 'LICENSE')) {
 New-Item -ItemType Directory -Path (Join-Path $destination 'docs') | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'docs/workbench-runtime.md') -Destination (Join-Path $destination 'docs')
 Copy-Item -LiteralPath (Join-Path $root 'docs/project-context.md') -Destination (Join-Path $destination 'docs')
+Copy-Item -LiteralPath (Join-Path $root 'docs/shared-server.md') -Destination (Join-Path $destination 'docs')
 Copy-Item -LiteralPath (Join-Path $root 'docs/workbench-targeting.md') -Destination (Join-Path $destination 'docs')
 $adapterDirectory = Join-Path $destination 'adapters/workbench/Scripts/WorkbenchGame'
 New-Item -ItemType Directory -Path $adapterDirectory -Force | Out-Null
@@ -44,6 +45,14 @@ $desktopFolder = @($assets.packageFolders.PSObject.Properties.Name | ForEach-Obj
 }) | Select-Object -First 1
 if (!$desktopVersion -or !$desktopFolder) { throw 'Cannot locate the exact published Windows Desktop runtime license' }
 Copy-Item -LiteralPath (Join-Path $desktopFolder 'LICENSE') -Destination (Join-Path $destination 'THIRD-PARTY/WINDOWSDESKTOP-LICENSE.txt')
+$aspnetVersion = ($runtimeConfig.runtimeOptions.includedFrameworks | Where-Object name -eq 'Microsoft.AspNetCore.App').version
+$aspnetFolder = @($assets.packageFolders.PSObject.Properties.Name | ForEach-Object {
+    $candidate = Join-Path $_ "microsoft.aspnetcore.app.runtime.win-x64/$aspnetVersion"
+    if (Test-Path (Join-Path $candidate 'LICENSE.txt')) { $candidate }
+}) | Select-Object -First 1
+if (!$aspnetVersion -or !$aspnetFolder) { throw 'Cannot locate the exact published ASP.NET Core runtime license' }
+Copy-Item -LiteralPath (Join-Path $aspnetFolder 'LICENSE.txt') -Destination (Join-Path $destination 'THIRD-PARTY/ASPNETCORE-LICENSE.txt')
+Copy-Item -LiteralPath (Join-Path $aspnetFolder 'THIRD-PARTY-NOTICES.txt') -Destination (Join-Path $destination 'THIRD-PARTY/ASPNETCORE-NOTICES.txt')
 $packageFiles = @(Get-ChildItem -LiteralPath $destination -File -Recurse)
 $forbidden = @($packageFiles | Where-Object {
     $_.Extension -in @('.pdb','.pak','.wav','.snd','.gpr','.gproj') -or

@@ -13,6 +13,7 @@ public sealed record Configuration
     public Dictionary<string, string> PakDirectories { get; init; } = [];
     public Dictionary<string, string> UnpackedDirectories { get; init; } = [];
     public WorkbenchConfiguration? Workbench { get; init; }
+    public LocalHttpConfiguration? LocalHttp { get; init; }
     public Dictionary<string, string> CaptureExecutables { get; init; } = [];
     public Dictionary<string, string> LogDirectories { get; init; } = [];
     public int AnalysisTimeoutSeconds { get; init; } = 1800;
@@ -38,6 +39,10 @@ public sealed record Configuration
         config = config with
         {
             DataDirectory = ResolvePath(config.DataDirectory, directory, "dataDirectory"),
+            LocalHttp = config.LocalHttp is null ? null : config.LocalHttp with
+            {
+                TokenFile = ResolvePath(config.LocalHttp.TokenFile, directory, "localHttp.tokenFile")
+            },
             GhidraHome = string.IsNullOrEmpty(config.GhidraHome) && config.Targets.Count == 0 ? "" :
                 ResolvePath(config.GhidraHome, directory, "ghidraHome"),
             JavaHome = string.IsNullOrEmpty(config.JavaHome) && config.Targets.Count == 0 ? "" :
@@ -76,6 +81,8 @@ public sealed record Configuration
                 throw new InvalidDataException("workbench.addonDirectories cannot contain commas: Workbench uses commas as separators.");
         }
         var runtimePaths = config.Targets.Count > 0 ? new[] { config.GhidraHome, config.JavaHome } : [];
+        if (config.LocalHttp is { Port: < 1 or > 65535 })
+            throw new InvalidDataException("localHttp.port must be between 1 and 65535.");
         foreach (var p in new[] { config.DataDirectory }.Concat(runtimePaths).Concat(config.Targets.Values).Concat(config.PakDirectories.Values))
             if (!Path.IsPathFullyQualified(p)) throw new InvalidDataException("Configuration paths must be absolute: " + p);
         if (config.Targets.Keys.Any(k => !new[] { "game", "diagnostic", "workbench", "server" }.Contains(k)))
@@ -147,6 +154,7 @@ public sealed record Configuration
         void Add(string field, string value, bool file = false) =>
             locations.Add(new(field, value, file ? "file" : "directory", file ? File.Exists(value) : Directory.Exists(value)));
         foreach (var item in config.PakDirectories) Add("pakDirectories." + item.Key, item.Value);
+        if (config.LocalHttp is not null) Add("localHttp.tokenFile", config.LocalHttp.TokenFile, true);
         foreach (var item in config.UnpackedDirectories) Add("unpackedDirectories." + item.Key, item.Value);
         foreach (var item in config.Targets) Add("targets." + item.Key, item.Value, true);
         foreach (var item in config.CaptureExecutables) Add("captureExecutables." + item.Key, item.Value, true);
@@ -165,6 +173,12 @@ public sealed record Configuration
         return new(locations.All(p => p.Exists), config, locations.ToArray(),
             "Read-only path resolution and existence check. dataDirectory may be created on startup. Does not verify write permissions, archive compatibility, Ghidra/JDK versions, or prepare data.");
     }
+}
+
+public sealed record LocalHttpConfiguration
+{
+    public required int Port { get; init; }
+    public required string TokenFile { get; init; }
 }
 
 public sealed record WorkbenchConfiguration

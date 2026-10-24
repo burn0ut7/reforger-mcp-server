@@ -51,6 +51,14 @@ Configuration-relative paths are resolved against the JSON file's folder, never 
 
 Only `workbench_open_project` launches Workbench, which loads the selected project's scripts and uses its normal profile and online services. The server does not modify installed game files. PAK preparation reads the installed archives and saves derived catalogues/scripts separately. Native analysis uses a private executable copy and can take tens of minutes per binary. Native/PAK/wiki operations report busy explicitly. Keep only one server process attached to a given data directory.
 
+### One shared local server
+
+For multiple chats, agents or clients, use the explicit shared HTTP mode in the
+[shared server guide](docs/shared-server.md). Start one server and configure every
+client with its loopback URL and bearer token. Clients then connect without
+launching extra processes. Stdio remains available for one owning client; it is
+never used as a fallback. Both transports expose the same tools and services.
+
 ## Tools
 
 Start a modding question with `research_mod`. It returns two pages by default, short excerpts with applicable warnings, and matching installed files. Each page has one call to read its section within a fixed text budget; larger link inventories are opt-in. Both indexes use the same configured `dataDirectory`; import the browser capture using the same configuration to combine them. Existing schema-1 wiki indexes require explicit reimport to preserve tables, warning types and heading ancestry. See the [research workflow](docs/wiki-index.md#coordinated-modding-research).
