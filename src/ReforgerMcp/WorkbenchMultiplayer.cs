@@ -87,6 +87,17 @@ public sealed partial class WorkbenchSession
             }
             if (action == "start")
             {
+                if (tool == "dedicated")
+                {
+                    var port = configuration.Workbench!.RuntimePort
+                        ?? throw new InvalidOperationException("Dedicated launch requires the managed adapter. Configure workbench.runtimePort and run workbench_runtime_setup install.");
+                    RuntimeNet.VerifyListener(port, process.Id);
+                    var profile = (NativeRuntimeSetup)NativeWorkbench.Execute(process, token, runtimeSetup: false);
+                    RuntimeAdapter.Handshake(port, profile.ProfileDirectory);
+                    var paths = RuntimeNet.Call(port, new { APIFunc = "RST_Runtime", protocol = 2, action = "multiplayer_paths", token = "r" + Guid.NewGuid().ToString("N") });
+                    if (paths.GetProperty("state").GetString() != "paths_ready")
+                        throw new InvalidOperationException("Dedicated launch paths unavailable. Resolve mounted project paths and addonsDir before launching. No launch dispatched.");
+                }
                 if (running) return new { state = "already_running", processId, tool, processes = owned, scope = "No launch invoked. Inspect all processes; a partially running group is not automatically repaired." };
                 if (Unsettled()) throw new InvalidOperationException("Previous launch has not been explicitly stopped. Inspect status/logs, then stop to settle its lifecycle before another start.");
                 SaveClaim(); // survives MCP reconnect; retain on failure/uncertainty

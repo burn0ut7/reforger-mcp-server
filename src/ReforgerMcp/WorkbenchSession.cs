@@ -60,6 +60,7 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
             version = process.MainModule.FileVersionInfo.FileVersion,
             backend = "Windows UI Automation observations",
             nativeReload = NativeWorkbench.Status(process),
+            automaticResourceLeakSuppression = AutomaticResourceLeakSuppression,
             windows = windows.Select(w => new
             {
                 title = w.Current.Name,
@@ -241,7 +242,7 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
     private async Task<object> Run(Func<CancellationToken, object> operation, CancellationToken ct, TimeSpan? timeout = null)
     {
         ct.ThrowIfCancellationRequested();
-        if (!await gate.WaitAsync(0, ct)) throw new InvalidOperationException("Native Workbench operation is busy. Inspect screenshots; do not retry a mutation blindly.");
+        if (!await gate.WaitAsync(0, ct)) throw new WorkbenchBusyException("Native Workbench operation is busy. Inspect screenshots; do not retry a mutation blindly.");
         var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
         deadline.CancelAfter(timeout ?? TimeSpan.FromSeconds(40));
         // Keep the lock until UIA returns, even when the caller stops waiting.
@@ -252,7 +253,7 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
             try
             {
                 try { acquired = mutex.WaitOne(0); } catch (AbandonedMutexException) { acquired = true; }
-                if (!acquired) throw new InvalidOperationException("Another server is using native Workbench commands.");
+                if (!acquired) throw new WorkbenchBusyException("Another server is using native Workbench commands.");
                 deadline.Token.ThrowIfCancellationRequested();
                 try { return operation(deadline.Token); }
                 catch (BlockedException ex)

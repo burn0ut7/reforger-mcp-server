@@ -72,7 +72,7 @@ Read **Persistence System** when gameplay must survive saves/restarts. Follow tr
 
 ## Assets, UI, and integration
 
-Choose the relevant **Weapon Modding**, **Car Modding**, **Prop Creation**, **Faction Creation**, or asset-creation guide. Trace the required model/material/audio configuration into prefabs and gameplay use. **Entity Catalog**, **Asset Browser Mod Integration**, and **Game Master: Editable Entities Configuration** cover registration/discoverability. For UI, use **Layout Creation**, **Input Manager**, and **Mod Localisation** as applicable. An asset existing on disk does not establish that the player can find or use it.
+Choose the relevant **Weapon Modding**, **Car Modding**, **Prop Creation**, **Faction Creation**, or asset-creation guide. Trace the required model/material/audio configuration into prefabs and gameplay use. **Entity Catalog**, **Asset Browser Mod Integration**, and **Game Master: Editable Entities Configuration** cover registration/discoverability. For player-facing UI, follow the [required UI workflow](ui-workflow.md), including UI behavior changed through scripts. It routes to layout, input, component, and localisation documentation as needed. An asset existing on disk does not establish that the player can find or use it.
 
 ## Testing and delivery
 

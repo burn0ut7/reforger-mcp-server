@@ -1,11 +1,13 @@
 ---
 name: reforger
-description: Create, modify, and debug Arma Reforger mods, scripts, prefabs, and scenarios using saved official wiki guidance, installed game sources, and the Reforger MCP tools. Use for mod authoring and gameplay workflows, rather than development of the MCP server itself.
+description: Use for any Arma Reforger or Reforger-modding question or task, including research, Workbench, gameplay, scripts, UI, assets, and related MCP tooling. Apply official wiki guidance, installed game sources, and Reforger MCP tools where relevant.
 ---
 
 # Reforger
 
-Help turn the requested mod idea into working, integrated gameplay. Establish the addon/project, relevant dependencies, and an observable result; reuse context already established.
+Use the relevant guidance below to answer Reforger questions or carry out requested work; apply authoring and testing steps only when the task calls for them. For mod work, establish the addon/project, relevant dependencies, and an observable result; reuse context already established.
+
+Follow applicable global and project AGENTS.md instructions. The main agent coordinates collaboration and independent review under that guidance; delegated readers and workers stay within their assigned roles.
 
 ## Find the right approach
 
@@ -16,6 +18,8 @@ Use the [curated wiki entry points and workflow map](references/workflows.md) fo
 Check relevant APIs and usage in installed sources with `pak_search_text` and `pak_read`; use `pak_search` for resources. Follow the current tool schemas and reported index state. Keep authored files in the addon, separate from reference mirrors and installed archives. Extracted `.c` files are script source; generated native declarations expose signatures, not native implementations. Reserve `engine_*` investigation for unresolved native behavior; decompiled function names do not establish callable script APIs.
 
 ## Build and verify
+
+When the task creates, changes, or diagnoses player-facing UI, read and follow the [UI workflow](references/ui-workflow.md) before design or edits. This includes layouts, HUDs, menus, dialogs, labels, input/focus, and script-driven visibility or feedback, even without a `.layout` change. Skip it for work that does not affect UI; apply only relevant checks to narrow UI fixes. New UI or substantial redesign requires a saved visual concept before implementation and comparison with actual MCP screenshots afterward.
 
 Before writing or revising Enforce Script, read [coding conventions and readability checks](references/scripting-style.md). Apply them to new code and touched logic, including snippets and generated scripts. Use the addon's existing creator tag; preserve engine overrides and externally referenced names. Check a relevant official or installed example for API usage, without copying its style defects or unrelated scaffolding.
 

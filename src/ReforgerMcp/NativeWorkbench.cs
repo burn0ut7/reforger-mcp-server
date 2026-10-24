@@ -65,7 +65,7 @@ internal static partial class NativeWorkbench
         }
         public void Dispose() { foreach (var file in files.Values) file.Dispose(); files.Clear(); }
     }
-    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null)
+    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null)
     {
         ct.ThrowIfCancellationRequested();
         if (RuntimeInformation.ProcessArchitecture != Architecture.X64) throw new InvalidOperationException("Native Workbench operations require an x64 server.");
@@ -80,7 +80,8 @@ internal static partial class NativeWorkbench
             if (field.Kind == "bool" && plugin.Value is not ("true" or "false")) throw new ArgumentException("Setting requires true or false.");
             if (field.Kind is "array" or "process") throw new ArgumentException("Peer count and process observations are read-only.");
         }
-        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null;
+        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null && resourceLeakAssertion is null;
+        var suppressResourceLeakAssertion = resourceLeakAssertion == true || runReload || world is not null || ui is not null || play is "start" or "stop";
         using var ownVerification = verification is null ? new VerificationScope() : null;
         void CheckHash(string path, string hash) => (verification ?? ownVerification!).Verify(path, hash);
         var exe = process.MainModule!;
@@ -103,8 +104,15 @@ internal static partial class NativeWorkbench
                 if (Ptr(app) != exe.BaseAddress + 0x2b922c8) throw new Exception("Application vtable mismatch");
                 // app+164e can be set during Play: it blocks reload/world opening,
                 // but must not prevent Play observation or its normal stop lifecycle.
-                if (ui is null && (Read(exe.BaseAddress + 0x3db65e5, 1)[0] != 0 || (play is null && plugin is null && Read(app + 0x164e, 1)[0] != 0))) throw new Exception("Application busy");
+                if (ui is null && (Read(exe.BaseAddress + 0x3db65e5, 1)[0] != 0 || (play is null && plugin is null && resourceLeakAssertion is null && Read(app + 0x164e, 1)[0] != 0))) throw new WorkbenchBusyException("Application busy");
                 CheckCode(exe, 0x222c70); CheckCode(qt, 0x20980);
+                if (suppressResourceLeakAssertion || resourceLeakAssertion is not null)
+                {
+                    // Validate the complete assertion branch, not just its owning function entry.
+                    CheckCode(exe, 0x1a6a881); CheckCode(exe, 0x1a6a8a1); CheckCode(exe, 0x1a6a8bc);
+                    if (Read(exe.BaseAddress + ResourceLeakSuppressionRva, 1)[0] > 1)
+                        throw new InvalidOperationException("Unsupported resource-leak assertion flag state.");
+                }
                 if (runtimeSetup is not null)
                 {
                     foreach (var rva in new[] { 0x1e90630, 0x57d160, 0x57d1a0, 0x22a320, 0x22c230, 0x22c310, 0x1e32460 }) CheckCode(exe, rva);
@@ -208,6 +216,7 @@ internal static partial class NativeWorkbench
                 var cb = new E(); cb.B(0x53, 0x48, 0x83, 0xec, 0x40, 0x48, 0x89, 0xd3); // rbx=self; 64-byte aligned call frame
                 cb.B(0x83, 0xf9, 0); cb.J(0x84, "destroy"); cb.B(0x83, 0xf9, 1); cb.J(0x85, "return");
                 cb.B(0xff, 0x53, 48, 0x89, 0x43, 60, 0x3b, 0x43, 56); cb.J(0x85, "wrong");
+                if (suppressResourceLeakAssertion) EmitSuppressResourceLeakAssertion(cb, exe.BaseAddress);
                 if (runReload)
                     cb.B(0x48, 0x8b, 0x4b, 16, 0x31, 0xd2, 0xff, 0x53, 24, 0x0f, 0xb6, 0xc0, 0x89, 0x43, 68);
                 else if (ui is not null)
@@ -222,6 +231,7 @@ internal static partial class NativeWorkbench
                     if (ui.Action is "select" or "expand" or "collapse") { CheckCode(widgets, 0x2ade00); CheckCode(widgets, 0x2c6f40); CheckCode(widgets, 0x33de90); }
                     EmitUi(cb, ui, gui.BaseAddress, widgets.BaseAddress, qt.BaseAddress);
                 }
+                else if (resourceLeakAssertion is not null) EmitReadResourceLeakAssertion(cb, exe.BaseAddress);
                 else if (runtimeSetup is not null) EmitRuntimeSetup(cb, exe.BaseAddress, runtimeSetup.Value);
                 else if (projectContext) EmitProjectContext(cb, exe.BaseAddress);
                 else if (childPrefab is not null) EmitChildPrefab(cb, exe.BaseAddress);
@@ -313,6 +323,11 @@ internal static partial class NativeWorkbench
                 var completed = BitConverter.ToUInt32(result, 72);
                 var succeeded = BitConverter.ToUInt32(result, 68) == 1;
                 var resourceAcknowledged = BitConverter.ToInt32(result, 116) == 1;
+                if (resourceLeakAssertion is not null)
+                    return new { state = completed == 2 ? resourceLeakAssertion.Value ? succeeded ? "suppressed" : "suppression_failed" : "observed" : "outcome_unknown",
+                        processId = process.Id, suppressed = completed == 2 ? BitConverter.ToInt32(result, 68) == 1 : (bool?)null,
+                        assertion = "Resources are leaking! Check log!", scope = "This Workbench process until exit; leak diagnostics remain enabled.",
+                        expectedThread = uiThread, actualThread = BitConverter.ToUInt32(result, 60), allocationsReleased = true };
                 if (childPrefab is not null)
                     return ChildPrefabResult(childPrefab, process.Id, completed, succeeded, resourceAcknowledged, watch.ElapsedMilliseconds);
                 if (entity?.Action == "save_world")

@@ -15,9 +15,15 @@ internal static class RuntimeAdapter
     internal static readonly string InstalledHash = Convert.ToHexString(SHA256.HashData(InstalledSource));
     private static byte[] ReadSource()
     {
-        using var input = typeof(RuntimeAdapter).Assembly.GetManifestResourceStream("ReforgerMcp.RuntimeAdapter")
-            ?? throw new InvalidOperationException("Server distribution is missing its embedded runtime adapter.");
-        using var output = new MemoryStream(); input.CopyTo(output); return output.ToArray();
+        using var output = new MemoryStream();
+        foreach (var resource in new[] { "ReforgerMcp.RuntimeAdapter", "ReforgerMcp.MultiplayerAdapter" })
+        {
+            using var input = typeof(RuntimeAdapter).Assembly.GetManifestResourceStream(resource)
+                ?? throw new InvalidOperationException("Server distribution is missing its embedded adapter: " + resource);
+            input.CopyTo(output);
+            output.WriteByte((byte)'\n');
+        }
+        return output.ToArray();
     }
     internal static string PathIn(string profile) => Path.Combine(profile, "scripts", "WorkbenchGame", "ReforgerMcp", "RST_Runtime.c");
     internal static string Hash(string path) { using var file = File.OpenRead(path); return Convert.ToHexString(SHA256.HashData(file)); }

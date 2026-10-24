@@ -127,6 +127,15 @@ class RST_Runtime : NetApiHandler
 			return response;
 		}
 
+		if (runtimeRequest.action == "multiplayer_paths")
+		{
+			string argument;
+			response.state = "missing_addon_path";
+			if (RST_MultiplayerPaths.TryGetArgument(argument))
+				response.state = "paths_ready";
+			return response;
+		}
+
 		response.world = GetGame().GetWorldFile();
 		if (!GetGame().InPlayMode())
 		{

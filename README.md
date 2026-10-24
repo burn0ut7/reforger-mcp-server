@@ -65,6 +65,7 @@ Start a modding question with `research_mod`. It returns two pages by default, s
 | `workbench_reload_scripts` | Full native validation/reload of Game and Workbench modules; takes only `processId`. |
 | `workbench_open_project` | Directly launch an absolute `.gproj` path with configured dependency directories; refuse if Workbench is running. |
 | `workbench_open_world` | Open one `.ent` world through the native hook; return completion or a pending operation ID. |
+| `workbench_resource_leak_assertion` | Observe or activate [process-local suppression](docs/workbench-native-reload.md#resource-leak-assertion-suppression) of the specific resource-leak popup. Automatically activated when each Workbench session becomes ready while MCP is running, and before native lifecycle/UI mutations; leak logs remain enabled. |
 | `workbench_entity` | Observe a named entity and the active layer in the expected world. |
 | `workbench_query_entities` | Bounded native searches across loaded editor sources, including locked objects. |
 | `workbench_inspect_entity` | Inspect components, nested objects, arrays and effective authoring values with override provenance; obtain an edit token. |

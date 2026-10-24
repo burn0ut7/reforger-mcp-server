@@ -2,6 +2,8 @@
 
 Use judgment and infer intent. Keep solutions and documentation concise; avoid unnecessary abstractions and clarification loops.
 
+For every Arma Reforger or Reforger-modding question or task, including discussion and related MCP-server work, use the [Reforger skill](skills/reforger/SKILL.md). Include the skill and applicable global/project instructions in related subagent handoffs.
+
 ## Project
 
 Build a standalone, downloadable Reforger MCP server in C#/.NET using the official MCP SDK. Expose Workbench operations, supported game-runtime commands, Reforger file and language inspection, and indexed official-wiki search through standard MCP.
