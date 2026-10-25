@@ -189,43 +189,6 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
         { return Task.FromResult<object>(new { state = "unavailable", reason = ex.Message }); }
     }, ct);
 
-    public async Task<object> ResolvePaths(string[] paths, string? source, CancellationToken ct)
-    {
-        if (paths.Length == 0)
-            return new { state = "not-queried", reason = "Selected pages contain no supported file links." };
-        if (!File.Exists(Current) && config.PakDirectories.Count == 0 && config.UnpackedDirectories.Count == 0)
-            return new { state = "unavailable", reason = "Set pakDirectories and explicitly run pak_prepare." };
-        return await Run(() =>
-        {
-            PakSnapshot s;
-            try { s = Load(null, ct); }
-            catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or JsonException)
-            { return Task.FromResult<object>(new { state = "unavailable", reason = ex.Message }); }
-            ValidateSource(s, source);
-            var requested = paths.ToHashSet(StringComparer.OrdinalIgnoreCase);
-            var matches = s.Entries.Where(e => (source is null || e.Source == source) && requested.Contains(e.Path))
-                .ToLookup(e => e.Path, StringComparer.OrdinalIgnoreCase);
-            Fresh(s, ct);
-            return Task.FromResult<object>(new
-            {
-                state = "ready", s.Revision, s.PreparedAt,
-                meaning = "Exact case-insensitive paths. Multiple archives/sources remain distinct; no override precedence inferred. Read files to verify current declarations.",
-                files = paths.Select(path => new
-                {
-                    path, total = matches[path].Count(), omitted = Math.Max(0, matches[path].Count() - 2),
-                    candidates = matches[path].Take(2).Select(e => new
-                    {
-                        entryId = e.Id, e.Source, e.Archive, e.Storage,
-                        next = e.Extension == ".c"
-                            ? (object)new { tool = "pak_read", arguments = new { entryId = e.Id, revision = s.Revision, offset = 0, limit = 40 } }
-                            : new { tool = "pak_extract", arguments = new { entryId = e.Id, revision = s.Revision } }
-                    }),
-                    search = new { tool = "pak_search", arguments = new { query = path, source, revision = s.Revision, limit = 20 } }
-                })
-            });
-        }, ct);
-    }
-
     public Task<object> Prepare(CancellationToken ct, string? projectToken = null, bool includeAvailable = false, string[]? addonGuids = null) => Run<object>(async () =>
     {
         var roots = new Dictionary<string, string>(config.PakDirectories);

@@ -28,7 +28,7 @@ After an uncertain response, inspect status and the editor before another explic
 
 ## Research and scope
 
-The official [Startup Parameters](https://community.bistudio.com/wiki/Arma_Reforger:Startup_Parameters#Workbench) documents `-gproj` for selecting the project and `-addonsDir` for additional dependency search roots. [Resource Manager options](https://community.bistudio.com/wiki/Arma_Reforger:Resource_Manager:_Options) specifically notes that startup-parameter launches must locate dependencies in those roots.
+Workbench launch uses `-gproj` to select the project and `-addonsDir` for additional dependency search roots. Verify dependencies against the selected installation and observed project context.
 
 Research on 2026-10-20 used official search results and the saved browser capture of Startup Parameters, revision **379133**, captured **2026-10-20 10:56 EDT**. Direct page retrieval returned HTTP 403. The capture is historical evidence, not live editor state.
 

@@ -1,6 +1,6 @@
 ---
 name: reforger
-description: Use for any Arma Reforger or Reforger-modding question or task, including research, Workbench, gameplay, scripts, UI, assets, and related MCP tooling. Apply official wiki guidance, installed game sources, and Reforger MCP tools where relevant.
+description: Use for any Arma Reforger or Reforger-modding question or task, including research, Workbench, gameplay, scripts, UI, assets, and related MCP tooling. Use installed API declarations, source examples, resource data, and Reforger MCP tools.
 ---
 
 # Reforger
@@ -11,11 +11,15 @@ Follow applicable global and project AGENTS.md instructions. The main agent coor
 
 ## Find the right approach
 
-Use the saved official wiki as the primary workflow reference. Start unfamiliar questions with `research_mod`, then follow its `wiki_read` calls for section context, prerequisites, warnings, and examples. For a particular guide, use `wiki_search` with its title. Preserve revision provenance and “Do/Don't” labels; captured documentation is not a live compatibility check. Missing coverage is a gap, not proof that a feature does not exist.
+Start with installed code and resource data. Use the [source research workflow](references/workflows.md) to trace API declarations, base classes, implementations, and real call sites, then inspect the prefabs/configuration that connect them. Prefer an existing framework or resource variant where it fits the requested behavior.
 
-Use the [curated wiki entry points and workflow map](references/workflows.md) for unfamiliar language/engine basics or to follow a feature across systems. It is a starting point: continue searching beyond it for the task's details. Read only relevant sections; reuse evidence while its source revision remains applicable. An existing scenario framework, prefab variant, or configuration change may already fit the request. Use custom Enforce Script where it adds the needed behavior.
+Prefer supported built-in engine APIs, existing game systems/components, and resource configuration over reimplementing their behavior in script. Before adding a custom helper or subsystem, look for the operation already owned by the engine or an existing framework and inspect how shipped code uses it. Keep custom code focused on project-specific policy and composition; explain the concrete capability gap when a replacement is necessary. Native implementation is a reason to investigate reuse, not proof of performance or reliability; verify suitability and measure consequential performance claims.
 
-Check relevant APIs and usage in installed sources with `pak_search_text` and `pak_read`; use `pak_search` for resources. Follow the current tool schemas and reported index state. Keep authored files in the addon, separate from reference mirrors and installed archives. Extracted `.c` files are script source; generated native declarations expose signatures, not native implementations. Reserve `engine_*` investigation for unresolved native behavior; decompiled function names do not establish callable script APIs.
+Research unfamiliar or consequential APIs thoroughly before design or coding. Follow declarations into base behavior, representative callers, setup/teardown, and associated resources; deepen the investigation for unclear lifecycle, authority, ownership, side effects, or performance. Use the research workflow's depth criteria, preserving compact evidence rather than stopping at a matching signature or indiscriminately loading files.
+
+Check `pak_status` and prepare explicitly if needed. Use bounded `pak_search_text` batches for related symbols, `pak_search` for resource paths, and `pak_read` for surrounding code and readable prefab/config/layout data. Follow the tools' current schemas and revision tokens; narrow by source or path and reuse inspected evidence instead of loading whole files repeatedly. Empty matches are not proof that a feature does not exist.
+
+Keep authored files separate from reference mirrors and installed archives. Extracted `.c` files are script source; generated native declarations expose signatures, not native implementations. Reserve `engine_*` investigation for unresolved native behavior; decompiled function names do not establish callable script APIs. Disk data does not prove effective override precedence or live behavior.
 
 ## Build and verify
 

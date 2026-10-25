@@ -2,7 +2,7 @@
 
 A standalone Windows 10 (build 19041+) x64 C# MCP server for Arma Reforger modding: launch Workbench, capture selected editor/game windows, search installed PAK assets, export and search script source, and inspect native engine code. It uses one C# PAK reader, **one Ghidra backend** for native code and **Windows Graphics Capture** for screenshots. No model API, Python service, provider selection, or fallback chain.
 
-Current capability: directly launch Workbench, open worlds and reload scripts through version-checked native calls on the editor thread, inspect and operate accessible menus, buttons, dialog text fields and folder trees, and capture editor/game windows; capture and search official Reforger wiki prose/code/categories; catalogue PAKs, create versioned script mirrors, search paths and script contents, read text and extract selected resources; prepare/search installed Windows native executables and retrieve function code/context. Standalone validation, arbitrary custom-widget manipulation, arbitrary standalone game control, arbitrary memory/function injection, resource conversion and mod repacking are not implemented.
+Current capability: directly launch Workbench, open worlds and reload scripts through version-checked native calls on the editor thread, inspect and operate accessible menus, buttons, dialog text fields and folder trees, and capture editor/game windows; catalogue PAKs, create versioned script mirrors, search paths and script contents, read text and extract selected resources; prepare/search installed Windows native executables and retrieve function code/context. Standalone validation, arbitrary custom-widget manipulation, arbitrary standalone game control, arbitrary memory/function injection, resource conversion and mod repacking are not implemented.
 
 Configure Workbench in your single `configuration.json`; see the [Workbench guide](docs/workbench.md). Workbench launch itself needs no Ghidra, Java or scripted bridge.
 
@@ -22,14 +22,13 @@ The same Workbench configuration enables [native script compilation/reload](docs
 
 For screenshots of Workbench and separate Reforger clients, set `captureExecutables` in the same configuration; see the [window capture guide](docs/window-capture.md). Images are returned directly through MCP.
 
-The [wiki guide](docs/wiki-index.md) describes capture, explicit refresh and offline search. On 2026-10-20 an ordinary browser capture produced a local corpus of **292 distinct pages and 1,066 code blocks** within the discovered modding link graph. Saved rendered HTML is explicitly distinguished from API wikitext. The API capture remains blocked by HTTP 403; browser capture is an operator-selected import, never an automatic fallback. See the [modding usefulness analysis](docs/wiki-modding-analysis.md) for practical findings and coverage limits.
 
 Start with the [PAK modding guide](docs/pak-modding.md) for source examples, sound discovery and updates.
 
 ## Setup
 
 1. Copy `configuration.example.json` to `configuration.json` once. This is the only configuration file the server needs; every capability uses it. Keep your private `configuration.json` out of releases and Git.
-2. Replace the example paths with your installed locations. Keep only entries you use: `pakDirectories` indexes archives, `unpackedDirectories` indexes loose addon files, `workbench` enables editor operations, `captureExecutables` enables screenshots, and `logDirectories` enables log reading. Remove `workbench` or set it to `null` if unused; use `{}` for unused directory/executable maps. For live runtime access, first run `workbench_runtime_setup` with `action="status"`, set `workbench.runtimePort` to the observed editor port, restart the MCP connection, then run `action="install"`; see [profile setup](docs/workbench-runtime.md#profile-installation-and-net-api-enablement). Leave the port unset if runtime access is unused. Native `targets` require [Ghidra 12.1.4](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.4_build) and JDK 21, such as [Temurin](https://adoptium.net/temurin/releases/?version=21); when native analysis is unused, set `targets` to `{}` and `ghidraHome`/`javaHome` to empty strings. Wiki-only use needs just `dataDirectory`. Paths may be absolute, configuration-relative, or use `%VARIABLE%`; `${Documents}` resolves Windows Documents. The example uses `%LOCALAPPDATA%/ReforgerMcp` for generated data. Native database paths cannot contain dot-prefixed components.
+2. Replace the example paths with your installed locations. Keep only entries you use: `pakDirectories` indexes archives, `unpackedDirectories` indexes loose addon files, `workbench` enables editor operations, `captureExecutables` enables screenshots, and `logDirectories` enables log reading. Remove `workbench` or set it to `null` if unused; use `{}` for unused directory/executable maps. For live runtime access, first run `workbench_runtime_setup` with `action="status"`, set `workbench.runtimePort` to the observed editor port, restart the MCP connection, then run `action="install"`; see [profile setup](docs/workbench-runtime.md#profile-installation-and-net-api-enablement). Leave the port unset if runtime access is unused. Native `targets` require [Ghidra 12.1.4](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.4_build) and JDK 21, such as [Temurin](https://adoptium.net/temurin/releases/?version=21); when native analysis is unused, set `targets` to `{}` and `ghidraHome`/`javaHome` to empty strings. Paths may be absolute, configuration-relative, or use `%VARIABLE%`; `${Documents}` resolves Windows Documents. The example uses `%LOCALAPPDATA%/ReforgerMcp` for generated data. Native database paths cannot contain dot-prefixed components.
 3. Build with .NET 10: `dotnet build src/ReforgerMcp -c Release`. Or run the executable from the self-contained Windows package produced by `scripts/package.ps1`.
 4. Run `ReforgerMcp.exe --check-config "path/to/configuration.json"` to inspect resolved paths and missing configured inputs. This read-only check exits 0 when configured inputs exist, 1 for missing/invalid settings; it does not prepare data or verify runtime compatibility/write permissions.
 5. Configure your MCP client to launch the server through stdio, using the actual executable and configuration locations:
@@ -49,7 +48,7 @@ This is the common command/arguments shape; client settings formats differ. A so
 
 Configuration-relative paths are resolved against the JSON file's folder, never the MCP client's working directory. Variables resolve in the server process's environment. An unset variable fails with its field name; no alternate Steam path is substituted. Moving the configuration file changes relative paths, so recheck it after a move. Each user supplies their own configuration; the release contains the example only. See the [PAK guide](docs/pak-modding.md) for a minimal setup.
 
-Only `workbench_open_project` launches Workbench, which loads the selected project's scripts and uses its normal profile and online services. The server does not modify installed game files. PAK preparation reads the installed archives and saves derived catalogues/scripts separately. Native analysis uses a private executable copy and can take tens of minutes per binary. Native/PAK/wiki operations report busy explicitly. Keep only one server process attached to a given data directory.
+Only `workbench_open_project` launches Workbench, which loads the selected project's scripts and uses its normal profile and online services. The server does not modify installed game files. PAK preparation reads the installed archives and saves derived catalogues/scripts separately. Native analysis uses a private executable copy and can take tens of minutes per binary. Native/PAK operations report busy explicitly. Keep only one server process attached to a given data directory.
 
 ### One shared local server
 
@@ -61,7 +60,7 @@ never used as a fallback. Both transports expose the same tools and services.
 
 ## Tools
 
-Start a modding question with `research_mod`. It returns two pages by default, short excerpts with applicable warnings, and matching installed files. Each page has one call to read its section within a fixed text budget; larger link inventories are opt-in. Both indexes use the same configured `dataDirectory`; import the browser capture using the same configuration to combine them. Existing schema-1 wiki indexes require explicit reimport to preserve tables, warning types and heading ancestry. See the [research workflow](docs/wiki-index.md#coordinated-modding-research).
+Start with `pak_status`, then use `pak_search_text` for API declarations and call sites, `pak_search` for resources, and `pak_read` for bounded context. Follow base classes, implementations, and prefab references before drawing conclusions. See the [source research workflow](skills/reforger/references/workflows.md).
 
 | Tool | Purpose |
 |---|---|
@@ -101,12 +100,6 @@ Start a modding question with `research_mod`. It returns two pages by default, s
 | `workbench_controls` | Discover accessible menus, buttons, text fields and tree rows with their current state. |
 | `workbench_window_action` | Invoke controls, set text, select/expand tree rows, toggle menus/checkboxes or close windows through native actions. |
 | `workbench_window_action_status` | Poll a queued UI action while inspecting and resolving any dialogs it opens. |
-| `research_mod` | Ranked wiki guidance with bounded excerpts, installed file matches and exact follow-up calls. |
-| `wiki_status` | Offline capture status, coverage, exclusions and freshness limitations. |
-| `wiki_prepare` | Capture official Reforger namespace/category pages and retain raw evidence. |
-| `wiki_import_browser` | Explicitly import completed browser page captures into the same offline wiki index; report changes. |
-| `wiki_search` | Search prose, code examples, page titles or category titles with direct category filters. |
-| `wiki_read` | Read revision-pinned page passages or original wikitext with source provenance. |
 | `pak_status` | Catalogue freshness, source coverage, file types and script mirror path. |
 | `pak_prepare` | Prepare configured or explicitly selected project sources, including packed and loose files, into a new revision. |
 | `pak_search` | Bounded path/type searches, including all sounds, scripts, prefabs and layouts. |

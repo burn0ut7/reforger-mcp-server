@@ -33,7 +33,6 @@ The source audit requires Git and a Git checkout. For a source ZIP, initialize a
 Follow [setup](../README.md#setup), copy `configuration.example.json` to `configuration.json` and set paths for your installations. Check it with `ReforgerMcp.exe --check-config <configuration.json>`. Private settings cannot be inferred from someone else's archived configuration.
 
 - PAK/script indexes: configure installed sources, then call `pak_prepare` through MCP.
-- Wiki indexes: call `wiki_prepare`, or capture the official pages and explicitly import them as described in the [wiki guide](wiki-index.md). Recapture depends on the upstream website being available; historical revisions are not guaranteed to remain obtainable.
 - Native analysis: install the documented Ghidra and JDK versions, configure native targets, then run `ReforgerMcp.exe --config <configuration.json> --prepare all` or use `engine_prepare` and poll `engine_job`.
 
 The configuration example use `%LOCALAPPDATA%/ReforgerMcp` for generated runtime data. **Ghidra databases cannot be created under dot-prefixed directories, including `.temp/`.** Use the explicit external data directory for active native analysis. That derived data is also rebuildable from the user's installations. Removing it requires stopping its server and explicitly preparing again; it does not trigger a hidden rebuild.

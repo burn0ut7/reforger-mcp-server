@@ -28,7 +28,7 @@ Repeated installation preserves identical adapter bytes and skips reload when th
 
 This is a development execution surface: anyone with access to the Workbench NET API can call installed handlers. Keep that endpoint confined to your trusted development machine/network. The MCP server's loopback restriction is not an authentication mechanism for Workbench itself.
 
-The existing native dispatcher controls editor entities, components, prefab export, Play and runtime setup. Live VM access is owned by the small Enforce adapter: it resolves live references and uses the engine's documented [ScriptModule](https://community.bistudio.com/wikidata/external-data/arma-reforger/EnfusionScriptAPIPublic/interfaceScriptModule.html) compile/call APIs. The C# server owns installation, configuration, process/listener checks, serialization, tokens, transport deadlines and MCP. There is one runtime executor. The native VM calling convention is not validated; no direct native invocation of arbitrary methods is shipped, and no editor UI traversal is used for runtime calls or setup.
+The existing native dispatcher controls editor entities, components, prefab export, Play and runtime setup. Live VM access is owned by the small Enforce adapter: it resolves live references and uses the engine's `ScriptModule` compile/call APIs. The C# server owns installation, configuration, process/listener checks, serialization, tokens, transport deadlines and MCP. There is one runtime executor. The native VM calling convention is not validated; no direct native invocation of arbitrary methods is shipped, and no editor UI traversal is used for runtime calls or setup.
 
 ## Workflow
 

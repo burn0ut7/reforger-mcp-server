@@ -6,7 +6,7 @@ For every Arma Reforger or Reforger-modding question or task, including discussi
 
 ## Project
 
-Build a standalone, downloadable Reforger MCP server in C#/.NET using the official MCP SDK. Expose Workbench operations, supported game-runtime commands, Reforger file and language inspection, and indexed official-wiki search through standard MCP.
+Build a standalone, downloadable Reforger MCP server in C#/.NET using the official MCP SDK. Expose Workbench operations, supported game-runtime commands, Reforger file and language inspection, and installed API/resource research through standard MCP.
 
 Support ChatGPT/Codex, Claude, and other compatible clients through the same server and tool contracts. GitHub releases and client-specific plugin packages are distribution wrappers, not separate implementations. Keep the core independent of model providers.
 
@@ -30,5 +30,5 @@ Support ChatGPT/Codex, Claude, and other compatible clients through the same ser
 - Keep modding capabilities addon-agnostic. Test addons and fixture names belong in tests and evidence, not production behavior. Add restrictions, layers, or special cases only when they provide clear correctness, safety, or usability value.
 - When authoring mods, treat shared `modded class` overrides (especially VON/voice) as global while the addon is loaded. Gate project-specific behavior on the active game mode's ownership, preserve inherited behavior when inactive, and release project-owned shared state on exit. Verify unrelated-mode behavior through MCP with the addon loaded and after mode changes against an addon-free baseline; compilation and source guards alone are insufficient.
 - Keep MCP transport and client packaging thin. Any supported connection modes must be explicitly configured and share the same implementation; never cascade between them.
-- Preserve source and version provenance for indexed files, language data, and wiki results. Do not present cached data as live state or declarations as recovered compiled code.
+- Preserve source and version provenance for indexed files and language data. Do not present cached data as live state or declarations as recovered compiled code.
 - Verify real end-to-end behavior. A failure requires a root-cause fix, not a workaround path; never blindly replay a game or editor mutation after an uncertain outcome.

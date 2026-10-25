@@ -86,7 +86,7 @@ public sealed record Configuration
         foreach (var p in new[] { config.DataDirectory }.Concat(runtimePaths).Concat(config.Targets.Values).Concat(config.PakDirectories.Values))
             if (!Path.IsPathFullyQualified(p)) throw new InvalidDataException("Configuration paths must be absolute: " + p);
         if (config.Targets.Keys.Any(k => !new[] { "game", "diagnostic", "workbench", "server" }.Contains(k)))
-            throw new InvalidDataException("Native targets must be game, diagnostic, workbench, server. Empty targets and pakDirectories support wiki-only use.");
+            throw new InvalidDataException("Native targets must be game, diagnostic, workbench, server.");
         if (config.PakDirectories.Keys.Any(k => k.Length is < 1 or > 64 || k.Any(c => !char.IsAsciiLetterOrDigit(c) && c is not ('-' or '_'))))
             throw new InvalidDataException("PAK source IDs must be 1-64 ASCII letters, digits, hyphens or underscores.");
         foreach (var id in config.PakDirectories.Keys) PakArchive.ValidatePath(id);

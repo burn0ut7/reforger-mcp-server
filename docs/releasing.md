@@ -1,6 +1,6 @@
 # Release preparation
 
-The public source contains the C# server, its Java native-analysis adapter, the authored Enforce runtime adapter, configuration example, current guides and dependency notices. Installed game files, extracted scripts, wiki captures, decompiled output, Ghidra projects, personal configuration and validation captures stay local. Users supply their own installations and data.
+The public source contains the C# server, its Java native-analysis adapter, the authored Enforce runtime adapter, configuration example, current guides and dependency notices. Installed game files, extracted scripts, decompiled output, Ghidra projects, personal configuration and validation captures stay local. Users supply their own installations and data.
 
 ## Before publishing
 

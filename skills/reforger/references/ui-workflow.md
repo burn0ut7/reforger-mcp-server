@@ -8,7 +8,7 @@ Identify who uses the UI, what they are trying to accomplish, how they enter it,
 
 Inspect the affected addon and its dependencies, existing theme/components, and the nearest base-game equivalent. Search related authored mods for useful patterns; inventory all relevant addons for a cross-mod audit, but do not repeat a global audit for each button change. Distinguish production, experiments, copies, and generated files. Record what was actually inspected, including absent coverage. Use [research findings and source entry points](ui-research.md) to start, then verify against the installed version with `pak_search`, `pak_search_text`, and `pak_read`. Preserve source/archive revision and distinguish cached source from live behavior.
 
-Use `research_mod`, `wiki_search`, and `wiki_read` for the relevant official guides, following returned schemas. If unavailable, identify the gap; public official documentation and existing source mirrors can inform design but cannot validate the running game. Check current connected MCP capabilities before promising runtime tests.
+Trace the owning widget/component APIs, their base classes, real usage, and referenced layouts/input configurations in installed sources. Source can inform design but cannot validate the running game. Check current connected MCP capabilities before promising runtime tests.
 
 Classify the surface deliberately: an informative display/HUD should not capture gameplay input; a menu supports interaction; a dialog requests a response. Inspect an existing screenshot of the affected screen, or capture a baseline through MCP. A source file or mockup is not that baseline. Record missing live evidence without manufacturing a substitute.
 

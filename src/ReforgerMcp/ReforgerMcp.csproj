@@ -13,7 +13,6 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="AngleSharp" Version="1.8.5" />
     <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
   </ItemGroup>

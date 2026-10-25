@@ -6,21 +6,7 @@ Research date: 2026-10-23. These are source observations and design implications
 
 The local PAK source index was prepared on 2026-10-22 at revision `9b2fea665c0943b9bcf87ec2891bc011`. Its manifest records game `data/data007.pak` SHA-256 `5df8a2d49f4bb80def5c2f4c83cf63a27fb73a5f12b8527066762c5e695fd51a`; base-game script observations below came from that extracted archive. This is cached script source, not decompiled code or a live compatibility result. Authored-addon observations came from files on disk on the research date, not necessarily published mod versions.
 
-No Reforger MCP tools were connected during this research. No new game/editor captures or interaction tests were performed. Existing concept briefs were read, but no current visual-quality verdict is asserted. The local wiki index pointer reported a failed capture (HTTP 403); direct web opens of Layout Editor, Mod Localisation and Widget Tooltip Setup also returned 403. Official-page text was available through web search retrieval; it is not represented as a successful live wiki capture. Recheck precise API/version questions in the connected index and installed sources.
-
-## Official guidance
-
-| Source | Relevant finding |
-|---|---|
-| [Layout Creation](https://community.bohemia.net/wiki/Arma_Reforger%3ALayout_Creation) (retrieval identifies oldid 370904) | Distinguishes passive displays, interactive menus and response dialogs. WLib buttons have component-owned text. The example binds close actions and removes their listeners on close. This supports choosing the surface and exit behavior before styling. |
-| [Layout Editor](https://community.bistudio.com/wiki/Arma_Reforger%3AResource_Manager%3A_Layout_Editor?useskin=vector) | Documents clipping, text sizing, color inheritance, cursor handling, focus and navigation properties. Layout-file coordinates alone cannot establish the rendered result. |
-| [Modular Button Component Tutorial](https://community.bistudio.com/wiki/Arma_Reforger%3AModular_Button_Component_Tutorial?useskin=darkvector) | Separates event/state-driven effects from the button's interaction. Includes mouse-to-focus behavior and event propagation controls. Inspect those settings before layering custom click or color logic over a component. |
-| [Dialog Configuration Tutorial](https://community.bistudio.com/wiki/Arma_Reforger%3ADialog_Configuration_Tutorial) | Configurable dialogs compose title, message, content and footer controls from presets. Separate content layouts protect custom content from base-hierarchy changes. Reuse this machinery when it fits; do not require every screen to be a dialog. |
-| [Input Manager](https://community.bistudio.com/wiki/Arma_Reforger%3AInput_Manager?useskin=darkvector) | Named actions abstract physical inputs; contexts govern which actions participate. The page contains unfinished sections, so exact flag behavior needs installed-source/runtime checking. |
-| [Widget Tooltip Setup](https://community.bistudio.com/wiki/Arma_Reforger%3AWidget_Tooltip_Setup?useskin=darkvector) | Describes hover and gamepad-focus tooltips. Static tooltip invokers need identity checks and subscription cleanup. Supplemental help should not become another always-visible explanation panel. |
-| [Mod Localisation](https://community.bistudio.com/wiki/Arma_Reforger%3AMod_Localisation), [String Editor](https://community.bistudio.com/wiki/Arma_Reforger%3AString_Editor) | Player strings use registered string tables and generated runtime tables. String Editor cautions against hardcoded text and assembling sentences from translated fragments. Test resolved text and fit in the actual UI. |
-
-The simplification rules in the workflow are project design policy responding to the user's request, not claims that Bohemia mandates a particular palette, widget count or screen arrangement.
+No Reforger MCP tools were connected during this research. No new game/editor captures or interaction tests were performed. Existing concept briefs were read, but no current visual-quality verdict is asserted. Recheck precise API/version questions in installed sources.
 
 ## Base-game implementation observations
 

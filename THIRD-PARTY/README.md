@@ -1,7 +1,5 @@
 # Dependency notices
 
-AngleSharp 1.8.5 parses captured MediaWiki HTML without executing scripts or loading network resources. Its MIT license from NuGet's recorded upstream commit `4994f0a06ba703dea38f77d6f24da690e1fafe78` is in `ANGLESHARP-LICENSE.txt`. Wiki content belongs to its respective authors and is not bundled with the server.
-
 ModelContextProtocol / ModelContextProtocol.Core 2.2.0: Copyright Model Context Protocol a Series of LF Projects, LLC. The unmodified upstream license from commit `6fa3825973949a9c4f0cd8af344e15a8db09dc35` is in `MCP-SDK-LICENSE.txt`.
 
 The self-contained package also includes Microsoft .NET runtime and Microsoft.Extensions components. Their license is in `DOTNET-LICENSE.txt`; runtime third-party notices are copied from the exact runtime distribution during packaging to `DOTNET-NOTICES.txt`. Exact application dependencies are recorded in `ReforgerMcp.deps.json` and the repository's NuGet lock files.

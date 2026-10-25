@@ -4,9 +4,7 @@ Read before authoring or revising Reforger scripts, including generated code and
 
 ## Sources and judgment
 
-Based on the official wiki's captured revisions (browser capture 2026-10-20; checked 2026-10-22): [Conventions, revision 371014](https://community.bistudio.com/wiki?title=Arma_Reforger:Scripting:_Conventions&oldid=371014), [Best Practices, revision 370955](https://community.bistudio.com/wiki?title=Arma_Reforger:Scripting:_Best_Practices&oldid=370955), and [Do's and Don'ts, revision 370911](https://community.bistudio.com/wiki?title=Arma_Reforger:Scripting:_Do%27s_and_Don%27ts&oldid=370911). Conventions' *Spacing*, *Method* and *Example* sections and the paired Do/Don't snippets provide concrete examples. These revisions establish the guide's provenance, not compatibility with every installed game build.
-
-Use Conventions for style, Best Practices for readability judgment, and installed sources for current signatures and integration. Read paired examples with their labels. Some wiki examples omit tags/separators or contain unrelated inconsistencies; follow the explicit convention rather than reproducing every detail of a snippet. Check current indexed guidance when a rule or API is uncertain. Do not substitute C#, SQF, or DayZ assumptions.
+These are project authoring conventions. Use installed declarations and real call sites for current signatures, language patterns, and integration. Compare surrounding implementation and base classes before adapting an example. Preserve the conventions below without copying unrelated scaffolding or style defects. Do not substitute C#, SQF, or DayZ assumptions.
 
 ## Formatting
 

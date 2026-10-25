@@ -8,6 +8,7 @@ $destination = Join-Path $root ".temp/artifacts/package-$stamp"
 if ($LASTEXITCODE -ne 0) { throw 'Publish failed' }
 Copy-Item -LiteralPath (Join-Path $root 'configuration.example.json') -Destination $destination
 Copy-Item -LiteralPath (Join-Path $root 'README.md') -Destination $destination
+Copy-Item -LiteralPath (Join-Path $root 'skills') -Destination $destination -Recurse
 if (Test-Path -LiteralPath (Join-Path $root 'LICENSE')) {
     Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination $destination
 }
@@ -19,14 +20,13 @@ Copy-Item -LiteralPath (Join-Path $root 'docs/workbench-targeting.md') -Destinat
 $adapterDirectory = Join-Path $destination 'adapters/workbench/Scripts/WorkbenchGame'
 New-Item -ItemType Directory -Path $adapterDirectory -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'adapters/workbench/Scripts/WorkbenchGame/RST_Runtime.c') -Destination $adapterDirectory
-foreach ($document in @('workspace.md','releasing.md','modding-workflows.md','system-validation.md','pak-modding.md','wiki-index.md','wiki-modding-analysis.md','workbench.md','workbench-scripts.md','workbench-native-reload.md','workbench-worlds.md','workbench-play.md','workbench-multiplayer.md','console-logs.md','workbench-windows.md','window-capture.md')) {
+foreach ($document in @('workspace.md','releasing.md','modding-workflows.md','system-validation.md','pak-modding.md','workbench.md','workbench-scripts.md','workbench-native-reload.md','workbench-worlds.md','workbench-play.md','workbench-multiplayer.md','console-logs.md','workbench-windows.md','window-capture.md')) {
     Copy-Item -LiteralPath (Join-Path $root "docs/$document") -Destination (Join-Path $destination 'docs')
 }
 New-Item -ItemType Directory -Path (Join-Path $destination 'scripts') | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'scripts/setup-workbench.ps1') -Destination (Join-Path $destination 'scripts')
-Copy-Item -LiteralPath (Join-Path $root 'scripts/capture-wiki-browser.mjs') -Destination (Join-Path $destination 'scripts')
 New-Item -ItemType Directory -Path (Join-Path $destination 'THIRD-PARTY') | Out-Null
-foreach ($notice in @('README.md','ANGLESHARP-LICENSE.txt','CSWINRT-LICENSE.txt','DOTNET-LICENSE.txt','MCP-SDK-LICENSE.txt','PAKINSPECTOR-LICENSE.txt')) {
+foreach ($notice in @('README.md','CSWINRT-LICENSE.txt','DOTNET-LICENSE.txt','MCP-SDK-LICENSE.txt','PAKINSPECTOR-LICENSE.txt')) {
     Copy-Item -LiteralPath (Join-Path $root "THIRD-PARTY/$notice") -Destination (Join-Path $destination 'THIRD-PARTY')
 }
 $runtimeConfig = Get-Content (Join-Path $destination 'ReforgerMcp.runtimeconfig.json') -Raw | ConvertFrom-Json

@@ -24,7 +24,7 @@ Keep three distinct statements in the investigation:
 - **Inferred:** an explanation supported by those observations, with ambiguous types/call targets identified.
 - **Verified mod interface:** the declaration, documented workflow or Workbench behavior that makes the proposed mod change valid.
 
-This server supplies native observations, PAK resources and extracted script declarations. The wiki tools capture documented concepts and workflows; see [wiki scope and current validation limits](wiki-index.md). [Native script commands](workbench-scripts.md) can compile and request script reloads inside Workbench, with bounded compiler output and diagnostics. They do not establish active project or world state. Start with official documentation for intended usage, check declarations against the installed game version, then compile/test the mod in Workbench. Do not invent a script call based on a native C++ function name.
+This server supplies native observations, PAK resources and extracted script declarations. [Native script commands](workbench-scripts.md) can compile and request script reloads inside Workbench, with bounded compiler output and diagnostics. They do not establish active project or world state. Start with installed declarations, implementations and call sites, then compile/test the mod in Workbench. Do not invent a script call based on a native C++ function name.
 
 ## Keep retrieval focused
 
