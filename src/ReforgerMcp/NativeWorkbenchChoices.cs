@@ -65,6 +65,7 @@ internal static partial class NativeWorkbench
     private static void EmitChoices(E e, ChoicesCommand command, nint image, nint widgets, nint core)
     {
         void Call(nint address) { e.B(0x48, 0xb8); e.Q(address); e.B(0xff, 0xd0); }
+        void ImportCall(int rva) { e.B(0x48, 0xb8); e.Q(image + rva); e.B(0xff, 0x10); }
         void Load(int offset) { e.B(0x48, 0x8b, 0x8b); e.B(BitConverter.GetBytes(offset)); }
         void Save(int offset) { e.B(0x48, 0x89, 0x83); e.B(BitConverter.GetBytes(offset)); }
         void Address(int offset) { e.B(0x48, 0x8d, 0x8b); e.B(BitConverter.GetBytes(offset)); }
@@ -130,6 +131,13 @@ internal static partial class NativeWorkbench
         else
         {
             var items = command.Items;
+            // EditComboBox owns normal text commit/undo. Do not rebuild its
+            // choices while the user is typing, even if another source changes.
+            Load(192); ImportCall(0x2b59118); // QComboBox::lineEdit
+            e.B(0x48, 0x85, 0xc0); e.J(0x84, "choicesNotEditing");
+            e.B(0x48, 0x89, 0xc1); ImportCall(0x2b58310); // QWidget::hasFocus
+            e.B(0x84, 0xc0); e.J(0x85, "choicesNext");
+            e.Label("choicesNotEditing");
             Load(208); e.B(0x48, 0x8b, 0x51, 8); Address(ChoicesInputOffset); Equal("choicesProviderEqual", "choicesNext");
             Load(184); e.B(0x48, 0x8b, 0x91, 24, 1, 0, 0); Address(ChoicesInputOffset + 256); Equal("choicesCurrentEqual", "choicesNext");
             Load(184); e.B(0x81, 0xb9, 4, 1, 0, 0); e.B(BitConverter.GetBytes(items.Length)); e.J(0x85, "choicesReplace");
