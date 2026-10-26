@@ -136,8 +136,16 @@ internal static partial class NativeWorkbench
                     foreach (var rva in new[] { 0x20ea70, 0x27f050, 0x27f070 }) CheckCode(exe, rva);
                 if (plugin is not null)
                     foreach (var rva in new[] { 0x20ea70, 0x2eae90, 0x2e9060, 0x2e9510, 0x2e9770, 0x1e9d100, 0x1f6f0b0, 0x1f6e490, 0x1f6ea40 }) CheckCode(exe, rva);
-                var uiThread = N.GetWindowThreadProcessId(process.MainWindowHandle, out var windowPid);
-                if (windowPid != process.Id || uiThread == 0) throw new Exception("No main window");
+                // Automatic choices already observed their owning World Editor
+                // window. Process.MainWindowHandle can transiently be zero when
+                // Qt opens/closes a popup; use the exact owner for this operation.
+                var threadWindow = choices is null ? process.MainWindowHandle : (nint)choices.Window;
+                var uiThread = N.GetWindowThreadProcessId(threadWindow, out var windowPid);
+                if (windowPid != process.Id || uiThread == 0)
+                {
+                    if (choices is not null) throw new WorkbenchBusyException("World Editor window changed before choice refresh.");
+                    throw new Exception("No main window");
+                }
                 nint Export(string name)
                 {
                     var local = N.GetProcAddress(N.GetModuleHandle("kernel32.dll"), name);

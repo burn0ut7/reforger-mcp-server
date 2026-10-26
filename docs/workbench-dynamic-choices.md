@@ -37,13 +37,18 @@ Opt in a scalar string field explicitly:
 
 ```c
 [Attribute("", UIWidgets.ComboBox, "Choose an existing value.",
-    enums: {ParamEnum("(None)", "", "rst-choices:1:My_ChoicesProvider")})]
+    enums: {ParamEnum("", "", "rst-choices:1:My_ChoicesProvider")})]
 string m_sValue;
 ```
 
 The first empty entry's description is routing metadata. The extension keeps it
 in the native property and hides it from the combo's tooltip. Provider identifiers
 are class names; labels and saved values are identical in this first slice.
+Keep the script entry's label empty: Workbench's string-enum conversion uses that
+label as its initial value. The extension supplies the visible `(None)` label with
+an empty saved value. This prevents selecting a literal `(None)` before refresh.
+JsonApiStruct omits empty arrays; a ready provider response without `values` means
+an empty list, including after deleting its last source.
 
 Every second, the extension queries providers for visible marked controls,
 deduplicates and sorts values, and updates the owning native StringProperty list
@@ -64,3 +69,10 @@ Set Flag action discovery, missing-value retention, and faction keys `US`/`USSR`
 Choosing values persisted through the normal property editor; undo restored the
 previous faction value. Evidence is retained locally under
 `.temp/local/evidence/flag-picker-20261026`.
+
+Follow-up checks removed all three playable USSR groups from player availability:
+the player-casualty list dropped USSR and restored it after undo. Removing the last
+flag source retained its selected reference as `Flag86 (not found)` and kept
+refresh active with no available flags. Choosing `(None)` stored an empty string;
+after saving and reloading, the faction popup showed exactly `(None)`, `US`, and
+`USSR`, with no undo steps from background refresh.

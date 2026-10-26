@@ -35,7 +35,11 @@ public sealed partial class WorkbenchSession
             var state = response.GetProperty("state").GetString();
             if (state == "world_unavailable") return new { state = "waiting_for_editor" };
             if (state != "ready") throw new InvalidOperationException("Choice provider " + group.Key + ": " + state);
-            var values = response.GetProperty("values").EnumerateArray().Select(v => v.GetString() ?? "")
+            // JsonApiStruct omits registered empty arrays. A ready response
+            // without values therefore means the provider found no sources.
+            var supplied = response.TryGetProperty("values", out var rawValues)
+                ? rawValues.EnumerateArray().Select(v => v.GetString() ?? "") : [];
+            var values = supplied
                 .Where(v => v.Length != 0).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
             foreach (var control in group)
             {
