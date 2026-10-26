@@ -214,7 +214,8 @@ public sealed class NativeEngine : IAsyncDisposable, IDisposable
             if (!ProjectExists(manifest)) throw new McpException("Saved analysis project is missing. Call engine_prepare to explicitly rebuild it.");
             var folder = Path.Combine(config.DataDirectory,"queries",Guid.NewGuid().ToString("N"));
             var response = await ghidra.RunAsync(folder,manifest.ProjectDirectory,null,
-                new { operation, query, kind, address, section, offset, limit, sha256 = identity.Sha256 },null,ct);
+                new { operation, query, kind, address, section, offset, limit, sha256 = identity.Sha256,
+                    decompileTimeoutSeconds = Math.Max(1, config.QueryTimeoutSeconds - 15) },null,ct);
             if ((await Identity(target,ct)).AnalysisKey != identity.AnalysisKey) throw new McpException("Installed binary changed during query. Result discarded; prepare the new build.");
             if (!IsStillCurrent(target,manifest)) throw new McpException("Analysis changed during query. Result discarded; restart retrieval when preparation is ready.");
             var adapterSha = Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(ghidra.BridgePath,ct)));

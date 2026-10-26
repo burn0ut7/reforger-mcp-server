@@ -171,7 +171,10 @@ public class ReforgerBridge extends HeadlessScript {
             DecompInterface decompiler = new DecompInterface();
             try {
                 if (!decompiler.openProgram(currentProgram)) throw new IllegalStateException(decompiler.getLastMessage());
-                DecompileResults result = decompiler.decompileFunction(f,30,monitor);
+                int timeout = request.get("decompileTimeoutSeconds").getAsInt();
+                if (timeout < 1 || timeout > 600) throw new IllegalArgumentException("Invalid decompiler timeout");
+                out.addProperty("decompileTimeoutSeconds", timeout);
+                DecompileResults result = decompiler.decompileFunction(f,timeout,monitor);
                 if (!result.decompileCompleted() || result.getDecompiledFunction() == null)
                     throw new IllegalStateException("Function analysis incomplete: " + result.getErrorMessage());
                 out.addProperty("decompileCompleted",true); value(out,"diagnostics",result.getErrorMessage());
