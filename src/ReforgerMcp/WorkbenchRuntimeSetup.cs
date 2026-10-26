@@ -16,7 +16,7 @@ internal static class RuntimeAdapter
     private static byte[] ReadSource()
     {
         using var output = new MemoryStream();
-        foreach (var resource in new[] { "ReforgerMcp.RuntimeAdapter", "ReforgerMcp.MultiplayerAdapter" })
+        foreach (var resource in new[] { "ReforgerMcp.RuntimeAdapter", "ReforgerMcp.MultiplayerAdapter", "ReforgerMcp.EditorChoicesAdapter" })
         {
             using var input = typeof(RuntimeAdapter).Assembly.GetManifestResourceStream(resource)
                 ?? throw new InvalidOperationException("Server distribution is missing its embedded adapter: " + resource);

@@ -134,6 +134,7 @@ public sealed class WorkbenchWindows(Configuration configuration)
         {
             if (e.TryGetCurrentPattern(SelectionItemPattern.Pattern, out _)) actions.Add("select");
             if (hasMenu) actions.AddRange(["expand", "collapse"]);
+            actions.AddRange(["open_choices", "choose"]); // Native owner check refuses rows without a combo editor.
         }
         if (Editable(e)) actions.Add("set_text");
         return actions.ToArray();
@@ -193,8 +194,15 @@ public sealed class WorkbenchWindows(Configuration configuration)
         var node = selected.Element;
         foreach (var ancestor in selected.Ancestors)
         {
-            node = TreeWalker.ControlViewWalker.GetParent(node);
-            if (node is null || RuntimeId(node) != RuntimeId(ancestor)) throw new InvalidOperationException("Control moved; inspect again.");
+            // Validate the same downward edge used to observe this control.
+            // Qt popup views may report the owning combo from GetParent even
+            // though the popup window exposes the view as its direct child.
+            var child = TreeWalker.ControlViewWalker.GetFirstChild(ancestor);
+            int visited = 0;
+            while (child is not null && RuntimeId(child) != RuntimeId(node) && visited++ < 2001)
+                child = TreeWalker.ControlViewWalker.GetNextSibling(child);
+            if (child is null || RuntimeId(child) != RuntimeId(node)) throw new InvalidOperationException("Control moved; inspect again.");
+            node = ancestor;
         }
     }
     private sealed record Selection(AutomationElement Window, AutomationElement? Button, int Pid, long Start,
@@ -297,10 +305,10 @@ public sealed class WorkbenchWindows(Configuration configuration)
 
     public Task<object> Act(string selectionId, string action, CancellationToken ct, string? value = null) => Run(() =>
     {
-        if (action is not ("invoke" or "close" or "menu" or "toggle" or "set_text" or "select" or "expand" or "collapse"))
-            throw new ArgumentException("action must be invoke, close, menu, toggle, set_text, select, expand or collapse, as advertised by inspection.");
-        if (action == "set_text" ? value is null || value.Length > 1024 || value.Contains('\0') : value is not null)
-            throw new ArgumentException("Only set_text accepts value; it requires at most 1024 UTF-16 code units without NUL.");
+        if (action is not ("invoke" or "close" or "menu" or "toggle" or "set_text" or "select" or "expand" or "collapse" or "open_choices" or "choose"))
+            throw new ArgumentException("action must be invoke, close, menu, toggle, set_text, select, expand, collapse, open_choices or choose, as advertised by inspection.");
+        if (action is "set_text" or "choose" ? value is null || value.Length > 1024 || value.Contains('\0') : value is not null)
+            throw new ArgumentException("set_text and choose accept value; it requires at most 1024 UTF-16 code units without NUL.");
         if (nativeWindows.TryGetValue(selectionId, out var header))
         {
             if (action != "close") throw new ArgumentException("Header selections support close only; request window details for controls.");

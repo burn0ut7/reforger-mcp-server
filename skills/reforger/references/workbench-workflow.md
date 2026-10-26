@@ -16,9 +16,11 @@ Inherited object-array entry deletion and creating a missing single-object prope
 
 ## Compile and play
 
-Save source files. Before `workbench_reload_scripts`, preserve authoring changes, stop Play if appropriate, and close World Editor normally. The current reload hook rejects an open World Editor and performs full native validation/reload; there is no standalone `validate` action. Native operations are binary-profile checked; an incompatible editor is not a reason to try menus as a replacement.
+Save source files and use the connected MCP Reload operation to recompile and activate script changes in the existing Workbench process. Keep the development project and test addons loaded; do not quit/relaunch Workbench or switch back to a production-only project after testing. Reload is the normal iteration path. Restart or switch projects only for an explicit user request or a demonstrated operation-specific requirement, explained before acting.
 
-After successful reload, reopen the test world and inspect its state. Play requires a saved, clean world and honors existing Play settings; camera-start mode may bypass the spawning flow a scenario test needs. Any deliberate setting change should serve the test and be explained. Stopping Play discards runtime-only changes.
+Check the current tool contract before dispatch. Some MCP versions reject Reload while World Editor is open; that is a tool limitation, not a Workbench restart requirement. Preserve unsaved work and follow any required editor-close prerequisite without quitting Workbench. Report or repair a blocking limitation in the owning MCP capability within the authorized scope; do not substitute another backend or introduce a process-restart cycle. Reopen the same world only if the operation actually required closing it.
+
+After Reload, inspect compilation results and the resulting editor/runtime state before continuing. Stop or restart Play only when required by the operation or test; stopping Play discards runtime-only changes. Play requires a saved, clean world and honors existing Play settings. Preserve those settings unless a deliberate change is needed and explained.
 
 Use fresh `log_sessions`/`log_read` evidence and observable gameplay assertions. Historical compiler diagnostics do not establish a new successful reload. A previously recorded script-reload teardown/resource-leak assertion remains unresolved; acknowledging a dialog or restarting is not evidence of a fix. Preserve its evidence if encountered.
 

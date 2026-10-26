@@ -23,6 +23,8 @@ Keep authored files separate from reference mirrors and installed archives. Extr
 
 ## Build and verify
 
+Keep the current Workbench process and development project open. Use Reload to recompile and activate script changes. Test addons and fixtures may stay loaded between iterations, tasks, and handoff; keep them separate from production code without routinely switching projects or unloading them. Restart or switch projects only when the user requests it or a specific operation demonstrably requires it, and explain that requirement first.
+
 When the task creates, changes, or diagnoses player-facing UI, read and follow the [UI workflow](references/ui-workflow.md) before design or edits. This includes layouts, HUDs, menus, dialogs, labels, input/focus, and script-driven visibility or feedback, even without a `.layout` change. Skip it for work that does not affect UI; apply only relevant checks to narrow UI fixes. New UI or substantial redesign requires a saved visual concept before implementation and comparison with actual MCP screenshots afterward.
 
 Before writing or revising Enforce Script, read [coding conventions and readability checks](references/scripting-style.md). Apply them to new code and touched logic, including snippets and generated scripts. Use the addon's existing creator tag; preserve engine overrides and externally referenced names. Check a relevant official or installed example for API usage, without copying its style defects or unrelated scaffolding.

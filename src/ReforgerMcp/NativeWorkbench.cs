@@ -65,11 +65,11 @@ internal static partial class NativeWorkbench
         }
         public void Dispose() { foreach (var file in files.Values) file.Dispose(); files.Clear(); }
     }
-    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null)
+    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null, ChoicesCommand? choices = null)
     {
         ct.ThrowIfCancellationRequested();
         if (RuntimeInformation.ProcessArchitecture != Architecture.X64) throw new InvalidOperationException("Native Workbench operations require an x64 server.");
-        if (ui?.Action == "set_text" && (ui.Text is null || ui.Text.Length > 1024 || ui.Text.Contains('\0'))) throw new ArgumentException("set_text requires at most 1024 UTF-16 code units without NUL.");
+        if (ui?.Action is "set_text" or "choose" && (ui.Text is null || ui.Text.Length > 1024 || ui.Text.Contains('\0'))) throw new ArgumentException("set_text requires at most 1024 UTF-16 code units without NUL.");
         if (play is not (null or "status" or "start" or "stop")) throw new ArgumentException("Invalid Play action.");
         if (plugin is not null && (plugin.Tool is not ("dedicated" or "peers") || plugin.Action is not ("status" or "run" or "configure" or "stop" or "start_peers" or "get" or "set" or "clear_closed_server") || plugin.Action == "start_peers" && plugin.Tool != "peers")) throw new ArgumentException("Invalid plugin command.");
         var field = plugin?.Action is "get" or "set" or "clear_closed_server" ? Field(plugin) : null;
@@ -80,7 +80,7 @@ internal static partial class NativeWorkbench
             if (field.Kind == "bool" && plugin.Value is not ("true" or "false")) throw new ArgumentException("Setting requires true or false.");
             if (field.Kind is "array" or "process") throw new ArgumentException("Peer count and process observations are read-only.");
         }
-        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null && resourceLeakAssertion is null;
+        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null && resourceLeakAssertion is null && choices is null;
         var suppressResourceLeakAssertion = resourceLeakAssertion == true || runReload || world is not null || ui is not null || play is "start" or "stop";
         using var ownVerification = verification is null ? new VerificationScope() : null;
         void CheckHash(string path, string hash) => (verification ?? ownVerification!).Verify(path, hash);
@@ -152,7 +152,7 @@ internal static partial class NativeWorkbench
                 var eventError = Marshal.GetLastWin32Error(); Check(released != 0);
                 if (eventError == 183) throw new InvalidOperationException("Native operation active or retained after interruption. Restart Workbench if its owning server cannot finish cleanup. No call dispatched.");
                 Check(N.DuplicateHandle(N.GetCurrentProcess(), released, hp, out remoteEvent, 0, false, 2));
-                data = N.VirtualAllocEx(hp, 0, projectContext ? (nuint)ProjectBufferSize : entity?.Target is null ? 4096u : (nuint)(TargetInputOffset + 4096), 0x3000, 4); Check(data != 0);
+                data = N.VirtualAllocEx(hp, 0, choices is not null ? ChoicesBufferSize : projectContext ? (nuint)ProjectBufferSize : entity?.Target is null ? 4096u : (nuint)(TargetInputOffset + 4096), 0x3000, 4); Check(data != 0);
                 code = N.VirtualAllocEx(hp, 0, 16384, 0x3000, 4); Check(code != 0);
                 // Data: Qt slot ref+impl; app; reload; event; SetEvent; GetCurrentThreadId;
                 // expected thread; actual thread; reload flag; bool result; completion; queue result.
@@ -162,6 +162,7 @@ internal static partial class NativeWorkbench
                 Q(32, remoteEvent); Q(40, Export("SetEvent")); Q(48, Export("GetCurrentThreadId"));
                 BitConverter.GetBytes(uiThread).CopyTo(bytes, 56); Q(64, runReload ? 1 : 0);
                 Write(data, bytes);
+                if (choices is not null) Write(data + ChoicesInputOffset, ChoicesInput(choices));
                 if (runtimeSetup is not null)
                 {
                     Write(data + 512, System.Text.Encoding.UTF8.GetBytes("$profile:\0"));
@@ -207,7 +208,7 @@ internal static partial class NativeWorkbench
                     if (plugin!.Action == "set") Write(data + 1024, System.Text.Encoding.UTF8.GetBytes(plugin.Value + "\0"));
                 }
 
-                if (ui?.Action == "set_text") Write(data + 512, System.Text.Encoding.Unicode.GetBytes(ui.Text! + "\0"));
+                if (ui?.Action is "set_text" or "choose") Write(data + 512, System.Text.Encoding.Unicode.GetBytes(ui.Text! + "\0"));
 
                 // Preserve RBX and shadow space; entity creation needs three stack arguments.
                 var helper = new E(); helper.B(0x53, 0x48, 0x83, 0xec, 0x20, 0x48, 0x89, 0xcb); // rbx=rcx
@@ -227,9 +228,18 @@ internal static partial class NativeWorkbench
                     CheckHash(widgets.FileName, "d34ef78b3d3b5506ee8279ce6efbfc263d773b74860af76e66b0715346897a3a");
                     foreach (var rva in new[] { 0x408c70, 0x409930, 0x40b480, 0x40bd20 }) CheckCode(gui, rva);
                     CheckCode(widgets, 0x577a0); CheckCode(widgets, 0x52d70);
-                    if (ui.Action == "set_text") { CheckCode(qt, 0x16bff0); CheckCode(qt, 0x1fd0); }
+                    if (ui.Action is "set_text" or "choose") { CheckCode(qt, 0x16bff0); CheckCode(qt, 0x1fd0); }
                     if (ui.Action is "select" or "expand" or "collapse") { CheckCode(widgets, 0x2ade00); CheckCode(widgets, 0x2c6f40); CheckCode(widgets, 0x33de90); }
+                    if (ui.Action is "open_choices" or "choose") { CheckCode(widgets, 0x2bee90); CheckCode(widgets, 0x143ef0); CheckCode(qt, 0x228d0); }
                     EmitUi(cb, ui, gui.BaseAddress, widgets.BaseAddress, qt.BaseAddress);
+                }
+                else if (choices is not null)
+                {
+                    var widgets = process.Modules.Cast<ProcessModule>().Single(m => m.ModuleName == "Qt6Widgets.dll");
+                    CheckHash(widgets.FileName, "d34ef78b3d3b5506ee8279ce6efbfc263d773b74860af76e66b0715346897a3a");
+                    foreach (var rva in new[] { 0x472240, 0x478730, 0x47a630 }) CheckCode(exe, rva);
+                    foreach (var rva in new[] { 0x22910, 0x1a7e10, 0x38f0, 0xe5400 }) CheckCode(qt, rva);
+                    EmitChoices(cb, choices, exe.BaseAddress, widgets.BaseAddress, qt.BaseAddress);
                 }
                 else if (resourceLeakAssertion is not null) EmitReadResourceLeakAssertion(cb, exe.BaseAddress);
                 else if (runtimeSetup is not null) EmitRuntimeSetup(cb, exe.BaseAddress, runtimeSetup.Value);
@@ -316,7 +326,9 @@ internal static partial class NativeWorkbench
                 var targets = entity?.Target is null ? null : ReadTargets(result, Read(data + 4096, TargetPageSize * TargetRowSize), loadedPath, watch.ElapsedMilliseconds);
                 var project = projectContext ? ReadProjectContext(result, Read(data + 4096, ProjectBufferSize - 4096)) : null;
                 var setup = runtimeSetup is null ? null : ReadRuntimeSetup(result, Read(data + 1024, 1024));
+                var choiceResult = choices is null ? null : ReadChoices(result, Read(data + ChoicesOutputOffset, ChoicesCapacity * ChoicesRowSize));
                 Cleanup();
+                if (choiceResult is not null) return choiceResult;
                 if (setup is not null) return setup;
                 if (project is not null) return project;
                 if (targets is not null) return targets;
@@ -454,7 +466,7 @@ internal static partial class NativeWorkbench
             e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
             e.B(0x48, 0x89, 0x43, 96, 0x48, 0x89, 0xc1, 0x48, 0x8b, 0x00, 0xff, 0x50, 8, 0x84, 0xc0); // isValid()
             e.J(0x84, "uiDone");
-            if (command.Action is "select" or "expand" or "collapse")
+            if (command.Action is "select" or "expand" or "collapse" or "open_choices" or "choose")
             {
                 // Exact Qt 6.8.3 QAccessibleTableCell layout, checked by RTTI-derived
                 // primary vtable. QPointer view.value +0x20; persistent index +0x28.
@@ -468,7 +480,32 @@ internal static partial class NativeWorkbench
                     0x48, 0x8b, 0x42, 8, 0x48, 0x89, 0x83, 0x28, 1, 0, 0,
                     0x48, 0x8b, 0x42, 16, 0x48, 0x89, 0x83, 0x30, 1, 0, 0,
                     0x48, 0x8d, 0x93, 0x20, 1, 0, 0);
-                if (command.Action == "select") Call(widgets + 0x2c6f40); // QAbstractItemView::setCurrentIndex
+                if (command.Action is "open_choices" or "choose")
+                {
+                    Call(widgets + 0x2bee90); // Row's native editor widget
+                    e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
+                    e.B(0x48, 0x89, 0xc1, 0x48, 0x8d, 0x93, 0x80, 1, 0, 0);
+                    e.B(0x49, 0xb8); e.Q(widgets + 0x487cf0); // QComboBox
+                    e.B(0x41, 0xb9, 1, 0, 0, 0); Call(core + 0x228d0);
+                    e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
+                    if (command.Action == "open_choices") { e.B(0x48, 0x89, 0xc1); Call(widgets + 0x143ef0); }
+                    else
+                    {
+                        e.B(0x48, 0x89, 0x43, 112);
+                        e.B(0x48, 0x8d, 0x8b, 0, 1, 0, 0, 0x48, 0x8d, 0x93, 0, 2, 0, 0, 0x41, 0xb8);
+                        e.B(BitConverter.GetBytes(command.Text!.Length)); Call(core + 0x16bff0);
+                        e.B(0x48, 0x8b, 0x4b, 112, 0x48, 0x8d, 0x93, 0, 1, 0, 0, 0x41, 0xb8, 16, 0, 0, 0);
+                        Call(widgets + 0xa04f0); // findText, exact case-sensitive label
+                        e.B(0x89, 0x43, 120, 0x48, 0x8d, 0x8b, 0, 1, 0, 0); Call(core + 0x1fd0);
+                        e.B(0x83, 0x7b, 120, 0); e.J(0x8c, "uiDone");
+                        e.B(0x48, 0x8b, 0x4b, 112, 0x8b, 0x53, 120); Call(widgets + 0x141ba0);
+                        e.B(0x48, 0x8b, 0x4b, 112); Call(widgets + 0x13c120);
+                        // Emit the same activation signal as selecting a popup item;
+                        // the owning property editor performs its normal commit/undo.
+                        e.B(0x48, 0x8b, 0x4b, 112, 0x8b, 0x53, 120); Call(widgets + 0x137e10);
+                    }
+                }
+                else if (command.Action == "select") Call(widgets + 0x2c6f40); // QAbstractItemView::setCurrentIndex
                 else { e.B(0x41, 0xb8); e.B(BitConverter.GetBytes(command.Action == "expand" ? 1 : 0)); Call(widgets + 0x33de90); }
             }
             else if (command.Action == "set_text")

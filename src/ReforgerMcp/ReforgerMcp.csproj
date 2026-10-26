@@ -21,6 +21,7 @@
     <None Update="Ghidra/ReforgerBridge.java" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <EmbeddedResource Include="../../adapters/workbench/Scripts/WorkbenchGame/RST_Runtime.c" LogicalName="ReforgerMcp.RuntimeAdapter" />
     <EmbeddedResource Include="../../adapters/workbench/Scripts/WorkbenchGame/RST_Multiplayer.c" LogicalName="ReforgerMcp.MultiplayerAdapter" />
+    <EmbeddedResource Include="../../adapters/workbench/Scripts/WorkbenchGame/RST_EditorChoices.c" LogicalName="ReforgerMcp.EditorChoicesAdapter" />
   </ItemGroup>
 
 </Project>
