@@ -135,7 +135,7 @@ internal static partial class NativeWorkbench
             Load(184); e.B(0x81, 0xb9, 4, 1, 0, 0); e.B(BitConverter.GetBytes(items.Length)); e.J(0x85, "choicesReplace");
             // Compare full metadata before emitting signals, so polling never disturbs an unchanged popup.
             e.B(0x48, 0xc7, 0x83, 216, 0, 0, 0, 0, 0, 0, 0);
-            e.Label("choicesCompare"); Load(216); e.B(0x48, 0x81, 0xf9); e.B(BitConverter.GetBytes(items.Length)); e.J(0x83, "choicesNext");
+            e.Label("choicesCompare"); Load(216); e.B(0x48, 0x81, 0xf9); e.B(BitConverter.GetBytes(items.Length)); e.J(0x83, "choicesPresentation");
             e.B(0x48, 0x6b, 0xc1, 24, 0x48, 0x03, 0x83, 208, 0, 0, 0); Save(224);
             e.B(0x48, 0x69, 0xc1); e.B(BitConverter.GetBytes(ChoiceEntrySize));
             e.B(0x48, 0x8d, 0x84, 0x03); e.B(BitConverter.GetBytes(ChoicesInputOffset + ChoiceEntryOffset)); Save(232);
@@ -158,12 +158,17 @@ internal static partial class NativeWorkbench
             e.Label("choicesRestore");
             Load(192); e.B(0xba); e.B(BitConverter.GetBytes(Array.FindIndex(items, i => i.Value == command.Current))); Call(widgets + 0x141ba0);
             Load(192); e.B(0x0f, 0xb6, 0x93, 240, 0, 0, 0); Call(core + 0xe5400);
+            e.B(0xff, 0x43, 116);
+            e.Label("choicesPresentation");
             // Provider routing is metadata, never a user-facing tooltip.
             Address(256); Call(core + 0x1ea0); // empty QVariant
             Load(192); e.B(0x31, 0xd2, 0x4c, 0x8d, 0x83, 0, 1, 0, 0, 0x41, 0xb9, 3, 0, 0, 0);
             Call(widgets + 0x142570); // clear empty item's ToolTipRole only
             Address(256); Call(core + 0x102480);
-            e.B(0xff, 0x43, 116);
+            if (command.Current.Length == 0)
+            {
+                Load(192); e.B(0x48, 0x8d, 0x93, 32, 1, 0, 0); Call(widgets + 0x6c370); // empty QString
+            }
         }
         e.Label("choicesNext"); e.B(0x48, 0xff, 0x83, 160, 0, 0, 0); e.J(0x84, "choicesLoop", true);
         e.Label("choicesOverflow"); e.B(0xc7, 0x43, 124, 1, 0, 0, 0);
