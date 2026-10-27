@@ -25,6 +25,14 @@ implementation. No supported hook for the current nested conditions has been
 verified. The fixture is gated by `GC_EDITOR_ENUM_PROBE` in Lobby2's optional
 test addon so its temporary fields stay out of the normal editor.
 
+A separate `GC_ENUM_FUNCTION_PROBE` tested `enums: GetChoices()` with a shared
+`ParamEnumArray`, following the installed ValidateFBXPlugin pattern. The nested
+control showed `Function initial` even after an entity callback mutated that
+provider's runtime array to `Function updated` before opening the popup. Logs
+confirmed the mutation. The popup did not reflect that mutation in this test;
+where choices are copied or retained was not established. Initial choices reach
+the field, but live discovery through this mechanism remains unverified.
+
 The rejected executable prototype did work from a local addon folder. Native
 inspection showed the ordinary Pack Project list excludes `.exe`, and the
 publisher's PAK-building branch calls that packer with no additional types.
