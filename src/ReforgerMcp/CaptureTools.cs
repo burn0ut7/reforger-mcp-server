@@ -37,4 +37,26 @@ public sealed class CaptureTools(WindowCapture capture)
         }
         catch (Exception ex) when (ex is not (McpException or OperationCanceledException)) { throw new McpException(ex.Message); }
     }
+
+    [McpServerTool(Name = "capture_sequence", ReadOnly = true, OpenWorld = false)]
+    [Description("Capture a bounded sequence from one selected window using the same Windows Graphics Capture backend as capture_screenshot. Returns alternating per-frame metadata and PNG blocks in capture order. Native frame timestamps reveal the actual cadence and skipped frames; consecutive rendered frames are not guaranteed. Requires capture_windows selection. No activation or input. Maximum 16 frames, 256 MiB source-frame budget, ten-second deadline; reduce frameCount if the budget is exceeded. One capture at a time.")]
+    public async Task<CallToolResult> Sequence(string windowId,
+        [Description("Number of frames, 2-16.")] int frameCount = 8,
+        [Description("Maximum image width/height, 320-3840, without upscaling.")] int maxDimension = 1280,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (frameCount is < 2 or > 16) throw new ArgumentException("frameCount must be 2-16.");
+            var frames = await capture.Sequence(windowId, maxDimension, frameCount, cancellationToken);
+            var result = new CallToolResult { Content = [] };
+            foreach (var frame in frames)
+            {
+                result.Content.Add(new TextContentBlock { Text = JsonSerializer.Serialize(frame.Metadata, Configuration.Json) });
+                result.Content.Add(ImageContentBlock.FromBytes(frame.Png, "image/png"));
+            }
+            return result;
+        }
+        catch (Exception ex) when (ex is not (McpException or OperationCanceledException)) { throw new McpException(ex.Message); }
+    }
 }

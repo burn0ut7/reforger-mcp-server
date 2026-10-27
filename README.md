@@ -66,6 +66,7 @@ Start with `pak_status`, then use `pak_search_text` for API declarations and cal
 |---|---|
 | `capture_windows` | List eligible editor/client windows with process IDs, titles and temporary selection IDs. |
 | `capture_screenshot` | Return a selected window as a PNG image plus metadata, without activating it. |
+| `capture_sequence` | Return a short sequence of window frames with native timestamps for motion inspection. |
 | `workbench_status` | Observe Workbench processes/window titles and the current server session's last launch/exit; project readiness remains unverified. |
 | `workbench_project_context` | Observe the actual current project and loaded/available addons, mounted paths, on-disk dependencies and local module declarations; return a token for packed/unpacked project preparation. |
 | `workbench_script_status` | Inspect native editor windows/dialogs and current compiler output/diagnostics, which may be historical. |
