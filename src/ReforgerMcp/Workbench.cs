@@ -107,6 +107,22 @@ public sealed class Workbench(Configuration configuration) : IDisposable
         (File.Exists(config.Executable) ? Array.Empty<string>() : [config.Executable])
         .Concat(config.AddonDirectories.Where(p => !Directory.Exists(p))).ToArray();
 
+    public object Terminate(int processId)
+    {
+        lock (gate)
+        {
+            var config = configuration.Workbench ?? throw new InvalidOperationException("Workbench is not configured.");
+            using var process = Process.GetProcessById(processId);
+            if (!process.ProcessName.Equals(Path.GetFileNameWithoutExtension(config.Executable), StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Selected PID is not the configured Workbench process name.");
+            if (process.HasExited) return new { state = "exited", processId };
+            // Only the explicitly selected process is terminated, never its children.
+            // Windows permissions remain authoritative; access denial is reported.
+            process.Kill();
+            return new { state = process.WaitForExit(5000) ? "exited" : "termination_pending", processId };
+        }
+    }
+
     private static WorkbenchInstance[] Observe(WorkbenchConfiguration config)
     {
         var result = new List<WorkbenchInstance>();

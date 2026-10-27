@@ -194,6 +194,7 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
         {
             foreach (var candidate in candidates)
             {
+                if (candidate.HasExited) continue;
                 if (!string.Equals(candidate.MainModule?.FileName, executable, StringComparison.OrdinalIgnoreCase)) continue;
                 if (selected is not null) throw new InvalidOperationException("Multiple configured Workbench processes; close the extra instance before using script commands.");
                 selected = candidate;
