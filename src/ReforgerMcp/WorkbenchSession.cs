@@ -176,6 +176,18 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
     internal static Process SelectProcess(Configuration configuration)
     {
         var executable = configuration.Workbench?.Executable ?? throw new InvalidOperationException("Workbench is not configured.");
+        if (configuration.Workbench.ProcessId is { } processId)
+        {
+            var process = Process.GetProcessById(processId);
+            try
+            {
+                if (!string.Equals(process.MainModule?.FileName, executable, StringComparison.OrdinalIgnoreCase) ||
+                    process.StartTime.ToUniversalTime().Ticks != configuration.Workbench.ProcessStartedUtc?.UtcTicks)
+                    throw new InvalidOperationException("Configured Workbench process identity changed. Update the explicit process selection; no other instance was selected.");
+                return process;
+            }
+            catch { process.Dispose(); throw; }
+        }
         var candidates = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(executable));
         Process? selected = null;
         try

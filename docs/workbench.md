@@ -8,6 +8,15 @@ Workbench launch is independent of `targets.workbench`, which configures native 
 
 ## Calls
 
+When several Workbench instances are running, pin live editor operations to one
+by setting both `workbench.processId` and `workbench.processStartedUtc` (its exact
+UTC process start timestamp in ISO 8601 form). Restart the MCP connection after
+changing configuration. The selector validates the executable and start time,
+so an exited or reused PID fails instead of selecting another editor. Omit both
+fields for the existing single-instance selection. Launch/status still inventory
+all instances and retain their launch refusal rules. Log browsing is independent:
+pass the intended log `session` explicitly when several editors write logs.
+
 1. Call `workbench_status`.
 2. If stopped, call `workbench_open_project` with `{"projectPath":"D:/Mods/MyAddon/addon.gproj"}`.
 3. Inspect `workbench_status` and the editor before continuing.

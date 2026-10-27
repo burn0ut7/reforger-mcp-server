@@ -5,7 +5,34 @@ world. Lobby2 uses it for **Flag Is Set**, required interaction flags, and scala
 mission faction keys. Flag names remain strings in saved missions. Creating a flag
 at its source makes it available to conditions; no second declaration is needed.
 
-## Run the extension
+## Shipping constraint
+
+Lobby2 must ship without an executable helper or an external installation.
+The addon-owned executable packaging prototype has therefore been removed from
+production and archived locally. No encoded executable payload is being shipped.
+The MCP extension below remains a development experiment; it does not satisfy
+that shipping requirement. Editable text entry works without this extension,
+but the current nested fields do not populate live choices by themselves.
+
+Workbench 1.8.0.13 was tested without the helper using an optional script probe.
+An entity-level `_WB_GetUserEnums` returned two real native popup choices. The
+component-instance callback produced no observed calls; its class callback ran
+with entity-style field names rather than the tested direct/nested property
+names. Neither component probe opened a populated popup, including a repeat with
+`EditComboBox` on all three probes to match the successful entity control. This establishes the
+observed boundary for this setup, not universal absence of every script-only
+implementation. No supported hook for the current nested conditions has been
+verified. The fixture is gated by `GC_EDITOR_ENUM_PROBE` in Lobby2's optional
+test addon so its temporary fields stay out of the normal editor.
+
+The rejected executable prototype did work from a local addon folder. Native
+inspection showed the ordinary Pack Project list excludes `.exe`, and the
+publisher's PAK-building branch calls that packer with no additional types.
+The separate publisher extension callback filters the RDB cache, not the archive.
+No packed-archive or Workshop download test was completed. Native analysis is
+implementation evidence, not a supported publishing contract.
+
+## Run the development extension
 
 1. Run the server built from this revision. Configure `workbench.runtimePort` to
    match Workbench's NET API port.
@@ -55,6 +82,13 @@ deduplicates and sorts values, and updates the owning native StringProperty list
 only when it differs. An existing value absent from the provider remains selected
 as `value (not found)`. Refresh does not author a replacement or create undo steps.
 Selecting an option follows the editor's normal activation and undo path.
+
+Use `UIWidgets.EditComboBox` with the same provider marker to also permit typed
+values before their sources exist. Workbench owns text commit and undo; native
+refresh skips a focused text field. Lobby2 uses this for all seven flag/faction
+references. Fixed enums remain selection-only. The user confirmed custom flag
+entry; exact value `sdads` survived saving and reopening, without the display-only
+`(not found)` suffix. Undo for newly typed text was not retested.
 
 Limits are explicit: 64 marked controls per observation, 256 entries per field
 including the empty and retained-missing entries, 255 UTF-8 bytes per label and

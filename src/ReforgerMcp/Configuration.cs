@@ -73,6 +73,8 @@ public sealed record Configuration
             throw new InvalidDataException("Each capture executable path must have one label; workbench.executable is already included.");
         if (config.Workbench is { } workbench)
         {
+            if ((workbench.ProcessId is null) != (workbench.ProcessStartedUtc is null) || workbench.ProcessId is <= 0)
+                throw new InvalidDataException("workbench.processId and processStartedUtc must be supplied together with a positive PID.");
             if (workbench.RuntimePort is not null && workbench.RuntimePort is < 1 or > 65535)
                 throw new InvalidDataException("workbench.runtimePort must be an explicit local NET API port (1-65535).");
             if (!Path.GetExtension(workbench.Executable).Equals(".exe", StringComparison.OrdinalIgnoreCase))
@@ -184,6 +186,8 @@ public sealed record LocalHttpConfiguration
 public sealed record WorkbenchConfiguration
 {
     public required string Executable { get; init; }
+    public int? ProcessId { get; init; }
+    public DateTimeOffset? ProcessStartedUtc { get; init; }
     public string[] AddonDirectories { get; init; } = [];
     public int? RuntimePort { get; init; }
 }
