@@ -33,6 +33,16 @@ confirmed the mutation. The popup did not reflect that mutation in this test;
 where choices are copied or retained was not established. Initial choices reach
 the field, but live discovery through this mechanism remains unverified.
 
+With the user's agreement to experiment with entity-based authoring,
+`GC_MissionChoicesProbeEntity` in Lobby2's optional test addon now supplies three
+native editable dropdowns through `_WB_GetUserEnums`, using the existing flag,
+playable-faction, and faction-manager discovery providers. Loose-source tests
+verified source renaming, temporary flag addition/removal, unique playable
+faction exclusion, and selection persistence across save/reopen without the
+native extension. Refresh is verified on entity reselection. The entity has no
+gameplay behavior and does not replace existing nested conditions. Packaging and
+Workshop delivery remain untested; see Lobby2 `tests/README.md` for rollback.
+
 The rejected executable prototype did work from a local addon folder. Native
 inspection showed the ordinary Pack Project list excludes `.exe`, and the
 publisher's PAK-building branch calls that packer with no additional types.
