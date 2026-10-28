@@ -482,21 +482,12 @@ internal static partial class NativeWorkbench
     private static void EmitUi(E e, UiCommand command, nint gui, nint widgets, nint core, nint image)
     {
         void Call(nint address) { e.B(0x48, 0xb8); e.Q(address); e.B(0xff, 0xd0); }
-        if (command.Action is "close" or "activate")
+        if (command.Action == "close")
         {
             e.B(0x48, 0xb9); e.Q(command.WindowHandle); Call(widgets + 0x577a0); // QWidget::find(WId)
             e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
-            if (command.Action == "activate")
-            {
-                e.B(0x48, 0x89, 0x43, 96, 0x48, 0x89, 0xc1); Call(widgets + 0x616e0); // QWidget::raise
-                e.B(0x48, 0x8b, 0x4b, 96); Call(widgets + 0x505e0); // QWidget::activateWindow
-                e.B(0xc7, 0x43, 68, 1, 0, 0, 0); // Request dispatched; foregroundAfter is the observation.
-            }
-            else
-            {
-                e.B(0x48, 0x89, 0xc1); Call(widgets + 0x52d70); // normal QWidget::close; can prompt/veto
-                e.B(0x0f, 0xb6, 0xc0, 0x89, 0x43, 68);
-            }
+            e.B(0x48, 0x89, 0xc1); Call(widgets + 0x52d70); // normal QWidget::close; can prompt/veto
+            e.B(0x0f, 0xb6, 0xc0, 0x89, 0x43, 68);
         }
         else
         {

@@ -21,6 +21,8 @@ Paths are relative to the named source archive. Search the current catalogue for
 
 Reforgedmin input example: `UI/layouts/HSM_NumberField.layout` (same addon revision above), lines 1–47, composes a vertical label/input field: 15px muted label, 6px label gap, 16px value, 14px horizontal/10px vertical inset and black background alpha 0.35. `HSM_PlayerMonitoringTab.c` `BuildSetting` binds the label and native `EditBoxWidget`, while `FillRowCell` aligns columns. Adapt scale and contrast deliberately; these are source values, not verified sizes on every viewport.
 
+Additional base-game reads on 2026-10-28, revision `c032908fa5cc4428b257394a5dd4644d` (source `58D0FB3206B6F859`): `data010.pak/UI/layouts/WidgetLibrary/TextWidgets/Text_BodySmall.layout` lines 5-10 stores `"Font Size"`, `"Min Font Size"` and **nested** `FontProperties { Font ... }`. A top-level `Font` is invalid. `UI/layouts/WidgetLibrary/EditBox/WLib_EditBox.layout` lines 151-159 attaches `Tooltip SCR_ScriptedWidgetTooltip` with a preset config/tag; lines 180-200 show native input properties. `data007.pak/scripts/Game/UI/Components/WidgetLibrary/SCR_ScriptedWidgetTooltip.c` owns placement, overflow avoidance and menu cleanup; tooltip targets must receive cursor input. Trace its `Configs/WLib/Tooltips/TooltipPreset_SimpleMessage.conf` and `data010.pak/UI/layouts/Menus/Tooltips/Tooltip_Base.layout` when adapting cell hints. Plain table values should remain plain text, including inside hints. Resource and owning-source evidence; live behavior must still be checked in the target UI.
+
 ## Find the next example
 
 Use the observed base-game source label from `pak_status`. These are search leads, not verified prefab names or guarantees of suitability:
