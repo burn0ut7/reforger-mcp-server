@@ -49,4 +49,6 @@ Define observable pass criteria, then exercise the real journey, capture actual 
 
 Keep original captures and relevant state/log receipts with build, mode, viewport and reproduction steps. Screenshots establish appearance; actual input and resulting state establish behavior. Report missing coverage honestly. Measure against a comparable performance baseline when changing UI update, frame or loading costs.
 
+For deterministic tooltip activation tests through MCP, an optional test addon can report cell-center movement with the installed `WidgetManager.ReportMouse(x, y, menuRoot)` API, then report leaving the cell. Observe the layout-attached tooltip appearing and dismissing; do not call `Show` or inject its hovered widget. This tests native widget dispatch, not physical mouse or OS focus handling. Capture while the tooltip is actually visible.
+
 For substantive work, obtain independent review under AGENTS.md using the request, changes, active reference and actual evidence, including limitations. Resolve feedback and return to the same reviewer until approved. Handoff briefly with final captures, tested behavior and remaining gaps.
