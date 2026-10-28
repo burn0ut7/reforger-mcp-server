@@ -65,9 +65,11 @@ internal static partial class NativeWorkbench
         }
         public void Dispose() { foreach (var file in files.Values) file.Dispose(); files.Clear(); }
     }
-    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null, ChoicesCommand? choices = null)
+    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null, ChoicesCommand? choices = null, int? runtimePort = null)
     {
         ct.ThrowIfCancellationRequested();
+        using var dispatchLease = ui is null ? new DispatchLease(process) : null;
+        if (runtimePort is not null && (runtimeSetup != true || runtimePort is < 1 or > 65535)) throw new ArgumentException("Runtime port requires explicit setup and a port from 1 to 65535.");
         if (RuntimeInformation.ProcessArchitecture != Architecture.X64) throw new InvalidOperationException("Native Workbench operations require an x64 server.");
         if (ui?.Action is "set_text" or "choose" && (ui.Text is null || ui.Text.Length > 1024 || ui.Text.Contains('\0'))) throw new ArgumentException("set_text requires at most 1024 UTF-16 code units without NUL.");
         if (play is not (null or "status" or "start" or "stop")) throw new ArgumentException("Invalid Play action.");
@@ -92,6 +94,7 @@ internal static partial class NativeWorkbench
         Check(hp != 0);
         nint released = 0, remoteEvent = 0, data = 0, code = 0;
         bool pending = false, uncertain = false, registered = false, cleaned = false, dispatched = false;
+        bool retainedRelease = false, releaseReset = false;
         Action? cleanup = null;
         try
         {
@@ -158,7 +161,16 @@ internal static partial class NativeWorkbench
                 // operation. Each has its own lifetime claim, not the reload lock.
                 released = N.CreateEvent(0, true, false, ui is null ? EventName(process) : EventName(process) + ".UI." + Guid.NewGuid().ToString("N"));
                 var eventError = Marshal.GetLastWin32Error(); Check(released != 0);
-                if (eventError == 183) throw new InvalidOperationException("Native operation active or retained after interruption. Restart Workbench if its owning server cannot finish cleanup. No call dispatched.");
+                if (eventError == 183)
+                {
+                    // The slot destructor signals only after Qt has released the callback.
+                    // A timed-out caller may have retained its allocations, but a signaled
+                    // event proves that callback can no longer execute. Never infer this
+                    // from dialog closure or elapsed time. Retained memory is not freed here.
+                    if (N.WaitForSingleObject(released, 0) != 0)
+                        throw new InvalidOperationException("Native operation is still active or its release is unverified. Resolve its dialog and inspect the original operation. No call dispatched.");
+                    retainedRelease = true;
+                }
                 Check(N.DuplicateHandle(N.GetCurrentProcess(), released, hp, out remoteEvent, 0, false, 2));
                 data = N.VirtualAllocEx(hp, 0, choices is not null ? ChoicesBufferSize : projectContext ? (nuint)ProjectBufferSize : entity?.Target is null ? 4096u : (nuint)(TargetInputOffset + 4096), 0x3000, 4); Check(data != 0);
                 code = N.VirtualAllocEx(hp, 0, 16384, 0x3000, 4); Check(code != 0);
@@ -239,7 +251,12 @@ internal static partial class NativeWorkbench
                     if (ui.Action is "set_text" or "choose") { CheckCode(qt, 0x16bff0); CheckCode(qt, 0x1fd0); }
                     if (ui.Action is "select" or "expand" or "collapse") { CheckCode(widgets, 0x2ade00); CheckCode(widgets, 0x2c6f40); CheckCode(widgets, 0x33de90); }
                     if (ui.Action is "open_choices" or "choose") { CheckCode(widgets, 0x2bee90); CheckCode(widgets, 0x143ef0); CheckCode(qt, 0x228d0); }
-                    EmitUi(cb, ui, gui.BaseAddress, widgets.BaseAddress, qt.BaseAddress);
+                    if (ui.Action == "add_item")
+                    {
+                        foreach (var rva in new[] { 0x2a68079, 0x48e210, 0x479130, 0x4e46c0 }) CheckCode(exe, rva);
+                        CheckCode(widgets, 0x34c240); CheckCode(widgets, 0x5c820);
+                    }
+                    EmitUi(cb, ui, gui.BaseAddress, widgets.BaseAddress, qt.BaseAddress, exe.BaseAddress);
                 }
                 else if (choices is not null)
                 {
@@ -250,7 +267,7 @@ internal static partial class NativeWorkbench
                     EmitChoices(cb, choices, exe.BaseAddress, widgets.BaseAddress, qt.BaseAddress);
                 }
                 else if (resourceLeakAssertion is not null) EmitReadResourceLeakAssertion(cb, exe.BaseAddress);
-                else if (runtimeSetup is not null) EmitRuntimeSetup(cb, exe.BaseAddress, runtimeSetup.Value);
+                else if (runtimeSetup is not null) EmitRuntimeSetup(cb, exe.BaseAddress, runtimeSetup.Value, runtimePort);
                 else if (projectContext) EmitProjectContext(cb, exe.BaseAddress);
                 else if (childPrefab is not null) EmitChildPrefab(cb, exe.BaseAddress);
                 else if (entity is not null) EmitEntity(cb, exe.BaseAddress, entity);
@@ -315,13 +332,14 @@ internal static partial class NativeWorkbench
                 var watch = Stopwatch.StartNew();
                 try
                 {
+                    if (retainedRelease) { Check(N.ResetEvent(released)); releaseReset = true; }
                     Remote(code + 8192, data, true);
                     while (true)
                     {
                         var wait = N.WaitForSingleObject(released, 50);
                         if (wait == 0) { pending = false; break; }
                         if (wait != 258 || process.HasExited || ct.IsCancellationRequested || watch.Elapsed.TotalSeconds > 180)
-                            throw new InvalidOperationException("Native operation outcome unknown. Inspect Workbench dialogs/logs; restart Workbench before another native operation. Temporary native allocations retained safely until process exit.");
+                            throw new InvalidOperationException("Native operation outcome unknown. Resolve Workbench dialogs and inspect state; never replay the mutation. A later operation may proceed only after the callback release is verified. Temporary native allocations remain retained until process exit.");
                     }
                 }
                 finally { monitoring.Cancel(); monitor.GetAwaiter().GetResult(); }
@@ -440,6 +458,9 @@ internal static partial class NativeWorkbench
                 // named claim until Workbench exits. Never free a potentially executing callback.
                 try
                 {
+                    // A failed queue-thread creation did not consume the old release.
+                    // Restore it so the retained remote handle cannot strand the claim.
+                    if (releaseReset && !dispatched) Check(N.SetEvent(released));
                     if (!cleaned && !pending && !uncertain && cleanup is not null) cleanup();
                     if (!cleaned && !pending && !uncertain && !registered)
                     {
@@ -458,15 +479,24 @@ internal static partial class NativeWorkbench
             throw new InvalidOperationException("Native operation dispatch was attempted; operation outcome or cleanup may be unknown. Inspect Workbench logs/state and do not blindly retry. " + ex.Message, ex);
         }
     }
-    private static void EmitUi(E e, UiCommand command, nint gui, nint widgets, nint core)
+    private static void EmitUi(E e, UiCommand command, nint gui, nint widgets, nint core, nint image)
     {
         void Call(nint address) { e.B(0x48, 0xb8); e.Q(address); e.B(0xff, 0xd0); }
-        if (command.Action == "close")
+        if (command.Action is "close" or "activate")
         {
             e.B(0x48, 0xb9); e.Q(command.WindowHandle); Call(widgets + 0x577a0); // QWidget::find(WId)
             e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
-            e.B(0x48, 0x89, 0xc1); Call(widgets + 0x52d70); // normal QWidget::close; can prompt/veto
-            e.B(0x0f, 0xb6, 0xc0, 0x89, 0x43, 68);
+            if (command.Action == "activate")
+            {
+                e.B(0x48, 0x89, 0x43, 96, 0x48, 0x89, 0xc1); Call(widgets + 0x616e0); // QWidget::raise
+                e.B(0x48, 0x8b, 0x4b, 96); Call(widgets + 0x505e0); // QWidget::activateWindow
+                e.B(0xc7, 0x43, 68, 1, 0, 0, 0); // Request dispatched; foregroundAfter is the observation.
+            }
+            else
+            {
+                e.B(0x48, 0x89, 0xc1); Call(widgets + 0x52d70); // normal QWidget::close; can prompt/veto
+                e.B(0x0f, 0xb6, 0xc0, 0x89, 0x43, 68);
+            }
         }
         else
         {
@@ -474,7 +504,7 @@ internal static partial class NativeWorkbench
             e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
             e.B(0x48, 0x89, 0x43, 96, 0x48, 0x89, 0xc1, 0x48, 0x8b, 0x00, 0xff, 0x50, 8, 0x84, 0xc0); // isValid()
             e.J(0x84, "uiDone");
-            if (command.Action is "select" or "expand" or "collapse" or "open_choices" or "choose")
+            if (command.Action is "select" or "expand" or "collapse" or "open_choices" or "choose" or "add_item")
             {
                 // Exact Qt 6.8.3 QAccessibleTableCell layout, checked by RTTI-derived
                 // primary vtable. QPointer view.value +0x20; persistent index +0x28.
@@ -488,7 +518,8 @@ internal static partial class NativeWorkbench
                     0x48, 0x8b, 0x42, 8, 0x48, 0x89, 0x83, 0x28, 1, 0, 0,
                     0x48, 0x8b, 0x42, 16, 0x48, 0x89, 0x83, 0x30, 1, 0, 0,
                     0x48, 0x8d, 0x93, 0x20, 1, 0, 0);
-                if (command.Action is "open_choices" or "choose")
+                if (command.Action == "add_item") EmitArrayAdd(e, image, widgets);
+                else if (command.Action is "open_choices" or "choose")
                 {
                     Call(widgets + 0x2bee90); // Row's native editor widget
                     e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
@@ -801,10 +832,30 @@ internal static partial class NativeWorkbench
     }
     // Keep the established name so older server processes share the same claim.
     private static string EventName(Process p) => $"Local\\ReforgerMcp.NativeReload.{p.Id}.{p.StartTime.ToUniversalTime().Ticks}";
+    internal sealed class DispatchLease : IDisposable
+    {
+        private readonly Mutex mutex;
+        public DispatchLease(Process process)
+        {
+            mutex = new Mutex(false, EventName(process) + ".Dispatch");
+            bool acquired;
+            try { acquired = mutex.WaitOne(0); }
+            catch (AbandonedMutexException) { acquired = true; } // release event still decides native safety
+            if (!acquired) { mutex.Dispose(); throw new WorkbenchBusyException("Another native dispatcher owns this Workbench operation."); }
+        }
+        public void Dispose() { mutex.ReleaseMutex(); mutex.Dispose(); }
+    }
     public static object Status(Process p)
     {
         var claim = N.OpenEvent(0x100000, false, EventName(p));
-        if (claim != 0) { N.CloseHandle(claim); return new { state = "blocked", message = "Native operation active or retained after interruption. If its owning server cannot finish cleanup, restart Workbench before another native operation." }; }
+        if (claim != 0)
+        {
+            var released = N.WaitForSingleObject(claim, 0) == 0;
+            N.CloseHandle(claim);
+            return new { state = released ? "released" : "blocked", message = released
+                ? "Previous native callback was released. Its result may remain unknown and retained allocations remain until Workbench exits; the next serialized dispatch can proceed."
+                : "Native callback release is unverified. Resolve dialogs and inspect the original operation; do not replay it." };
+        }
         if (Marshal.GetLastWin32Error() != 2) return new { state = "unavailable", message = "Cannot inspect native operation claim: " + new Win32Exception(Marshal.GetLastWin32Error()).Message };
         return new { state = "not_active", message = "Binary compatibility and readiness are checked at native dispatch." };
     }
@@ -830,6 +881,8 @@ internal static partial class NativeWorkbench
         [DllImport("kernel32", SetLastError = true)] public static extern bool FlushInstructionCache(nint p, nint address, nuint size);
         [DllImport("kernel32", SetLastError = true)] public static extern nint CreateRemoteThread(nint p, nint attributes, nuint stack, nint start, nint argument, uint flags, out uint id);
         [DllImport("kernel32", SetLastError = true)] public static extern uint WaitForSingleObject(nint handle, uint ms);
+        [DllImport("kernel32", SetLastError = true)] public static extern bool ResetEvent(nint handle);
+        [DllImport("kernel32", SetLastError = true)] public static extern bool SetEvent(nint handle);
         [DllImport("kernel32", SetLastError = true)] public static extern bool GetExitCodeThread(nint handle, out uint exit);
         [DllImport("kernel32", SetLastError = true)] public static extern bool CloseHandle(nint h);
         [DllImport("kernel32")] public static extern nint GetCurrentProcess();

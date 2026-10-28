@@ -127,7 +127,8 @@ internal static class RuntimeNet
                 if (localPort == port && (allowAbsent || address == 0 || address == 0x0100007f)) owners.Add(Marshal.ReadInt32(row, 20));
             }
             if (allowAbsent && owners.Count == 0) return;
-            if (owners.Count != 1 || owners[0] != pid) throw new InvalidOperationException("Configured runtime port is not a unique IPv4 listener owned by the selected Workbench process.");
+            if (owners.Count != 1 || owners[0] != pid) throw new InvalidOperationException(
+                $"Configured runtime port {port} is not a unique IPv4 listener owned by Workbench PID {pid}. Observed owners: [{string.Join(", ", owners)}].");
         }
         finally { Marshal.FreeHGlobal(memory); }
     }

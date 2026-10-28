@@ -30,11 +30,24 @@ Repeated automatic polls reuse unchanged window/button IDs until their original 
 
 ## Scope and lifetime
 
+`workbench_window_action(selectionId, action="add_item")` adds an element through
+the inspected array row's native `ArrayProperty` handler. Inspect its row with
+`workbench_controls` first. This works with the **Peers Windows** list in Peer Tool
+configuration and uses the same implementation for other standard array properties.
+The row is resolved through Qt and checked with native RTTI; non-array rows,
+unsupported editor widgets, and disabled add buttons return `control_unavailable`.
+The normal handler determines insertion position, defaults and any type-selection
+prompt. Answer such prompts through fresh window/control inspection and poll the
+original action. `invoked` proves only handler completion: inspect the resulting
+list/count, including when the user cancels. This action does not implement removal,
+dragging, or arbitrary custom widgets. Like combo actions, it is advertised as a
+candidate on tree rows and validated against the native owner at dispatch.
+
 Qt menus, standard buttons, checkboxes, editable text fields and standard Qt tree rows exposed through accessibility are supported. Custom viewport widgets, drag/drop, arbitrary list selection and inaccessible controls are not implemented. Tree rows are returned in Qt's visible flat order; their UIA parent is the tree, not necessarily their model parent. Use screenshots to confirm folder hierarchy. This slice adds no path-knowledge/planning index. Unsupported roles have empty action lists, without synthetic-input fallback. Native title-bar buttons are not Qt command IDs: use the window's `close` action. Native non-Qt dialogs retain their UIA Invoke/Close contract, selected by framework rather than as a fallback for failed Qt actions.
 
 Selections expire after two minutes, another window listing, a dispatched action or server restart. Actions recheck process start, window/control identity, text/state, ancestry and enabled state. Modal-disabled editor and dialog controls are refused. Owned modal contents are excluded from the outer dialog summary. Edit values and read-only state participate in stale-selection checks. The control snapshot is bounded to about 2,000 IDs; list windows again when full. Dialog summaries return at most 200 text/button nodes, with no button IDs if truncated. Up to 64 UI operation results are retained; the oldest completed result is pruned at capacity, and pending calls are never pruned. Keep the server connection until completion.
 
-Native execution waits up to 180 seconds. Timeout/disconnection can leave target allocations retained safely until Workbench exits; inspect state and restart normally when cleanup is uncertain. Never blindly replay a pending/uncertain action. Accessibility inspection has a ten-second wait; a stuck provider retains its serialized lane until it returns. Screenshots are independent. Non-Qt UIA actions share the inspection lane; arbitrary third-party modal behavior is not guaranteed. `control_unavailable` means no accessible target/action interface was available, or normal close was vetoed; inspect the actual window state.
+Native execution waits up to 180 seconds. Timeout/disconnection can leave target allocations retained safely until Workbench exits. Resolve dialogs and inspect state; the native lane can proceed once the callback release event is signaled, while an unverified release continues to block it. Never blindly replay a pending/uncertain action. Accessibility inspection has a ten-second wait; a stuck provider retains its serialized lane until it returns. Screenshots are independent. Non-Qt UIA actions share the inspection lane; arbitrary third-party modal behavior is not guaranteed. `control_unavailable` means no accessible target/action interface was available, or normal close was vetoed; inspect the actual window state.
 
 ## Implementation
 
@@ -53,6 +66,29 @@ ABI provenance: exact Qt [accessibility declarations](https://github.com/qt/qtba
 
 ## Verification
 
+The 2026-10-27 live Peer Tool check added exactly one entry (one to two), rejected
+`add_item` on **Launch Delay**, read back both entries through multiplayer status,
+and confirmed the original entry's settings were preserved. Workbench PID 48584
+and its existing Play session stayed running. The preceding configuration timeout
+also exercised released-callback recovery: subsequent Play/status calls completed
+without an editor restart. Controlled pre-dispatch failure recovery was reviewed
+in source, not live fault-injected. General array variants, disabled/max-count
+arrays and type-picker cancellation are not established by this narrow check.
+
+Native provenance for the pinned profile: `ArrayEditWidget` construction at
+`0x471270` places the plus button at `+0x30`; `ArrayProperty` owns its editor at
+`+0xA8`. The add slot dispatches virtual `+0x298` (`0x48E210` for the base class,
+`0x4E46C0` for object arrays), preserving native creation and subtype selection.
+The adapter calls this owning handler directly, after checking the button's
+enabled state. It uses RTTI casts from QWidget to QTreeWidget, then from the
+resolved QTreeWidgetItem to ArrayProperty, instead of assuming item inheritance.
+Installed Qt exports provide `itemFromIndex` (`0x34C240`) and `isEnabledTo`
+(`0x5C820`). Ghidra evidence under the existing
+`%LOCALAPPDATA%/ReforgerMcpAdminImplementation/queries/` includes
+`941dcc4f48f34d0a825a325f6f758ae7`, `526b69b2db2d4c798c6329c855ca6fb6`,
+`54983148ea384d34a560061af59e52b9` and `3bf6f62abab342c4b299762c8fc7c9b1`.
+These are local reconstruction evidence, not a supported public engine ABI.
+
 `.temp/tests/ReforgerMcp.ControlTests` exercises Help / About / inspect / screenshot / close, polling the pending parent action, modal-disabled rejection, menu state, toolbar checkbox mutation/restoration, stale IDs, disabled buttons and paging boundaries. `.temp/tests/ReforgerMcp.WindowTests` opens an old-format temporary addon world, reads/captures its conversion prompt, invokes No, verifies completion/cleanup and unchanged source, restores the base world and removes the fixture. Failures preserve evidence and uncertain fixtures. These checks establish representative supported workflows, not universal compatibility with every custom control.
 
 
@@ -65,3 +101,5 @@ The text/tree profile is pinned to the same DLL hashes. QtCore exports: QString(
 Pre-dispatch dialog/editor/unsaved-tab guards for reload, world/prefab opening, Play, entity access/editing, history and runtime/multiplayer commands return `state: blocked`, `dispatched: false`, the original reason, and `blockerInspection`. It uses the same one-second inspector, includes editor windows with actionable IDs, and preserves unchanged selections. Accessible tab names marked `*` are included from the first 200 tabs; this is an observation, not a complete unsaved-state check. Inspect the reason together with the windows: not every listed window is necessarily blocking.
 
 No window is closed, file saved/discarded, or dialog answered automatically. Inspection failure remains explicit alongside the refusal. These structured guard responses do not change invalid-input errors, internal project-context validation errors, or native rejection results after dispatch. When another native operation is already pending, the refusal supplies its original poll call rather than taking a second snapshot.
+
+`workbench_window_action(action="activate", selectionId=windowId)` explicitly raises and requests activation of an observed, enabled Qt window. It uses QWidget::raise/activateWindow on the owning UI thread, with the same binary and stale-selection checks. It sends no keyboard or mouse input. A native dispatch result is not proof that Windows granted focus; inspect `foregroundAfter` and the resulting interaction.

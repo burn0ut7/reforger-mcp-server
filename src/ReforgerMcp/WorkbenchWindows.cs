@@ -35,7 +35,7 @@ public sealed class WorkbenchWindows(Configuration configuration)
             var id = Guid.NewGuid().ToString("N"); var title = Title(hwnd); var cls = Class(hwnd);
             var canClose = cls.StartsWith("Qt", StringComparison.Ordinal) && IsWindowEnabled(hwnd);
             nativeWindows.Add(id, new(hwnd, process.Id, process.StartTime.ToUniversalTime().Ticks, title, cls, expires));
-            result.Add(new { windowId = id, title, windowClass = cls, enabled = IsWindowEnabled(hwnd), canClose });
+            result.Add(new { windowId = id, title, windowClass = cls, enabled = IsWindowEnabled(hwnd), canClose, canActivate = canClose });
             return true;
         };
         if (!CaptureNative.EnumWindows(callback, 0)) throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
@@ -135,6 +135,7 @@ public sealed class WorkbenchWindows(Configuration configuration)
             if (e.TryGetCurrentPattern(SelectionItemPattern.Pattern, out _)) actions.Add("select");
             if (hasMenu) actions.AddRange(["expand", "collapse"]);
             actions.AddRange(["open_choices", "choose"]); // Native owner check refuses rows without a combo editor.
+            actions.Add("add_item"); // Native owner/type/enabled checks refuse non-array rows.
         }
         if (Editable(e)) actions.Add("set_text");
         return actions.ToArray();
@@ -281,6 +282,7 @@ public sealed class WorkbenchWindows(Configuration configuration)
             windows.Add(new { windowId, title = window.Current.Name, automationId = window.Current.AutomationId,
                 modal = Modal(window), enabled = WindowEnabled(window), isEditor,
                 canClose = WindowEnabled(window) && window.TryGetCurrentPattern(WindowPattern.Pattern, out _),
+                canActivate = WindowEnabled(window) && window.Current.FrameworkId == "Qt",
                 text = children.Take(200).Where(c => c.Current.ControlType == ControlType.Text).Select(c => c.Current.Name).ToArray(),
                 buttons, expiresAt = selection.Expires, truncated = children.Length > 200,
                 unsavedTabs = isEditor ? window.FindAll(TreeScope.Descendants,
@@ -305,21 +307,21 @@ public sealed class WorkbenchWindows(Configuration configuration)
 
     public Task<object> Act(string selectionId, string action, CancellationToken ct, string? value = null) => Run(() =>
     {
-        if (action is not ("invoke" or "close" or "menu" or "toggle" or "set_text" or "select" or "expand" or "collapse" or "open_choices" or "choose"))
-            throw new ArgumentException("action must be invoke, close, menu, toggle, set_text, select, expand, collapse, open_choices or choose, as advertised by inspection.");
+        if (action is not ("invoke" or "close" or "activate" or "menu" or "toggle" or "set_text" or "select" or "expand" or "collapse" or "open_choices" or "choose" or "add_item"))
+            throw new ArgumentException("action must be invoke, close, activate, menu, toggle, set_text, select, expand, collapse, open_choices, choose or add_item, as advertised by inspection.");
         if (action is "set_text" or "choose" ? value is null || value.Length > 1024 || value.Contains('\0') : value is not null)
             throw new ArgumentException("set_text and choose accept value; it requires at most 1024 UTF-16 code units without NUL.");
         if (nativeWindows.TryGetValue(selectionId, out var header))
         {
-            if (action != "close") throw new ArgumentException("Header selections support close only; request window details for controls.");
+            if (action is not ("close" or "activate")) throw new ArgumentException("Header selections support close or activate; request window details for controls.");
             using var p = WorkbenchSession.SelectProcess(configuration);
             CaptureNative.GetWindowThreadProcessId(header.Handle, out var pid);
             if (header.Expires <= DateTimeOffset.UtcNow || p.Id != header.Pid || pid != p.Id || p.StartTime.ToUniversalTime().Ticks != header.Start ||
                 !CaptureNative.IsWindowVisible(header.Handle) || Title(header.Handle) != header.Title || Class(header.Handle) != header.Class)
                 throw new InvalidOperationException("Window selection changed; inspect again.");
-            if (!header.Class.StartsWith("Qt", StringComparison.Ordinal) || !IsWindowEnabled(header.Handle)) throw new InvalidOperationException("Window cannot be closed by the Qt action backend.");
+            if (!header.Class.StartsWith("Qt", StringComparison.Ordinal) || !IsWindowEnabled(header.Handle)) throw new InvalidOperationException("Window does not support the requested Qt window action.");
             ct.ThrowIfCancellationRequested(); nativeWindows.Clear(); selections.Clear(); controls.Clear();
-            return Dispatch(p.Id, header.Start, new("close", WindowHandle: header.Handle));
+            return Dispatch(p.Id, header.Start, new(action, WindowHandle: header.Handle));
         }
         if (controls.TryGetValue(selectionId, out var selectedControl)) return ActControl(selectedControl, action, ct, value);
         if (!selections.TryGetValue(selectionId, out var selected) || selected.Expires <= DateTimeOffset.UtcNow)
@@ -335,6 +337,14 @@ public sealed class WorkbenchWindows(Configuration configuration)
         if (Fingerprint(window, children) != selected.Fingerprint)
             throw new InvalidOperationException("Window text or controls changed; inspect a fresh listing before acting.");
         if (!WindowEnabled(window)) throw new InvalidOperationException("Window is disabled by a dialog; resolve it first.");
+        if (action == "activate")
+        {
+            if (selected.Button is not null || window.Current.FrameworkId != "Qt")
+                throw new ArgumentException("activate requires a Qt windowId from workbench_windows.");
+            ct.ThrowIfCancellationRequested();
+            selections.Clear(); controls.Clear(); nativeWindows.Clear();
+            return Dispatch(process.Id, selected.Start, new(action, WindowHandle: window.Current.NativeWindowHandle));
+        }
         Action perform;
         if (action == "invoke")
         {

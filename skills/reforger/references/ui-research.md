@@ -1,12 +1,16 @@
 # UI research and reusable patterns
 
-Research date: 2026-10-23. These are source observations and design implications, not acceptance of any existing UI. Use the [UI workflow](ui-workflow.md) for execution. Paths below are resource-relative entry points to search in the current installation, not fixed resource IDs to copy.
+Original research: 2026-10-23; resource checks added 2026-10-28. These are source observations and design implications, not acceptance of any existing UI. Use the [UI workflow](ui-workflow.md) for execution. Paths below are resource-relative entry points to search in the current installation, not fixed resource IDs to copy.
 
-## Evidence and limits
+## Base-game resource examples
+
+The resource reads from 2026-10-28 are maintained in the [UI resource index](ui-resource-index.md), with provenance, inspected consumers and reuse caveats. Use that guide to discover controls; the observations below cover earlier script and addon research.
+
+## Original research evidence and limits
 
 The local PAK source index was prepared on 2026-10-22 at revision `9b2fea665c0943b9bcf87ec2891bc011`. Its manifest records game `data/data007.pak` SHA-256 `5df8a2d49f4bb80def5c2f4c83cf63a27fb73a5f12b8527066762c5e695fd51a`; base-game script observations below came from that extracted archive. This is cached script source, not decompiled code or a live compatibility result. Authored-addon observations came from files on disk on the research date, not necessarily published mod versions.
 
-No Reforger MCP tools were connected during this research. No new game/editor captures or interaction tests were performed. Existing concept briefs were read, but no current visual-quality verdict is asserted. Recheck precise API/version questions in installed sources.
+No Reforger MCP tools were connected during the original 2026-10-23 research below; the 2026-10-28 resource checks above used MCP. No new game/editor captures or interaction tests were performed. Existing concept briefs were read, but no current visual-quality verdict is asserted. Recheck precise API/version questions in installed sources.
 
 ## Base-game implementation observations
 

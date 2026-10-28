@@ -1,5 +1,8 @@
 # Reforger MCP
 
+Tool calls are logged automatically with bounded storage and session summaries;
+see [tool activity logging](docs/tool-activity.md).
+
 A standalone Windows 10 (build 19041+) x64 C# MCP server for Arma Reforger modding: launch Workbench, capture selected editor/game windows, search installed PAK assets, export and search script source, and inspect native engine code. It uses one C# PAK reader, **one Ghidra backend** for native code and **Windows Graphics Capture** for screenshots. No model API, Python service, provider selection, or fallback chain.
 
 Current capability: directly launch Workbench, open worlds and reload scripts through version-checked native calls on the editor thread, inspect and operate accessible menus, buttons, dialog text fields and folder trees, and capture editor/game windows; catalogue PAKs, create versioned script mirrors, search paths and script contents, read text and extract selected resources; prepare/search installed Windows native executables and retrieve function code/context. Standalone validation, arbitrary custom-widget manipulation, arbitrary standalone game control, arbitrary memory/function injection, resource conversion and mod repacking are not implemented.

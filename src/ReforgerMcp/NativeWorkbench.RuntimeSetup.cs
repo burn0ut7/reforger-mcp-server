@@ -19,7 +19,7 @@ internal static partial class NativeWorkbench
     // Workbench 1.8.0.13: settings access follows the startup override path;
     // server creation and selected-setting persistence call the owning routines.
     // No options dialog, registry patch, arbitrary address input, or VM bridge needed.
-    private static void EmitRuntimeSetup(E e, nint image, bool enable)
+    private static void EmitRuntimeSetup(E e, nint image, bool enable, int? port)
     {
         void I(int n) => e.B(BitConverter.GetBytes(n));
         void Call(int rva) { e.B(0x48, 0xb8); e.Q(image + rva); e.B(0xff, 0xd0); }
@@ -32,16 +32,26 @@ internal static partial class NativeWorkbench
         e.B(0x84, 0xc0); e.J(0x84, "setupInvalid");
         if (enable)
         {
+            if (port is not null)
+            {
+                // Same mutable setting accessor as Enable NET API. Stop only NetApi,
+                // through its owner, before starting it with the requested setting.
+                Settings(); e.B(0xba); I(9); e.B(0x48, 0x8b, 0x01, 0xff, 0x90); I(0x120);
+                e.B(0x48, 0x85, 0xc0); e.J(0x84, "setupInvalid");
+                e.B(0xc7, 0x00); I(port.Value);
+                e.B(0x48, 0x8b, 0x4b, 16, 0x48, 0x8d, 0x93); I(544); Call(0x22a710);
+            }
             Settings(); e.B(0xba); I(8); e.B(0x48, 0x8b, 0x01, 0xff, 0x90); I(0x120);
             e.B(0x48, 0x85, 0xc0); e.J(0x84, "setupInvalid");
             e.B(0xc6, 0x00, 1);
             e.B(0x48, 0x8b, 0x4b, 16, 0x48, 0x8d, 0x93); I(544); Call(0x22a320);
             // Engine-owned array<int> containing only the Enable NET API field.
             // Save routine consumes it and writes through Workbench's QSettings.
-            e.B(0xb9); I(4); e.B(0x31, 0xd2); Call(0x1e32460);
+            e.B(0xb9); I(port is null ? 4 : 8); e.B(0x31, 0xd2); Call(0x1e32460);
             e.B(0x48, 0x85, 0xc0); e.J(0x84, "setupInvalid");
             e.B(0xc7, 0x00); I(8); e.B(0x48, 0x89, 0x83); I(256);
-            e.B(0xc7, 0x83); I(264); I(1); e.B(0xc7, 0x83); I(268); I(1);
+            if (port is not null) { e.B(0xc7, 0x40, 4); I(9); }
+            e.B(0xc7, 0x83); I(264); I(port is null ? 1 : 2); e.B(0xc7, 0x83); I(268); I(port is null ? 1 : 2);
             e.B(0x48, 0x8b, 0x4b, 16, 0x48, 0x8d, 0x93); I(256); Call(0x22c230);
         }
         foreach (var (id, offset) in new[] { (8, 104), (9, 108) })

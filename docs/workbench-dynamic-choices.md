@@ -128,3 +128,145 @@ flag source retained its selected reference as `Flag86 (not found)` and kept
 refresh active with no available flags. Choosing `(None)` stored an empty string;
 after saving and reloading, the faction popup showed exactly `(None)`, `US`, and
 `USSR`, with no undo steps from background refresh.
+
+## TILW nested-field probe (2026-10-26)
+
+TILW stores its events on a GenericEntity, unlike the earlier component-owned
+Lobby2 configuration. An inert test fixture explicitly checked this distinction
+in Workbench 1.8.0.13, with the native choices helper disabled. No TILW production
+files were modified.
+
+The same entity exposed a direct EditComboBox, a single nested BaseContainerProps
+condition, and an event array containing a nested condition. The direct popup
+listed the empty choice, Probe Alpha and Probe Beta. Opening each nested Flag
+field produced no observable popup. Callback logging recorded the entity's own
+properties, including the condition and events properties, but no nested m_sFlag
+callback. This establishes failure of this tested approach, not impossibility of
+every potential script approach. The test used a structural fixture in the loaded
+test addon, not a live TILW project.
+
+Evidence: .temp/local/evidence/flag-picker-20261026 contains the saved
+TILW_EditorDropdownProbeEntity.c and .et fixture, helper status receipt
+1793067354923824200, UI receipts, callback logs, and screenshot
+1793067644182092200.png. Temporary world objects were discarded after preserving
+the previously saved user world; test source/resources were removed and scripts
+reloaded. Ghidra functions 141ac6810 and 141acb5a0 show inferred callback dispatch;
+they do not establish a supported script API for nested property list refresh.
+
+The requested all-fields, addon-only UI change remains unimplemented. Moving
+fields to new entities would alter authoring structure; enabling the external
+native helper would violate the distribution constraint. Neither is an accepted
+substitute for this request.
+
+## Addon-only feasibility follow-up (2026-10-26, Workbench 1.8.0.13)
+
+The remaining reflection route was tested with a new inert fixture,
+TILW_AttributeRefreshProbeEntity. Its nested term has an EditComboBox initialized
+with `Initial option`. A checkbox handler obtains the actual Attribute through
+`typename.GetVariableAttributes`, replaces `m_Enums`, and obtains it again.
+Both the write and the independent reread report `Updated option` in the log.
+The actual editable popup nevertheless retains `Initial option` immediately,
+after selecting another entity and returning, and on a fresh prefab instance
+created after the metadata mutation. This closes a different path from the
+previous shared ParamEnumArray mutation test: the reflected Attribute itself was
+changed, not only a previously returned array.
+
+A SearchComboBox control was included but its open action returned
+`control_unavailable` from MCP. Its popup behavior is unverified and must not be
+reported as a failed engine test. It consumes the same declared Attribute enum
+source; the observed EditComboBox result is the tested requirement.
+
+Luna independently retrieved the native attribute conversion path. Ghidra's
+inferred FUN_141ed7e70 reads Attribute.m_Enums at code line 208 and passes it to
+FUN_141ed8ad0 at line 209. The latter creates native enf::ParmEnum entries from
+the script key/description fields and stores them in the property data (string
+case, lines 215-236). Native artifacts are under the configured research cache:
+
+- queries/b894fe973ba348538fb63557816b89c3/decompilation.c
+- queries/22e547fec7db4e1a9e97d1383201489a/decompilation.c
+- queries/89e6f15b74ef428e87ed03f5cfb03dc2/decompilation.c
+
+The binary SHA-256 is
+7dd36ca1f662b0c13669a4f2f7f10e3c461c2906b021e742272d64b3ab7e9798.
+The refreshed installed-source catalogue revision is
+e135e8b45aa844efa237b165de99c1cb. Luna also verified the earlier inspected core
+archive against the installed archive: SHA-256
+a2f2aee2b1043ebee24995581fc53fb5f3713195fda432e6c2b4c5acdcc64ea4.
+BaseContainer exposes GetEnumValues but no enum metadata setter in its generated
+API. Nested custom-title attributes supply titles, not choice-list callbacks.
+WorldEditorTool.UpdatePropertyPanel refreshes a tool panel; it is not an exposed
+setter for a nested field's native enum metadata.
+
+Engineering conclusion: the complete requested change cannot be delivered through
+the exposed addon scripting interfaces in the inspected Workbench version while
+preserving existing nested authoring and excluding native helpers. This conclusion
+is bounded to those requirements and version; it is not a proof against unknown
+engine defects, unsupported exploitation, or future engine APIs. A native engine
+change exposing a nested enum provider or metadata refresh would address the
+missing capability. The earlier Lobby2 entity-based result does not satisfy
+TILW's unchanged-authoring requirement. No production TILW edits are justified by
+these unsuccessful prototypes.
+
+The reflection fixture source and prefab are archived in the same local evidence
+folder. Both temporary instances were discarded, fixture files removed from the
+test addon, and the original saved Arland world reopened after a successful
+cleanup reload. A fresh entity query found no TILW_Attribute probe instances.
+TILW git status remained clean. Independent review approved the bounded findings
+and documentation; this is a completed feasibility investigation, not a shipped
+UI implementation.
+
+## Separate native plugin feasibility (2026-10-26)
+
+A separate DLL plugin is feasible on the tested Workbench 1.8.0.13 / Qt 6.8.3,
+using Qt's generic plugin mechanism. This is distinct from an addon script and
+is not a documented Bohemia native Workbench extension API.
+
+A minimal C++ QGenericPlugin was built against Qt 6.8.3 with a statically linked
+C++ runtime. Its PE dependency table contains only Qt6Core.dll, Qt6Gui.dll,
+Qt6Widgets.dll and KERNEL32.dll. Those Qt libraries already ship with Workbench;
+end users do not need an SDK, .NET, Python, an installer or a running helper.
+Build tools are development-only dependencies.
+
+Two live observations establish the loading path:
+
+1. Qt's QGenericPluginFactory loaded the DLL inside the existing Workbench
+   PID 12464; the plugin enumerated native QComboBox controls. MCP invoked the
+   factory for this first development test.
+2. A separate empty test project started Workbench PID 35436 with the ordinary
+   command-line arguments `-plugin tilwprobe:<report-path>`. The DLL was under
+   Workbench/generic/tilwprobe.dll. Its own report confirmed that Workbench loaded
+   it at startup, without MCP invoking the plugin factory or installing a bridge
+   into that process. The original Workbench instances were left running.
+
+The second launch used MCP solely for normal process startup. It required no
+startup injector, helper executable or persistent external service. The launch
+option must be present on every launch, normally configured once in a shortcut
+or Steam launch settings. Merely copying a DLL without activation is not proven
+to load it automatically.
+
+Evidence under .temp/local/qt-plugin-probe: probe.cpp, probe.json, build.cmd,
+generic/tilwprobe.dll, dependencies.txt, loaded.json and startup.json. Startup
+operation receipt:
+.temp/local/evidence/flag-picker-20261026/1793070133392870700-workbench_open_project.json.
+DLL SHA-256: F2206AAEAC7720A94B80ED12401A93DB5C3114141BECB44734827473994B4608.
+
+Qt documents the loader and activation mechanism:
+https://doc.qt.io/qt-6.8/qguiapplication.html
+https://doc.qt.io/qt-6.8/qgenericplugin.html
+The matching factory source searches the generic subdirectory:
+https://raw.githubusercontent.com/qt/qtbase/v6.8.3/src/gui/kernel/qgenericpluginfactory.cpp
+
+This establishes a viable deployment architecture, not a completed dropdown
+extension. The probe only loads and observes controls. Porting the provider,
+nested native property updates, refresh, typed entry and undo/save verification
+into the DLL remains implementation work. Existing native dropdown experiments
+show that native property updates can work, but that behavior was not implemented
+or tested in this DLL. A production extension needs explicit engine/Qt version
+checks because the property integration uses private native interfaces.
+
+Cleanup: the temporary startup Workbench was closed through MCP and the installed
+probe DLL removed after checking its hash. Temporary MCP loader/launch changes
+were archived locally and removed from production source; the original research
+server configuration was restored. The first inert probe remains loaded in the
+already-open original Workbench until that process exits, with no repeating work
+or gameplay changes. TILW production files were not modified.

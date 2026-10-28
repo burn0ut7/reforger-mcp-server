@@ -23,6 +23,7 @@ try
     if (args.Length < 2 || args[0] != "--config" || (args.Length != 2 && !serveHttp && !(args.Length == 4 && args[2] is "--prepare" or "--setup-runtime")))
         throw new ArgumentException("Usage: ReforgerMcp --config <json-path> [--serve-http | --setup-runtime <status|install|enable> | --prepare <target|all>] | --check-config <json-path>");
     var config = Configuration.Load(args[1]);
+    using var activityLifetime = new ActivityLifetime();
     WebApplicationBuilder? webBuilder = null;
     byte[]? tokenHash = null;
     if (serveHttp)
@@ -68,6 +69,8 @@ try
             .WithTools<EngineTools>().WithTools<PakTools>().WithTools<WorkbenchTools>().WithTools<CaptureTools>().WithTools<WorkbenchScriptTools>().WithTools<WorkbenchEntityTools>().WithTools<WorkbenchTargetTools>().WithTools<WorkbenchPrefabTools>().WithTools<WorkbenchRuntimeTools>().WithTools<WorkbenchRuntimeSetupTools>().WithTools<WorkbenchHistoryTools>().WithTools<WorkbenchMultiplayerTools>().WithTools<WorkbenchWindowTools>().WithTools<LogTools>().WithTools<ProjectTools>().WithTools<WorkbenchChoicesTools>();
         if (serveHttp) mcp.WithHttpTransport(options => options.SessionMode = HttpServerSessionMode.Stateless);
         else mcp.WithStdioServerTransport();
+        mcp.WithRequestFilters(filters => filters.AddCallToolFilter(next =>
+            (request, token) => activityLifetime.Log!.Invoke(request, next, token)));
     }
     using IHost host = webBuilder is not null ? webBuilder.Build() : ((HostApplicationBuilder)builder).Build();
     if (host is WebApplication web)
@@ -92,6 +95,8 @@ try
         web.MapMcp("/mcp");
     }
     var engine = host.Services.GetRequiredService<NativeEngine>();
+    if (args.Length == 2 || serveHttp)
+        activityLifetime.Log = new ToolActivityLog(Path.Combine(config.DataDirectory, "tool-activity"), serveHttp ? "http-stateless" : "stdio");
     try
     {
         if (args.Length == 4 && args[2] == "--setup-runtime")
@@ -127,15 +132,30 @@ try
             }
             await host.StopAsync();
         }
-        else await host.RunAsync();
+        else
+        {
+            await host.StartAsync();
+            await host.WaitForShutdownAsync();
+        }
     }
-    finally { await engine.DisposeAsync(); }
+    finally
+    {
+        activityLifetime.Dispose();
+        await engine.DisposeAsync();
+    }
     return 0;
 }
 catch (Exception ex)
 {
     Console.Error.WriteLine(ex.Message);
     return 1;
+}
+
+// Created only after the exclusive data owner is acquired; disposed after the host stops.
+file sealed class ActivityLifetime : IDisposable
+{
+    public ToolActivityLog? Log { get; set; }
+    public void Dispose() => Log?.Dispose();
 }
 
 

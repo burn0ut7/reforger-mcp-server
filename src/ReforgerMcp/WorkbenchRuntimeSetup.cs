@@ -97,9 +97,11 @@ internal static class RuntimeAdapter
 
 public sealed partial class WorkbenchSession
 {
-    internal Task<object> RuntimeSetup(string action, int processId, CancellationToken ct)
+    internal Task<object> RuntimeSetup(string action, int processId, CancellationToken ct, int? port = null)
     {
-        if (action is not ("status" or "install" or "enable")) throw new ArgumentException("action must be status, install or enable.");
+        if (action is not ("status" or "install" or "enable" or "configure")) throw new ArgumentException("action must be status, install, enable or configure.");
+        if (action == "configure" ? port is null or < 1 or > 65535 : port is not null)
+            throw new ArgumentException("Only configure accepts a required port from 1 to 65535.");
         return Start(token =>
         {
             using var process = SelectProcess();
@@ -118,12 +120,16 @@ public sealed partial class WorkbenchSession
             RuntimeAdapter.CheckPath(target);
             var installed = File.Exists(target) && RuntimeAdapter.Hash(target) == RuntimeAdapter.InstalledHash;
             var configuredPort = configuration.Workbench!.RuntimePort;
-            if (action != "status" && configuredPort != native.Port)
+            if (action == "configure" && configuredPort != port)
+                throw new InvalidOperationException("Set workbench.runtimePort to the deliberately requested port before configuring Workbench. Nothing changed.");
+            if (action == "configure") RuntimeNet.VerifyPortAvailableOrOwned(port!.Value, process.Id);
+            if (action is not ("status" or "configure") && configuredPort != native.Port)
                 throw new InvalidOperationException($"Set workbench.runtimePort to Workbench's current NET API port {native.Port}. No port/settings/files were changed.");
             var changed = false;
             var wasEnabled = native.Enabled;
+            var previousPort = native.Port;
             if (action == "install") changed = RuntimeAdapter.Install(native.ProfileDirectory);
-            if (action != "status") native = (NativeRuntimeSetup)NativeWorkbench.Execute(process, token, runtimeSetup: true);
+            if (action != "status") native = (NativeRuntimeSetup)NativeWorkbench.Execute(process, token, runtimeSetup: true, runtimePort: port);
             var needsReload = action == "install";
             if (needsReload && !changed)
             {
@@ -163,7 +169,7 @@ public sealed partial class WorkbenchSession
             var ready = native.Enabled && installed && configuredPort == native.Port && adapter is not null;
             return new { state = ready ? "ready" : "not_ready", processId, profileDirectory = native.ProfileDirectory,
                 adapterPath = target, adapterBuild = RuntimeAdapter.Build, installedSha256 = RuntimeAdapter.InstalledHash,
-                changed, reloaded = needsReload, installed, wasEnabled, enabled = native.Enabled, port = native.Port, configuredPort, listener, builtin, adapter, problem,
+                changed, settingsChanged = wasEnabled != native.Enabled || previousPort != native.Port, previousPort, reloaded = needsReload, installed, wasEnabled, enabled = native.Enabled, port = native.Port, configuredPort, listener, builtin, adapter, problem,
                 scope = "Readiness requires the current profile file, enabled engine setting, selected-process listener, successful compilation and matching live adapter handshake. NET API may listen on all interfaces; client requests use loopback. No alternate port or executor." };
         }, ct);
     }
@@ -173,10 +179,10 @@ public sealed partial class WorkbenchSession
 public sealed class WorkbenchRuntimeSetupTools(WorkbenchSession session)
 {
     [McpServerTool(Name = "workbench_runtime_setup", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Explicit runtime bridge setup for the running supported Workbench. action=status observes the mounted profile, NET API setting/port and verifies the installed/live adapter. action=enable enables and persists NET API through its native owner even when NET API is off; preserves the port and unrelated settings. action=install also installs this server's embedded adapter into profile/scripts/WorkbenchGame/ReforgerMcp and reloads scripts; close World Editor/other editors and save script tabs first. Locally modified/unmanaged files are preserved. Requires workbench.runtimePort to match the observed editor port for mutations. Never installs in gameplay addons. ready requires a PID-owned listener and matching adapter build/profile/protocol. Poll pending via workbench_operation; never blindly retry after uncertainty.")]
-    public async Task<object> Setup(string action, int processId, CancellationToken cancellationToken = default)
+    [Description("Explicit runtime bridge setup for the running supported Workbench. action=status observes the mounted profile, NET API setting/port and verifies the installed/live adapter. action=enable enables and persists NET API through its native owner even when NET API is off; preserves the port and unrelated settings. action=configure requires an explicit port matching workbench.runtimePort, checks it is available or uniquely owned, then enables NET API and changes its live port through the native owner. It persists the chosen port in Workbench settings (shared defaults for future instances); other running processes are untouched. action=install also installs this server's embedded adapter into profile/scripts/WorkbenchGame/ReforgerMcp and reloads scripts; close World Editor/other editors and save script tabs first. Locally modified/unmanaged files are preserved. enable/install require workbench.runtimePort to match the observed editor port. Never installs in gameplay addons. ready requires a PID-owned listener and matching adapter build/profile/protocol. Poll pending via workbench_operation; never blindly retry after uncertainty.")]
+    public async Task<object> Setup(string action, int processId, int? port = null, CancellationToken cancellationToken = default)
     {
-        try { return await session.RuntimeSetup(action, processId, cancellationToken); }
+        try { return await session.RuntimeSetup(action, processId, cancellationToken, port); }
         catch (Exception ex) when (ex is not (McpException or OperationCanceledException)) { throw new McpException(ex.Message); }
     }
 }

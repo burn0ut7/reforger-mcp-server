@@ -9,6 +9,7 @@ $allowed = @(
     '^THIRD-PARTY/[A-Za-z0-9-]+\.(md|txt)$',
     '^docs/[A-Za-z0-9-]+\.md$',
     '^scripts/[A-Za-z0-9-]+\.(ps1|mjs)$',
+    '^tests/ToolActivity/(Program\.cs|ToolActivity\.csproj)$',
     '^src/ReforgerMcp/([A-Za-z0-9.]+\.(cs|csproj)|packages\.lock\.json|Ghidra/ReforgerBridge\.java)$',
     '^adapters/workbench/Scripts/WorkbenchGame/RST_Runtime\.c$',
     '^skills/reforger/(SKILL\.md|references/[a-z-]+\.md|agents/openai\.yaml)$'

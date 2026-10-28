@@ -158,17 +158,31 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
         var windows = Windows(process.Id);
         if (windows.Any(IsModal)) throw Blocked(process, "Workbench has a modal dialog. Resolve it before reloading.");
         RequiredWindow(windows, ResourceManager);
-        if (windows.Any(w => w.Current.AutomationId is not (ResourceManager or ScriptEditor or "Arma4WorkbenchApp.NotificationPopup")))
-            throw Blocked(process, "Native reload currently requires Resource Manager/Script Editor only; close other editor windows first.");
+        if (windows.Any(w => w.Current.AutomationId is not (ResourceManager or ScriptEditor or "Arma4WorkbenchApp.worldEditorMain" or "Arma4WorkbenchApp.NotificationPopup")))
+            throw Blocked(process, "Native reload supports Resource Manager, Script Editor and World Editor; another editor is open.");
         if (windows.Any(w => !w.Current.IsEnabled || w.FindAll(TreeScope.Descendants,
             new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.TabItem))
             .Cast<AutomationElement>().Any(t => t.Current.Name.Contains('*'))))
             throw Blocked(process, "Resolve disabled editors or unsaved tabs before native reload.");
         ct.ThrowIfCancellationRequested();
         editObservations.Clear();
+        // Keep Stop and Reload in one serialized operation, including across MCP servers.
+        // Native Execute takes this same reentrant mutex for each main-thread dispatch.
+        using var reloadLease = new NativeWorkbench.DispatchLease(process);
+        System.Text.Json.Nodes.JsonObject? play = null;
+        if (windows.Any(w => w.Current.AutomationId == "Arma4WorkbenchApp.worldEditorMain"))
+        {
+            play = System.Text.Json.JsonSerializer.SerializeToNode(
+                NativeWorkbench.Execute(process, ct, play: "stop"), Configuration.Json)!.AsObject();
+            if (play["state"]?.GetValue<string>() is not ("stopped" or "already_stopped") ||
+                play["isPlaying"]?.GetValue<bool>() != false)
+                return new { state = "reload_not_started", processId, reloadDispatched = false,
+                    reason = "Play did not reach a confirmed stopped state. Inspect this operation before retrying.", play };
+        }
         var checkpoint = logs.BeginReload(process, ct);
         var result = System.Text.Json.JsonSerializer.SerializeToNode(NativeWorkbench.Execute(process, ct), Configuration.Json)!.AsObject();
-        if (result["state"]?.GetValue<string>() == "reload_failed")
+        result["play"] = play;
+        if (result["state"]?.GetValue<string>() is "reloaded" or "reload_failed")
             result["diagnostics"] = System.Text.Json.JsonSerializer.SerializeToNode(logs.ReloadErrors(checkpoint, process, ct), Configuration.Json);
         return result;
     }
