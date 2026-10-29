@@ -35,6 +35,8 @@ Include the authoring work that makes code usable: appropriate script module, ed
 
 Read [Workbench guidance](references/workbench-workflow.md) before editor mutations or live tests. Prefer the semantic MCP operation for the task. If the server is disconnected or the operation unsupported, report that boundary; do not invent tools or substitute another execution backend.
 
+For immediate live component method execution, use `workbench_runtime_call`; it performs target resolution, signature validation and one invocation internally. Use separate prepare/invoke only for intentional validation-only or two-step work. The receipt and synchronous result still need relevant state/log verification.
+
 Verify the requested behavior and saved result, not just compilation. For scenarios, follow the player's path from joining and spawning through objectives and completion; for multiplayer, check the relevant authority and peers. Report what was tested and what remains unverified. Publishing is a separate user-directed action.
 
 Before delivery, run the coding reference's readability check against the actual saved scripts. Treat formatting review and runtime verification as separate checks; neither proves the other. State any intentional compatibility exceptions.

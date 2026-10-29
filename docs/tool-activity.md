@@ -15,7 +15,7 @@ recorded. Stateful HTTP would require its own session lifecycle integration.
 
 The central SDK call-tool filter records UTC timestamps, session ID, call ID,
 tool name, safe parameter summaries, OK/FAIL, and duration in milliseconds.
-Strings and nested payloads are redacted by default. Only a small allowlist of
+Strings and nested payloads are redacted by default, except bounded entity/component/method/return-type names for runtime call and preparation. Only a small allowlist of
 numeric/boolean controls is shown; at most 16 parameter names and 64 characters
 per name are retained. Source text, credentials, images, results, and error bodies
 are never copied. Errors identify cancellation, exception type, or a tool-reported
@@ -41,3 +41,39 @@ permissions govern access; these are local operational logs, not an audit trail.
 
 Verification: `dotnet build ReforgerMcp.slnx` and
 `dotnet run --project tests/ToolActivity/ToolActivity.csproj`.
+
+## Runtime comparison evidence
+
+`workbench_runtime_call` combines validation and execution in one adapter request;
+legacy prepare/invoke remains measurable alongside it. `RUNTIME` JSON records share
+the originating MCP call ID even when work completes after a pending response.
+They include action, receipt, entity/component/method names, argument types, outcome,
+dispatch status, invocation-attempt flag, exception type, and phase timings. Argument
+values, return values, generated source and exception messages are excluded. JSON
+escaping prevents target names from creating extra log lines. These records describe
+execution, not the AI's reasoning or the user's purpose.
+
+A start record without a terminal record has an unestablished outcome. `not_sent`
+means runtime transport was not entered; `sent_outcome_unknown` conservatively means
+the transport was entered but no validated result is available (it does not prove
+bytes reached the engine). `returned` means the response was validated, not that
+gameplay succeeded. Rejected input or operation-lane refusal before runtime work
+starts has only the ordinary tool record. Pending polls do not count as executions.
+
+`prepareMs` includes `compileMs`; do not add them together. `invokeMs` covers target
+checks and synchronous invocation; absent phases are null. Server elapsed time starts
+after process/token selection and includes live preflight and transport. Engine
+measurements have millisecond resolution. No phase measures deferred gameplay work.
+Session headers identify the server module build and adapter build.
+
+The footer retains counts, outcome totals and phase sums for the first 32
+(action, component, method) combinations, with additional combinations under `other`.
+These aggregates continue after detail logging fills up. `Failed` includes returned
+non-success states; `Uncertain` counts unvalidated transport outcomes. `Timed` counts
+operations with a preparation or invocation timing, including zero milliseconds.
+
+For before/after comparison, use the same method, arguments, world and build; compare
+legacy prepare-plus-invoke end-to-end time with the combined call, interleaving samples
+and excluding warm-up. Count completed invocations separately from public requests.
+Do not treat fewer requests as proof of faster compilation. Preserve baseline files
+before session retention removes them; capped details cannot reconstruct every call.

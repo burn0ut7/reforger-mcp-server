@@ -97,6 +97,7 @@ Start with `pak_status`, then use `pak_search_text` for API declarations and cal
 | `workbench_runtime_setup` | Inspect setup, install the bridge into the mounted Workbench profile, or enable and persist NET API when off; verify live readiness. |
 | `workbench_runtime_status` | Observe the explicitly installed adapter and embedded Play state. |
 | `workbench_runtime_inspect` | Read a named live entity and supported reflected component fields during Play. |
+| `workbench_runtime_call` | Validate and invoke a typed live-component method in one request; return its value, receipt and phase timings. Preferred for immediate execution. |
 | `workbench_runtime_prepare` | Resolve a live target and compile-check typed arguments and return type; return a short-lived single-use token. |
 | `workbench_runtime_invoke` | Invoke through the game module and return supported values; correlate the receipt with logs and gameplay assertions. |
 | `workbench_operation` | Poll pending native world, entity, prefab, reload, Play, multiplayer or runtime setup operations. |

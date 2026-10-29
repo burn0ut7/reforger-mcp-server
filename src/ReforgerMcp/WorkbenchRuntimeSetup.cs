@@ -110,11 +110,11 @@ public sealed partial class WorkbenchSession
             RequiredWindow(observedWindows, ResourceManager);
             if (observedWindows.Any(IsModal) || observedWindows.Any(w => !w.Current.IsEnabled))
                 throw Blocked(process, "Resolve Workbench dialogs before runtime setup.");
-            if (action == "install" && (observedWindows.Any(w => w.Current.AutomationId is not (ResourceManager or ScriptEditor or "Arma4WorkbenchApp.NotificationPopup")) ||
+            if (action == "install" && (observedWindows.Any(w => w.Current.AutomationId is not (ResourceManager or ScriptEditor or "Arma4WorkbenchApp.worldEditorMain" or "Arma4WorkbenchApp.NotificationPopup")) ||
                 observedWindows.Any(w => w.FindAll(System.Windows.Automation.TreeScope.Descendants,
                     new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.TabItem))
                     .Cast<System.Windows.Automation.AutomationElement>().Any(t => t.Current.Name.Contains('*')))))
-                throw Blocked(process, "Close World Editor/other editors and save script tabs before installing the profile bridge. Setup reloads scripts.");
+                throw Blocked(process, "Close unsupported editors and save script tabs before installing the profile bridge. World Editor may remain open; setup uses the normal reload operation.");
             var native = (NativeRuntimeSetup)NativeWorkbench.Execute(process, token, runtimeSetup: false);
             var target = RuntimeAdapter.PathIn(native.ProfileDirectory);
             RuntimeAdapter.CheckPath(target);
@@ -179,7 +179,7 @@ public sealed partial class WorkbenchSession
 public sealed class WorkbenchRuntimeSetupTools(WorkbenchSession session)
 {
     [McpServerTool(Name = "workbench_runtime_setup", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Explicit runtime bridge setup for the running supported Workbench. action=status observes the mounted profile, NET API setting/port and verifies the installed/live adapter. action=enable enables and persists NET API through its native owner even when NET API is off; preserves the port and unrelated settings. action=configure requires an explicit port matching workbench.runtimePort, checks it is available or uniquely owned, then enables NET API and changes its live port through the native owner. It persists the chosen port in Workbench settings (shared defaults for future instances); other running processes are untouched. action=install also installs this server's embedded adapter into profile/scripts/WorkbenchGame/ReforgerMcp and reloads scripts; close World Editor/other editors and save script tabs first. Locally modified/unmanaged files are preserved. enable/install require workbench.runtimePort to match the observed editor port. Never installs in gameplay addons. ready requires a PID-owned listener and matching adapter build/profile/protocol. Poll pending via workbench_operation; never blindly retry after uncertainty.")]
+    [Description("Explicit runtime bridge setup for the running supported Workbench. action=status observes the mounted profile, NET API setting/port and verifies the installed/live adapter. action=enable enables and persists NET API through its native owner even when NET API is off; preserves the port and unrelated settings. action=configure requires an explicit port matching workbench.runtimePort, checks it is available or uniquely owned, then enables NET API and changes its live port through the native owner. It persists the chosen port in Workbench settings (shared defaults for future instances); other running processes are untouched. action=install also installs this server's embedded adapter into profile/scripts/WorkbenchGame/ReforgerMcp and reloads scripts; stop Play, close unsupported editors and save script tabs first; World Editor may remain open. Locally modified/unmanaged files are preserved. enable/install require workbench.runtimePort to match the observed editor port. Never installs in gameplay addons. ready requires a PID-owned listener and matching adapter build/profile/protocol. Poll pending via workbench_operation; never blindly retry after uncertainty.")]
     public async Task<object> Setup(string action, int processId, int? port = null, CancellationToken cancellationToken = default)
     {
         try { return await session.RuntimeSetup(action, processId, cancellationToken, port); }

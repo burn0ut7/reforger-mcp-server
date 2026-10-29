@@ -62,6 +62,10 @@ class RST_RuntimeResponse : JsonApiStruct
 	string error;
 	int errorLine;
 	string resultJson;
+	int prepareMs = -1;
+	int compileMs = -1;
+	int invokeMs = -1;
+	bool invocationAttempted;
 	string entityId;
 	string entityType;
 	vector position;
@@ -92,6 +96,10 @@ class RST_RuntimeResponse : JsonApiStruct
 		RegV("nextOffset");
 		RegV("items");
 		RegV("resultJson");
+		RegV("prepareMs");
+		RegV("compileMs");
+		RegV("invokeMs");
+		RegV("invocationAttempted");
 	}
 }
 
@@ -156,15 +164,20 @@ class RST_Runtime : NetApiHandler
 			return response;
 		}
 
-		if (runtimeRequest.action == "prepare")
+		if (runtimeRequest.action == "prepare" || runtimeRequest.action == "call")
 		{
+			int prepareStarted = System.GetTickCount();
 			Prepare(runtimeRequest, response);
-			return response;
+			response.prepareMs = System.GetTickCount(prepareStarted);
+			if (runtimeRequest.action == "prepare" || response.state != "prepared")
+				return response;
 		}
 
-		if (runtimeRequest.action == "invoke")
+		if (runtimeRequest.action == "invoke" || runtimeRequest.action == "call")
 		{
+			int invokeStarted = System.GetTickCount();
 			Invoke(runtimeRequest, response);
+			response.invokeMs = System.GetTickCount(invokeStarted);
 			return response;
 		}
 
@@ -400,8 +413,10 @@ class RST_Runtime : NetApiHandler
 		string code = runtimeRequest.callCode;
 		code.Replace("\nvoid RST_AccessCheck(__TARGET__ c)\n",
 			"\nvoid RST_AccessCheck(" + dispatchType + " c)\n");
+		int compileStarted = System.GetTickCount();
 		ScriptModule module = ScriptModule.CompileScript(GetGame().GetScriptModule(), code,
 			response.error, response.errorLine);
+		response.compileMs = System.GetTickCount(compileStarted);
 		if (!module)
 		{
 			response.state = "compile_rejected";
@@ -455,7 +470,10 @@ class RST_Runtime : NetApiHandler
 		Print("RST_MCP_BEGIN " + runtimeRequest.token);
 		bool called;
 		if (callModule)
+		{
+			response.invocationAttempted = true;
 			called = callModule.Call(null, "RST_Invoke", false, response.resultJson, target);
+		}
 
 		response.state = "call_failed";
 		if (called)

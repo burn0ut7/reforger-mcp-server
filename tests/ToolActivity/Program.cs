@@ -46,13 +46,59 @@ Check(!text.Contains("NEVER-LOG-THIS") && text.Contains("redacted") && text.Cont
 Check(text.Contains("accumulated_tool_ms=") && text.Contains("elapsed_ms=") && text.Contains("slowest_call="), "timing summary fields");
 Check(text.Split('\n').Count(l => l.Contains("START call=")) == 23, "all starts present");
 
+var runtimeDir = Path.Combine(root, "runtime");
+using (var runtimeLog = new ToolActivityLog(runtimeDir, "http-stateless"))
+{
+    var activity = new RuntimeActivity("call", "rtest", "Test\nEntity", "TestComponent", "ReadState", "string", ["string"]);
+    var request = Request("workbench_runtime_call");
+    request.Params!.Arguments!["method"] = JsonSerializer.SerializeToElement("ReadState");
+    request.Params.Arguments["arguments"] = JsonSerializer.SerializeToElement(new[] { new { type = "string", value = "NEVER-LOG-THIS" } });
+    var complete = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+    Task? background = null;
+    await runtimeLog.Invoke(request, (_, _) =>
+    {
+        ToolActivityLog.RecordRuntime(activity);
+        background = Task.Run(async () =>
+        {
+            await complete.Task;
+            ToolActivityLog.RecordRuntime(activity with { State = "invoked", Dispatch = "returned", InvocationAttempted = true,
+                PrepareMs = 4, CompileMs = 3, InvokeMs = 2, ElapsedMs = 12 });
+        });
+        return ValueTask.FromResult(new CallToolResult());
+    }, default);
+    await runtimeLog.Invoke(Request("workbench_operation"), (_, _) => ValueTask.FromResult(new CallToolResult()), default);
+    complete.SetResult();
+    await background!;
+    text = ReadLog(Directory.GetFiles(runtimeDir).Single());
+    Check(text.Split('\n').Count(l => l.Contains("RUNTIME call=1 ")) == 2 && !text.Contains("RUNTIME call=2 "), "pending runtime completion retains originating call ID");
+    Check(text.Contains("ReadState") && text.Contains("Test\\nEntity") && !text.Contains("NEVER-LOG-THIS"), "runtime identities logged, newlines escaped and values redacted");
+    Check(text.Contains("\"CompileMs\":3") && text.Contains("\"Invoked\":1"), "runtime phase timings and method totals");
+    Check(text.Contains("server_mvid=") && text.Contains("adapter_build="), "build provenance recorded");
+    for (var i = 0; i < 140; i++)
+        await runtimeLog.Invoke(Request("tool_" + i + new string('x', 60)), (_, _) =>
+        {
+            ToolActivityLog.RecordRuntime(activity with { ComponentType = new string('C', 96), Method = "Method" + i + new string('M', 85), State = "uncertain", Dispatch = "sent_outcome_unknown" });
+            return ValueTask.FromResult(new CallToolResult());
+        }, default);
+    text = ReadLog(Directory.GetFiles(runtimeDir).Single());
+    var footer = text.Split('\n', StringSplitOptions.RemoveEmptyEntries).Last();
+    using var totals = JsonDocument.Parse(footer[(footer.IndexOf("runtime_per_method=", StringComparison.Ordinal) + "runtime_per_method=".Length)..]);
+    Check(totals.RootElement.EnumerateObject().Count() == 33 && totals.RootElement.GetProperty("other").GetProperty("Uncertain").GetInt64() > 0, "runtime method cardinality bounded with explicit overflow");
+}
+
 var capped = Path.Combine(root, "cap");
 using (var cap = new ToolActivityLog(capped, "http-stateless"))
-    for (var i = 0; i < 4000; i++) await cap.Invoke(Request(), (_, _) => ValueTask.FromResult(new CallToolResult()), default);
+    for (var i = 0; i < 4000; i++) await cap.Invoke(Request(), (_, _) =>
+    {
+        ToolActivityLog.RecordRuntime(new RuntimeActivity("call", "rtest", "entity", "Component", "Method", "int", [])
+            { State = "invoked", Dispatch = "returned", PrepareMs = 3, CompileMs = 2, InvokeMs = 1 });
+        return ValueTask.FromResult(new CallToolResult());
+    }, default);
 var capFile = Directory.GetFiles(capped).Single();
 text = ReadLog(capFile);
 Check(new FileInfo(capFile).Length <= ToolActivityLog.MaxBytes && text.Contains("calls=4000 completed=4000"), "byte cap with complete summary");
 Check(!text.Contains("omitted_detail_lines=0 "), "overflow details counted");
+Check(text.Contains("\"Invoked\":4000") && text.Contains("\"CompileMs\":8000"), "runtime totals continue after detail cap");
 for (var i = 0; i < 7; i++) { using var retained = new ToolActivityLog(capped, "stdio"); }
 Check(Directory.GetFiles(capped).Length == 5, "five-session retention");
 var blocked = Path.Combine(root, "blocked");
