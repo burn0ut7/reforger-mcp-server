@@ -35,7 +35,7 @@ public sealed class PakTools(PakStore store)
         CancellationToken cancellationToken = default) => Report(() => store.ReadText(entryId, offset, limit, revision, cancellationToken));
 
     [McpServerTool(Name = "pak_search_text", ReadOnly = true, OpenWorld = false)]
-    [Description("Search mirrored .c scripts by case-insensitive all-term line match. Supply query OR queries (1-8); batches return 3 matches/query and forbid offset/limit. Continue each query with nextOffset, revision and unchanged source/pathQuery filters. Read context with pak_read.")]
+    [Description("Search readable scripts, prefabs, layouts and resource text; case-insensitive all-term line match. pathQuery narrows paths/extensions; no inherited-value resolution. Supply query OR queries (1-8); batches return 3 matches/query and forbid offset/limit. Continue each query with nextOffset, revision and unchanged source/pathQuery filters. Read context with pak_read.")]
     public Task<object> SearchText(string? query = null, string pathQuery = "", int offset = 0, int limit = 20,
         string? revision = null, string? source = null, string[]? queries = null, CancellationToken cancellationToken = default)
         => Report(() =>

@@ -6,9 +6,9 @@ using System.Text.Json;
 namespace ReforgerMcp;
 
 public sealed record PakIdentity(string Source, string Archive, long Length, long LastWriteUtcTicks, string Sha256);
-public sealed record PakScript(string EntryId, string Sha256, string? TextError);
+public sealed record PakText(string EntryId, string Sha256, long Offset, int Length, string? TextError);
 public sealed record PakSnapshot(int Format, string Revision, DateTimeOffset PreparedAt,
-    Dictionary<string, string> Roots, List<PakIdentity> Archives, List<PakEntry> Entries, List<PakScript> Scripts)
+    Dictionary<string, string> Roots, List<PakIdentity> Archives, List<PakEntry> Entries, List<PakText> TextFiles)
 {
     public Dictionary<string, string> LooseRoots { get; init; } = [];
     public List<LooseIdentity> LooseFiles { get; init; } = [];
@@ -19,12 +19,20 @@ public sealed record LooseIdentity(string Source, string Path, long Length, long
 public sealed record PakPointer(string Revision, string ManifestSha256);
 
 // Owns all PAK operations and derived files. A revision becomes visible only after a complete
-// catalogue and byte-preserving script mirror have been saved. No partial or stale fallback.
+// catalogue and byte-preserving text store have been saved. No partial or stale fallback.
 public sealed class PakStore(Configuration config, ProjectContext? projects = null)
 {
     private readonly SemaphoreSlim gate = new(1);
     private PakSnapshot? cached;
     private PakPointer? cachedPointer;
+    // Resource source formats, not compiled textures, models, audio or terrain tiles.
+    private static readonly HashSet<string> TextExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".c", ".et", ".conf", ".layout", ".emat", ".ent", ".layer", ".gproj", ".meta",
+        ".json", ".xml", ".txt", ".styles", ".imageset", ".acp", ".sig", ".afm", ".smap",
+        ".gamemat", ".physmat", ".ct", ".ptc", ".agf", ".agr", ".ast", ".bt", ".pap"
+    };
+    private const long MaxTextStore = 8L * 1024 * 1024 * 1024;
     private string Store => Path.Combine(config.DataDirectory, "paks");
     private string Current => Path.Combine(Store, "current.json");
     private string RevisionDirectory(string revision) => Path.Combine(Store, revision);
@@ -133,7 +141,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
         {
             var file = new FileInfo(loose[i].FullPath); var saved = snapshot.LooseFiles[i];
             if (loose[i].Source != saved.Source || loose[i].Name != saved.Path || file.Length != saved.Length || file.LastWriteTimeUtc.Ticks != saved.LastWriteUtcTicks ||
-                ((file.Extension.Equals(".c", StringComparison.OrdinalIgnoreCase) || file.Extension.Equals(".gproj", StringComparison.OrdinalIgnoreCase)) && HashFile(file.FullName) != saved.Sha256))
+                (TextExtensions.Contains(file.Extension) && HashFile(file.FullName) != saved.Sha256))
                 throw new InvalidOperationException("Source catalogue stale: loose file changed; run pak_prepare: " + loose[i].Name);
         }
     }
@@ -151,7 +159,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
             if (HashFile(path) != pointer.ManifestSha256) throw new InvalidDataException("PAK manifest damaged; run pak_prepare.");
             using var file = Open(path);
             cached = JsonSerializer.Deserialize<PakSnapshot>(file, Configuration.Json) ?? throw new InvalidDataException("Invalid PAK manifest.");
-            if (cached.Format is not (2 or 3) || cached.Revision != pointer.Revision) throw new InvalidDataException("Unsupported PAK manifest; run pak_prepare.");
+            if (cached.Format != 4 || cached.TextFiles is null || cached.Revision != pointer.Revision) throw new InvalidDataException("Content catalogue upgrade required; run pak_prepare.");
             cachedPointer = pointer;
         }
         if (revision is not null && revision != cached.Revision) throw new InvalidOperationException("PAK revision changed; restart the search.");
@@ -162,7 +170,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
     {
         state = "ready", revision = s.Revision, preparedAt = s.PreparedAt, sources = s.Roots, unpackedSources = s.LooseRoots,
         project = s.Project, addons = s.Addons, looseFileCount = s.LooseFiles.Count,
-        archiveCount = s.Archives.Count, entryCount = s.Entries.Count, scriptCount = s.Scripts.Count,
+        archiveCount = s.Archives.Count, entryCount = s.Entries.Count,
         sourceCoverage = s.Roots.Concat(s.LooseRoots).DistinctBy(p => p.Key).Select(root => new
         {
             source = root.Key, root = root.Value,
@@ -171,12 +179,16 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
             entryCount = s.Entries.Count(e => e.Source == root.Key),
             scriptCount = s.Entries.Count(e => e.Source == root.Key && e.Extension == ".c")
         }).ToArray(),
-        searchableScripts = s.Scripts.Count(p => p.TextError is null),
-        unreadableScripts = s.Scripts.Where(p => p.TextError is not null).ToArray(),
-        scriptDirectory = Path.Combine(directory, "scripts"), manifest = Path.Combine(directory, "manifest.json"),
+        searchableFiles = s.TextFiles.Count(p => p.TextError is null),
+        excludedTextFiles = s.TextFiles.Count(p => p.TextError is not null),
+        excludedExamples = s.TextFiles.Where(p => p.TextError is not null).Take(10).Select(p => new { p.EntryId, p.TextError }).ToArray(),
+        textCoverage = s.TextFiles.GroupBy(p => Path.GetExtension(p.EntryId)).Select(g => new
+        { extension = g.Key, searchable = g.Count(p => p.TextError is null), excluded = g.Count(p => p.TextError is not null) }).ToArray(),
+        supportedTextExtensions = TextExtensions.Order().ToArray(),
+        textStore = Path.Combine(directory, "content.bin"), manifest = Path.Combine(directory, "manifest.json"),
         extensions = s.Entries.GroupBy(e => e.Extension).OrderByDescending(g => g.Count())
             .Select(g => new { extension = g.Key, count = g.Count() }).ToArray(),
-        freshness = "Source sets, lengths and modification times checked on every operation; loose scripts/project files also rehashed. Selected loose reads verify captured hashes. Project-bound catalogues reobserve the native context. Disk bytes only, not unsaved editor buffers or effective resource precedence."
+        freshness = "Source sets, sizes and times checked per operation; loose text candidates rehashed. Searched content hashes verified. Disk bytes only; no unsaved buffers, inheritance resolution or effective override precedence."
     };
     public Task<object> Status(CancellationToken ct) => Run(() =>
     {
@@ -260,27 +272,43 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
                 entries.Add(new(file.Source, "", file.Name, 0, (int)stream.Length, (int)stream.Length, 0, "loose"));
                 if (entries.Count > 2_000_000) throw new InvalidDataException("Catalogue exceeds two million entries.");
             }
-            var scripts = new List<PakScript>();
-            long total = 0;
-            foreach (var entry in entries.Where(e => e.Extension == ".c"))
+            var textFiles = new List<PakText>();
+            var stored = new Dictionary<string, (long Offset, int Length)>();
+            var looseHashes = looseIdentities.ToDictionary(f => (f.Source, f.Path), f => f.Sha256);
+            await using (var content = new FileStream(Path.Combine(directory, "content.bin"), FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
-                ct.ThrowIfCancellationRequested();
-                total += entry.OriginalBytes;
-                if (total > 512L * 1024 * 1024) throw new InvalidDataException("Script mirror exceeds 512 MiB limit.");
-                var bytes = entry.Storage == "pak" ? PakArchive.Read(streams[(entry.Source, entry.Archive)], entry, ct)
-                    : ReadLoose(Output(looseRoots[entry.Source], entry.Path));
-                if (entry.Storage == "loose" && Hash(bytes) != looseIdentities.Single(f => f.Source == entry.Source && f.Path == entry.Path).Sha256)
-                    throw new InvalidOperationException("Loose script changed during preparation: " + entry.Id);
-                string? error = null;
-                try { PakArchive.Text(bytes); }
-                catch (Exception ex) when (ex is DecoderFallbackException or InvalidDataException) { error = ex.Message; }
-                var path = Output(Path.Combine(directory, "scripts"), entry.Id);
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-                await File.WriteAllBytesAsync(path, bytes, ct);
-                scripts.Add(new(entry.Id, Hash(bytes), error));
+                foreach (var entry in entries.Where(e => TextExtensions.Contains(e.Extension)))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    if (entry.OriginalBytes > PakArchive.MaxPayload || entry.StoredBytes > PakArchive.MaxPayload)
+                    {
+                        textFiles.Add(new(entry.Id, "", 0, 0, "Exceeds 64 MiB read limit."));
+                        continue;
+                    }
+                    var bytes = entry.Storage == "pak" ? PakArchive.Read(streams[(entry.Source, entry.Archive)], entry, ct)
+                        : ReadLoose(Output(looseRoots[entry.Source], entry.Path));
+                    var hash = Hash(bytes);
+                    if (entry.Storage == "loose" && hash != looseHashes[(entry.Source, entry.Path)])
+                        throw new InvalidOperationException("Loose text changed during preparation: " + entry.Id);
+                    try { PakArchive.Text(bytes); }
+                    catch (Exception ex) when (ex is DecoderFallbackException or InvalidDataException)
+                    {
+                        textFiles.Add(new(entry.Id, hash, 0, 0, ex.Message));
+                        continue;
+                    }
+                    if (!stored.TryGetValue(hash, out var location))
+                    {
+                        if (content.Position + bytes.Length > MaxTextStore)
+                            throw new InvalidDataException("Text store exceeds 8 GiB; narrow the prepared source scope.");
+                        location = (content.Position, bytes.Length);
+                        await content.WriteAsync(bytes, ct);
+                        stored.Add(hash, location);
+                    }
+                    textFiles.Add(new(entry.Id, hash, location.Offset, location.Length, null));
+                }
             }
-            var snapshot = new PakSnapshot(3, revision, DateTimeOffset.UtcNow,
-                roots, identities, entries, scripts) { LooseRoots = looseRoots, LooseFiles = looseIdentities, Project = binding, Addons = addons };
+            var snapshot = new PakSnapshot(4, revision, DateTimeOffset.UtcNow,
+                roots, identities, entries, textFiles) { LooseRoots = looseRoots, LooseFiles = looseIdentities, Project = binding, Addons = addons };
             Fresh(snapshot, ct);
             var manifest = Path.Combine(directory, "manifest.json");
             await Save(manifest, snapshot, ct);
@@ -380,23 +408,23 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
             total, offset, nextOffset = offset + lines.Length < total ? (int?)(offset + lines.Length) : null, lines });
     }, ct);
 
-    private const string ScriptSearchScope = "Literal, case-insensitive, all terms on one line. Scripts only; not semantic symbol resolution or a complete resource dependency graph.";
+    private const string TextSearchScope = "Literal text, all terms on one line; no inherited-value or override resolution. Binary/unsupported formats excluded; pak_status reports coverage.";
     public Task<object> SearchText(string query, string pathQuery, int offset, int limit, string? revision,
         CancellationToken ct, string? source = null) =>
-        ScanScripts([query], pathQuery, offset, limit, revision, ct, source, false);
+        ScanText([query], pathQuery, offset, limit, revision, ct, source, false);
 
     public Task<object> SearchBatch(string[] queries, string pathQuery = "", string? source = null,
         string? revision = null, CancellationToken ct = default) =>
-        ScanScripts(queries, pathQuery, 0, 3, revision, ct, source, true);
+        ScanText(queries, pathQuery, 0, 3, revision, ct, source, true);
 
-    private Task<object> ScanScripts(string[] queries, string pathQuery, int offset, int limit, string? revision,
+    private Task<object> ScanText(string[] queries, string pathQuery, int offset, int limit, string? revision,
         CancellationToken ct, string? source, bool batch) => Run(() =>
     {
         Page(offset, limit, revision);
         if (queries is null || queries.Length is < 1 or > 8)
             throw new ArgumentException("Supply 1–8 queries.");
         if (queries.Any(string.IsNullOrWhiteSpace))
-            throw new ArgumentException("Script content queries must not be empty.");
+            throw new ArgumentException("Content queries must not be empty.");
         var terms = queries.Select(Terms).ToArray();
         var paths = Terms(pathQuery);
         var candidates = SearchValues.Create(terms.SelectMany(t => t).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
@@ -406,22 +434,80 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
         var items = queries.Select(_ => new List<object>()).ToArray();
         var totals = new int[queries.Length];
         int searched = 0, excluded = 0;
-        var checkedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var script in s.Scripts.Where(e =>
-            (source is null || e.EntryId.StartsWith(source + "/", StringComparison.Ordinal)) && Match(e.EntryId, paths)))
+        var contentPath = Path.Combine(RevisionDirectory(s.Revision), "content.bin");
+        NoLinks(contentPath);
+        using var content = File.OpenHandle(contentPath, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess);
+        long contentLength = RandomAccess.GetLength(content);
+        var selected = s.TextFiles.Where(e =>
+            (source is null || e.EntryId.StartsWith(source + "/", StringComparison.Ordinal)) && Match(e.EntryId, paths)).ToArray();
+        var excludedExamples = selected.Where(d => d.TextError is not null).Take(5)
+            .Select(d => (object)new { d.EntryId, d.TextError }).ToList();
+        excluded = selected.Count(d => d.TextError is not null);
+        var documents = selected.Where(d => d.TextError is null).ToArray();
+        searched = documents.Length;
+        var groups = documents.GroupBy(d => (d.Offset, d.Length, d.Sha256)).ToArray();
+        var indexes = groups.Select((g, i) => (g.Key, Index: i)).ToDictionary(x => x.Key, x => x.Index);
+        var counts = new int[groups.Length][];
+        // Large UTF-8 documents also allocate decoded/normalized text. Keep their peak
+        // overlap bounded while all eight workers remain available for ordinary files.
+        using var largeDocuments = new SemaphoreSlim(2);
+        // The corpus handle is read-only and shared; positioned reads never share a cursor.
+        // Workers retain counts only. Preview text is collected later in catalogue order.
+        try
+        {
+            Parallel.For(0, groups.Length, new ParallelOptions
+            { MaxDegreeOfParallelism = Math.Min(8, Environment.ProcessorCount), CancellationToken = ct },
+                i => counts[i] = ScanDocument(groups[i].First(), null, null));
+        }
+        catch (AggregateException ex)
         {
             ct.ThrowIfCancellationRequested();
-            if (script.TextError is not null) { excluded++; continue; }
-            var path = Output(Path.Combine(RevisionDirectory(s.Revision), "scripts"), script.EntryId, checkedPaths);
-            using var file = Open(path);
-            if (file.Length > PakArchive.MaxPayload) throw new InvalidDataException("Script mirror exceeds payload limit: " + script.EntryId);
-            var bytes = new byte[(int)file.Length];
-            file.ReadExactly(bytes);
-            if (Hash(bytes) != script.Sha256) throw new InvalidDataException("Script mirror changed; run pak_prepare: " + script.EntryId);
-            // Preserve the existing CR/LF definition of a source line. EnumerateLines
-            // also splits Unicode separators, changing match and line-number semantics.
+            // Preserve the owning reader's error rather than expose a parallel-runtime wrapper.
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex.Flatten().InnerExceptions[0]).Throw();
+            throw;
+        }
+        // Merge in original catalogue order, independent of worker completion order.
+        foreach (var document in documents)
+        {
+            ct.ThrowIfCancellationRequested();
+            var local = counts[indexes[(document.Offset, document.Length, document.Sha256)]];
+            var skips = new int[queries.Length];
+            var takes = new int[queries.Length];
+            for (int q = 0; q < queries.Length; q++)
+            {
+                skips[q] = Math.Max(0, offset - totals[q]);
+                takes[q] = local[q] > skips[q] ? limit - items[q].Count : 0;
+            }
+            if (takes.Any(t => t > 0)) ScanDocument(document, skips, takes);
+            for (int q = 0; q < queries.Length; q++) totals[q] += local[q];
+        }
+
+        int[] ScanDocument(PakText document, int[]? skips, int[]? takes)
+        {
+            bool large = document.Length > 4 * 1024 * 1024;
+            if (large) largeDocuments.Wait(ct);
+            try { return ScanDocumentCore(document, skips, takes); }
+            finally { if (large) largeDocuments.Release(); }
+        }
+
+        int[] ScanDocumentCore(PakText document, int[]? skips, int[]? takes)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (document.Offset < 0 || document.Length < 0 || document.Length > PakArchive.MaxPayload || document.Offset > contentLength - document.Length)
+                throw new InvalidDataException("Invalid text store range; run pak_prepare: " + document.EntryId);
+            var bytes = new byte[document.Length];
+            int read = 0;
+            while (read < bytes.Length)
+            {
+                ct.ThrowIfCancellationRequested();
+                int n = RandomAccess.Read(content, bytes.AsSpan(read), document.Offset + read);
+                if (n == 0) throw new EndOfStreamException("Truncated text store.");
+                read += n;
+            }
+            if (Hash(bytes) != document.Sha256) throw new InvalidDataException("Text store changed; run pak_prepare: " + document.EntryId);
             var text = PakArchive.Text(bytes).Replace("\r\n", "\n").Replace('\r', '\n');
-            searched++;
+            var found = new int[queries.Length];
+            if (!text.AsSpan().ContainsAny(candidates)) return found;
             int lineNumber = 0;
             foreach (var range in text.AsSpan().Split('\n'))
             {
@@ -435,23 +521,25 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
                     foreach (var term in terms[q])
                         if (!line.Contains(term, StringComparison.OrdinalIgnoreCase)) { match = false; break; }
                     if (!match) continue;
-                    if (totals[q] >= offset && items[q].Count < limit)
+                    if (skips is not null && takes is not null && found[q] >= skips[q] && takes[q] > 0)
                     {
                         int max = batch ? 180 : 2000;
-                        items[q].Add(new { entryId = script.EntryId, line = lineNumber,
-                            text = line[..Math.Min(line.Length, max)].ToString(), truncated = line.Length > max, sha256 = script.Sha256 });
+                        items[q].Add(new { entryId = document.EntryId, line = lineNumber,
+                            text = line[..Math.Min(line.Length, max)].ToString(), truncated = line.Length > max, sha256 = document.Sha256 });
+                        takes[q]--;
                     }
-                    totals[q]++;
+                    found[q]++;
                 }
             }
+            return found;
         }
         Fresh(s, ct);
         if (!batch)
             return Task.FromResult<object>(new { revision = s.Revision, total = totals[0], offset,
                 nextOffset = offset + items[0].Count < totals[0] ? (int?)(offset + items[0].Count) : null,
-                searchedScripts = searched, excludedUnreadableScripts = excluded, scope = ScriptSearchScope, items = items[0] });
-        return Task.FromResult<object>(new { revision = s.Revision, searchedScripts = searched,
-            excludedUnreadableScripts = excluded, scope = ScriptSearchScope,
+                searchedFiles = searched, excludedUnreadableFiles = excluded, excludedExamples, scope = TextSearchScope, items = items[0] });
+        return Task.FromResult<object>(new { revision = s.Revision, searchedFiles = searched,
+            excludedUnreadableFiles = excluded, excludedExamples, scope = TextSearchScope,
             continuation = "For more matches, call pak_search_text with the group's query, nextOffset as offset, this revision, and the same source/pathQuery.",
             groups = queries.Select((query, q) => new { query, total = totals[q],
                 nextOffset = items[q].Count < totals[q] ? (int?)items[q].Count : null, items = items[q] }).ToArray() });

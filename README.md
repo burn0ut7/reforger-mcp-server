@@ -5,7 +5,7 @@ see [tool activity logging](docs/tool-activity.md).
 
 A standalone Windows 10 (build 19041+) x64 C# MCP server for Arma Reforger modding: launch Workbench, capture selected editor/game windows, search installed PAK assets, export and search script source, and inspect native engine code. It uses one C# PAK reader, **one Ghidra backend** for native code and **Windows Graphics Capture** for screenshots. No model API, Python service, provider selection, or fallback chain.
 
-Current capability: directly launch Workbench, open worlds and reload scripts through version-checked native calls on the editor thread, inspect and operate accessible menus, buttons, dialog text fields and folder trees, and capture editor/game windows; catalogue PAKs, create versioned script mirrors, search paths and script contents, read text and extract selected resources; prepare/search installed Windows native executables and retrieve function code/context. Standalone validation, arbitrary custom-widget manipulation, arbitrary standalone game control, arbitrary memory/function injection, resource conversion and mod repacking are not implemented.
+Current capability: directly launch Workbench, open worlds and reload scripts through version-checked native calls on the editor thread, inspect and operate accessible menus, buttons, dialog text fields and folder trees, and capture editor/game windows; catalogue PAKs, prepare a versioned text store, search paths and readable script/resource contents, read text and extract selected resources; prepare/search installed Windows native executables and retrieve function code/context. Standalone validation, arbitrary custom-widget manipulation, arbitrary standalone game control, arbitrary memory/function injection, resource conversion and mod repacking are not implemented.
 
 Configure Workbench in your single `configuration.json`; see the [Workbench guide](docs/workbench.md). Workbench launch itself needs no Ghidra, Java or scripted bridge.
 
@@ -63,7 +63,7 @@ never used as a fallback. Both transports expose the same tools and services.
 
 ## Tools
 
-Start with `pak_status`, then use `pak_search_text` for API declarations and call sites, `pak_search` for resources, and `pak_read` for bounded context. Follow base classes, implementations, and prefab references before drawing conclusions. See the [source research workflow](skills/reforger/references/workflows.md).
+Start with `pak_status`, then use `pak_search_text` for API declarations, call sites, prefab components and layout properties, `pak_search` for resources, and `pak_read` for bounded context. Follow base classes, implementations, and prefab references before drawing conclusions. See the [source research workflow](skills/reforger/references/workflows.md).
 
 | Tool | Purpose |
 |---|---|
@@ -105,7 +105,7 @@ Start with `pak_status`, then use `pak_search_text` for API declarations and cal
 | `workbench_controls` | Discover accessible menus, buttons, text fields and tree rows with their current state. |
 | `workbench_window_action` | Invoke controls, set text, select/expand tree rows, toggle menus/checkboxes or close windows through native actions. |
 | `workbench_window_action_status` | Poll a queued UI action while inspecting and resolving any dialogs it opens. |
-| `pak_status` | Catalogue freshness, source coverage, file types and script mirror path. |
+| `pak_status` | Catalogue freshness, source coverage, file types and searchable/excluded text coverage. |
 | `pak_prepare` | Prepare configured or explicitly selected project sources, including packed and loose files, into a new revision. |
 | `pak_search` | Bounded path/type searches, including all sounds, scripts, prefabs and layouts. |
 | `pak_search_text` | Find declarations, examples, usages and resource literals. Use `query` for one search or `queries` for up to eight searches sharing one scan and bounded previews. |
@@ -136,7 +136,7 @@ For mod work, use engine findings to investigate behavior and generate hypothese
 
 ## Data and maintenance
 
-For native analysis, `dataDirectory` holds one manifest per configured target, preparation job directories with binary snapshots/projects/logs, and query evidence directories. Hashes of installed executable bytes are checked on every native query, and again before returning a result. Changed bytes or analysis settings require explicit preparation; an old build is never silently substituted. A missing saved project is reported and can be explicitly rebuilt. PAK data is under `dataDirectory/paks`: full archive hashes are recorded at preparation, while queries check archive set/length/modification time and text searches verify mirror hashes. See the PAK guide for refresh and retention.
+For native analysis, `dataDirectory` holds one manifest per configured target, preparation job directories with binary snapshots/projects/logs, and query evidence directories. Hashes of installed executable bytes are checked on every native query, and again before returning a result. Changed bytes or analysis settings require explicit preparation; an old build is never silently substituted. A missing saved project is reported and can be explicitly rebuilt. PAK data is under `dataDirectory/paks`: full archive hashes are recorded at preparation, while queries check archive set/length/modification time and text searches verify stored content hashes. See the PAK guide for refresh and retention.
 
 Completed databases survive restarts. Interrupted jobs are reported as interrupted, with no automatic replay. Clients cancel an active query using the standard MCP `notifications/cancelled` message; cancelling only a client's local wait may leave server work running until its configured deadline. Preparation uses the explicit `engine_cancel` tool. Evidence and old builds are retained for diagnosis; disk usage grows. Stop the server before manually removing unneeded job/query directories, and retain every project referenced by a current target manifest. This version has no automatic retention or cleanup scheduler.
 
