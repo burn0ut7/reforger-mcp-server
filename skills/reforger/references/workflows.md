@@ -16,6 +16,8 @@ Check `pak_status` for coverage and freshness. If unprepared, explicitly prepare
 
 Use `engine_*` only for unresolved native behavior that source cannot explain. Native analysis remains inferred implementation evidence, not proof of a callable script API. Confirm authored behavior through supported MCP compilation and runtime tests.
 
+Run native-analysis queries sequentially. Poll preparation job IDs with `engine_job`; only `ready` establishes completed preparation. Inspect warnings and context before interpreting inferred code. Combine code pages only when their `codeSha256` values match.
+
 ## Research depth and reuse decisions
 
 Before designing custom behavior, search for the capability in supported engine APIs and existing game systems, then examine how shipped scripts and resources integrate it. Search related terminology and likely owning/base classes when the first identifier search fails. Prefer the public operation that owns the behavior, including its lifecycle and authority checks, over reproducing internal logic or manipulating its state directly. Existing script frameworks and prefab/configuration mechanisms also count as reuse; native code is not the only useful built-in functionality.

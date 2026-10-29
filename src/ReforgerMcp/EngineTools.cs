@@ -18,7 +18,7 @@ public sealed class EngineTools(NativeEngine engine)
     public Task<object> Targets(CancellationToken cancellationToken) => Report(() => engine.Targets(cancellationToken));
 
     [McpServerTool(Name = "engine_prepare", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("Prepare persistent Ghidra analysis; poll jobId with engine_job. rebuild retires existing analysis even if rebuilding fails.")]
+    [Description("Prepare persistent Ghidra analysis; returns jobId. rebuild retires existing analysis even if rebuilding fails.")]
     public Task<JobInfo> Prepare(string target, bool rebuild = false, CancellationToken cancellationToken = default) => Report(() => engine.Prepare(target,cancellationToken,rebuild));
 
     [McpServerTool(Name = "engine_job", ReadOnly = true, OpenWorld = false)]
@@ -41,7 +41,7 @@ public sealed class EngineTools(NativeEngine engine)
         CancellationToken cancellationToken = default) => Report(() => engine.Query(target,"search",query,kind,"","",offset,limit,analysisKey,cancellationToken));
 
     [McpServerTool(Name = "engine_function", ReadOnly = true, OpenWorld = false)]
-    [Description("Inspect function at hexadecimal address. section=overview|code|context|callers|callees|instructions|types; limit=1-100. Combine code pages only with matching codeSha256; codeArtifact holds full pseudocode. Inferred code/types; imports have no body.")]
+    [Description("Inspect function at hexadecimal address. section=overview|code|context|callers|callees|instructions|types; limit=1-100. codeSha256 identifies code-page content; codeArtifact holds full pseudocode. Inferred code/types; imports have no body.")]
     public Task<EngineResult> Function(string target, string address, string section = "overview", int offset = 0, int limit = 60,
         [Description("Previous identity.analysisKey; rejects changed analysis while paging.")] string? analysisKey = null, CancellationToken cancellationToken = default) => Report(() => engine.Query(target,"function","","",address,section,offset,limit,analysisKey,cancellationToken));
 

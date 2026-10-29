@@ -285,7 +285,7 @@ public sealed partial class WorkbenchSession
 public sealed class WorkbenchTargetTools(WorkbenchSession session)
 {
     [McpServerTool(Name = "workbench_edit_entity", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Edit inspected world instance or opened prefab according to editToken scope; unsaved undo action. Token consumed before dispatch; inspect again after edits. Refuses locked/stale targets; inherited entry deletion unsupported.")]
+    [Description("Edit inspected world instance or opened prefab according to editToken scope; unsaved undo action. Token consumed before dispatch. Locked/stale targets and inherited entry deletion are unsupported.")]
     public async Task<object> Edit(string editToken, [Description("set|clear: property key, typed JSON value for set. add_component: class key; remove_component: observed component index. insert_object: class key/insertion index; remove_object: local entry index; both require objects token. insert_value|remove_value: properties token/property key/entry index; insertion takes typed value.")] string action, string? key = null, [Description("Typed JSON; value-array set uses array. Native bool arrays use 0/1. Empty entries and embedded commas unsupported.")] JsonElement? value = null, int component = -1, int index = -1, CancellationToken cancellationToken = default)
     {
         try { return await session.EditEntity(editToken, action, key, value, component, cancellationToken, index); }
@@ -309,7 +309,7 @@ public sealed class WorkbenchTargetTools(WorkbenchSession session)
     }
 
     [McpServerTool(Name = "workbench_inspect_prefab", ReadOnly = true, OpenWorld = false)]
-    [Description("Inspect opened prefab using exact prefabResource/rootEntityId; returns definition-scoped editToken. section=components|properties|objects; objects requires property. component=-1 means root, otherwise observed component index. Save separately with workbench_save_prefab_definition.")]
+    [Description("Inspect opened prefab using exact prefabResource/rootEntityId; returns definition-scoped editToken. section=components|properties|objects; objects requires property. component=-1 means root, otherwise observed component index. Inspection does not save edits.")]
     public async Task<object> InspectPrefab(int processId, string prefabResource, string rootEntityId, string section = "components", int component = -1,
         int offset = 0, int limit = 100, [Description("Up to 8 {property,index} object steps; index=-1 for single object, otherwise zero-based array index.")] WorkbenchPropertyPath[]? path = null, string? property = null, CancellationToken cancellationToken = default)
     {
@@ -319,7 +319,7 @@ public sealed class WorkbenchTargetTools(WorkbenchSession session)
     }
 
     [McpServerTool(Name = "workbench_query_entities", ReadOnly = true, OpenWorld = false)]
-    [Description("Query live editor entities: name substring (case-insensitive), exact class/prefabPath (path, not GUID/ancestry), subscene/layer/lock. limit=1-128; scanLimit=1-8192. Continue nextOffset with unchanged filters, even after zero matches. Pages are not snapshots.")]
+    [Description("Query live editor entities: name substring (case-insensitive), exact class/prefabPath (path, not GUID/ancestry), subscene/layer/lock. limit=1-128; scanLimit=1-8192. nextOffset continues the same filters, including after zero matches. Pages are live observations.")]
     public async Task<object> Query(int processId, string expectedWorld, int offset = 0, int limit = 100,
         string? nameContains = null, string? className = null, string? prefabPath = null, int? subscene = null, int? layer = null,
         bool? locked = null, int scanLimit = 4096, CancellationToken cancellationToken = default)

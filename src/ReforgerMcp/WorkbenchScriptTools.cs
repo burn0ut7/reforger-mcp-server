@@ -13,16 +13,16 @@ public sealed class WorkbenchScriptTools(WorkbenchSession scripts)
         catch (Exception ex) when (ex is not (McpException or OperationCanceledException)) { throw new McpException(ex.Message); }
     }
     [McpServerTool(Name = "workbench_script_status", ReadOnly = true, OpenWorld = false)]
-    [Description("Observe Workbench processes, windows and compiler buffer; historical diagnostics are not a fresh compile gate.")]
+    [Description("Observe Workbench processes, windows and the existing compiler buffer; does not compile scripts.")]
     public Task<object> Status(CancellationToken cancellationToken = default) => Report(() => scripts.Status(cancellationToken));
 
     [McpServerTool(Name = "workbench_resource_leak_assertion", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("action=status|suppress for process-local Resources are leaking assertion only; logs remain active. Automatic monitor also suppresses it. Existing dialogs still need a response.")]
+    [Description("action=status|suppress for the process-local Resources are leaking assertion. Automatic monitor also suppresses it; logging and existing dialogs remain unchanged.")]
     public Task<object> ResourceLeakAssertion(string action, int processId, CancellationToken cancellationToken = default)
         => Report(() => scripts.ResourceLeakAssertion(action, processId, cancellationToken));
 
     [McpServerTool(Name = "workbench_reload_scripts", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Stop embedded Play, verify stopped, then reload scripts with World Editor open. Requires saved tabs; never auto-saves. Returns fresh compile diagnostics or explicit unavailability.")]
+    [Description("Reload scripts after automatically stopping embedded Play, with World Editor open. Saved tabs only; no automatic save. Returns fresh compile diagnostics or explicit unavailability.")]
     public Task<object> Reload(int processId, CancellationToken cancellationToken = default)
         => Report(() => scripts.Reload(processId, cancellationToken));
 

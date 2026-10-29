@@ -179,7 +179,7 @@ public sealed partial class WorkbenchSession
 public sealed class WorkbenchRuntimeSetupTools(WorkbenchSession session)
 {
     [McpServerTool(Name = "workbench_runtime_setup", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("action=status|enable|configure|install for profile runtime adapter. port only with configure; must match server config. install deploys adapter and reloads scripts when needed; requires stopped Play/saved tabs, preserves modified files. enable/install require matching runtimePort. enable/configure/install persist NET API settings; require ready handshake.")]
+    [Description("action=status|enable|configure|install for profile runtime adapter. port applies only to configure and matches server config. install deploys adapter and reloads scripts when needed; stopped Play/saved tabs only, modified files preserved. enable/install accept matching runtimePort. enable/configure/install persist NET API settings; ready indicates a matching handshake.")]
     public async Task<object> Setup(string action, int processId, int? port = null, CancellationToken cancellationToken = default)
     {
         try { return await session.RuntimeSetup(action, processId, cancellationToken, port); }

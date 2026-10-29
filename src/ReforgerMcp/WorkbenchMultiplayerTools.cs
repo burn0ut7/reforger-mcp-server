@@ -26,7 +26,7 @@ public sealed class WorkbenchMultiplayerTools(WorkbenchSession workbench)
             : throw new ArgumentException("action must be start, stop or configure."));
 
     [McpServerTool(Name = "workbench_multiplayer_setting", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Read live setting by omitting value; write requires value+reason and stopped session. tool=dedicated|peers. Existing peer entries only; add through dialog add_item. Strings raw, bools true/false, integers decimal. UI may persist changes.")]
+    [Description("Read live setting when value is absent; value+reason writes a stopped session. tool=dedicated|peers. Existing peer entries only. Strings raw, bools true/false, integers decimal. UI may persist changes.")]
     public Task<object> Setting(string tool, [Description("dedicated: world,executable,profile,parameters,runPeers,maxFPS,peerExecutable. peers: executable,launchDelay. Both: peerCount (read-only), peer.INDEX.FIELD (zero-based): title,enabled,profile,parameters,autoJoin,autoReconnect,disableTimeout,windowed,forceUpdate,noFocus,maxFPS,width,height,x,y.")] string field, int processId, string? value = null, string? reason = null, CancellationToken cancellationToken = default)
         => Report(() => workbench.Multiplayer(tool, value is null ? "get" : "set", processId, field, value, reason, cancellationToken));
 }

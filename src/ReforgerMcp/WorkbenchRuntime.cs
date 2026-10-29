@@ -259,19 +259,19 @@ public sealed class WorkbenchRuntimeTools(WorkbenchSession session)
         => Report(() => session.Runtime("inspect", processId, null, entityName, componentType, null, cancellationToken, offset, limit));
 
     [McpServerTool(Name = "workbench_runtime_call", ReadOnly = false, Destructive = true, OpenWorld = true)]
-    [Description("Validate and invoke one public component method during embedded Play; requires installed adapter/runtimePort. Synchronous return only; no deferred completion or out/inout updates. details includes raw diagnostics; recover original details with workbench_operation, never re-execute. Accepted code cannot be cancelled.")]
+    [Description("Validate and invoke one public component method during embedded Play through the installed adapter/runtimePort. Synchronous return only; no deferred completion or out/inout updates. details adds raw diagnostics; operationId identifies the stored result. Accepted code cannot be cancelled.")]
     public Task<object> Call(int processId, string entityName, string componentType, string method, [Description("All declared arguments, including optional ones; max 9 {type,value} items. type=int|float|bool|string|vector; vector=[x,y,z]. Inputs only.")] JsonElement[]? arguments = null,
         [Description("int|float|bool|string|vector|void; void discards result. Objects/arrays unsupported.")] string returnType = "void", bool details = false, CancellationToken cancellationToken = default)
         => Report(() => session.Runtime("call", processId, null, entityName, componentType, method, cancellationToken, arguments: arguments, returnType: returnType, details: details));
 
     [McpServerTool(Name = "workbench_runtime_prepare", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("Validate a component call without execution during embedded Play; requires installed adapter/runtimePort. Returns single-use targetToken valid 55 seconds; any prepare/call supersedes it globally. Reload, world replacement or target destruction invalidates it. For immediate execution use workbench_runtime_call.")]
+    [Description("Validate a component call without execution during embedded Play through the installed adapter/runtimePort. Returns single-use targetToken valid 55 seconds; any prepare/call supersedes it globally. Reload, world replacement or target destruction invalidates it.")]
     public Task<object> Prepare(int processId, string entityName, string componentType, string method, [Description("All declared arguments, including optional ones; max 9 {type,value} items. type=int|float|bool|string|vector; vector=[x,y,z]. Inputs only.")] JsonElement[]? arguments = null,
         [Description("int|float|bool|string|vector|void; void discards result. Objects/arrays unsupported.")] string returnType = "void", CancellationToken cancellationToken = default)
         => Report(() => session.Runtime("prepare", processId, null, entityName, componentType, method, cancellationToken, arguments: arguments, returnType: returnType));
 
     [McpServerTool(Name = "workbench_runtime_invoke", ReadOnly = false, Destructive = true, OpenWorld = true)]
-    [Description("Consume prepared targetToken and invoke once during embedded Play. Synchronous return only; no deferred completion or out/inout updates. Accepted code cannot be cancelled. details includes raw diagnostics; recover original details with workbench_operation.")]
+    [Description("Consume prepared targetToken and invoke once during embedded Play. Synchronous return only; no deferred completion or out/inout updates. Accepted code cannot be cancelled. details adds raw diagnostics; operationId identifies the stored result.")]
     public Task<object> Invoke(string targetToken, bool details = false, CancellationToken cancellationToken = default)
         => Report(() => session.Runtime("invoke", 0, targetToken, null, null, null, cancellationToken, details: details));
 }

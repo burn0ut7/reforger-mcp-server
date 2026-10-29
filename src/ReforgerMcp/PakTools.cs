@@ -24,18 +24,18 @@ public sealed class PakTools(PakStore store)
         => Report(() => store.Prepare(cancellationToken, projectToken, includeAvailable, addonGuids));
 
     [McpServerTool(Name = "pak_search", ReadOnly = true, OpenWorld = false)]
-    [Description("Search catalogue paths by case-insensitive all-term query; empty query lists. kind=all|script|sound|audio-config|prefab|config|layout|material. source is an exact label/GUID. Continue with revision and unchanged filters.")]
+    [Description("Search catalogue paths by case-insensitive all-term query; empty query lists. kind=all|script|sound|audio-config|prefab|config|layout|material. source is an exact label/GUID. revision pins catalogue identity; nextOffset continues the same filters.")]
     public Task<object> Search(string query = "", string kind = "all", string? extension = null, string? source = null,
         int offset = 0, int limit = 20, string? revision = null, CancellationToken cancellationToken = default)
         => Report(() => store.Search(query, kind, extension, source, offset, limit, revision, cancellationToken));
 
     [McpServerTool(Name = "pak_read", ReadOnly = true, OpenWorld = false)]
-    [Description("Read UTF-8 entryId lines; offset is zero-based, returned lines one-based; limit=1-100. Lines clip at 2000 characters; binary entries fail. Use revision for consistent paging.")]
+    [Description("Read UTF-8 entryId lines; offset is zero-based, returned lines one-based; limit=1-100. Lines clip at 2000 characters; binary entries fail. revision pins catalogue identity.")]
     public Task<object> Read(string entryId, int offset = 0, int limit = 60, string? revision = null,
         CancellationToken cancellationToken = default) => Report(() => store.ReadText(entryId, offset, limit, revision, cancellationToken));
 
     [McpServerTool(Name = "pak_search_text", ReadOnly = true, OpenWorld = false)]
-    [Description("Search readable scripts, prefabs, layouts and resource text; case-insensitive all-term line match. pathQuery narrows paths/extensions; no inherited-value resolution. Supply query OR queries (1-8); batches return 3 matches/query and forbid offset/limit. Continue each query with nextOffset, revision and unchanged source/pathQuery filters. Read context with pak_read.")]
+    [Description("Search readable scripts, prefabs, layouts and resource text; case-insensitive all-term line match. pathQuery filters entry paths; no inherited-value resolution. query OR queries (1-8); batches return 3 matches/query with fixed offset/limit defaults. nextOffset continues a single query with the same revision/filters.")]
     public Task<object> SearchText(string? query = null, string pathQuery = "", int offset = 0, int limit = 20,
         string? revision = null, string? source = null, string[]? queries = null, CancellationToken cancellationToken = default)
         => Report(() =>

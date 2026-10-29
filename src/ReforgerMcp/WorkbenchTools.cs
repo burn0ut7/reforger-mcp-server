@@ -19,7 +19,7 @@ public sealed class WorkbenchTools(Workbench workbench)
     public object Status() => Report(workbench.Status);
 
     [McpServerTool(Name = "workbench_terminate", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Force-terminate explicit processId; unsaved work is lost. Requires user authorization.")]
+    [Description("Force-terminate explicit processId; unsaved work is lost.")]
     public object Terminate(int processId) => Report(() => workbench.Terminate(processId));
 
     [McpServerTool(Name = "workbench_open_project", ReadOnly = false, Destructive = false, OpenWorld = true)]
