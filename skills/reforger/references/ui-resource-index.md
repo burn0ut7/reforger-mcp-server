@@ -4,7 +4,7 @@ A starting guide, not an approved-only list. Choose resources for the player's t
 
 ## Coverage
 
-The entries below were read through Reforger MCP on 2026-10-28 at catalogue revision `af6068cb44aa4c0db613213faa82a050`. They are stored resource definitions, not live appearance or interaction tests. Later reads below use their own recorded revisions; recheck `pak_status` before extending the index. This is a small verified starting set, not a complete base-game inventory.
+The entries below were read through Reforger MCP on 2026-10-28 at catalogue revision `af6068cb44aa4c0db613213faa82a050`. They are stored resource definitions, not live appearance or interaction tests. Later reads below use their own recorded revisions; recheck `workbench_status` before extending the index. This is a small verified starting set, not a complete base-game inventory.
 
 Reforgedmin Admin Tools 1.0.57 (`6A6EA6AD906D8C12`) checkbox source was read on 2026-10-28 through the same MCP PAK backend with an isolated configured-source catalogue (revision `f29e551559714c8fa5a0f838634846c6`). `data.pak/UI/layouts/HSM_Checkbox.layout` uses native `SCR_ButtonTextComponent`, a 22px outlined square and a yellow `Tick` inset by 5px. `scripts/Game/HSM_UiTools.c` lines 614–673 creates it and controls tick visibility; `HSM_AssetSpawner.c` lines 563/648 creates and updates the budget checkbox. This is a custom composition of native widgets, not the stock toolbox checkbox. Reuse the pattern without adding a mod dependency; keep confirmed state in the owning controller. Source/caller inspected, not runtime-tested. Navigation, surfaces and row composition are traced below; this is not an audit of every addon feature.
 
@@ -37,7 +37,7 @@ Additional base-game reads on 2026-10-28, revision `c032908fa5cc4428b257394a5dd4
 
 ## Find the next example
 
-Use the observed base-game source label from `pak_status`. These are search leads, not verified prefab names or guarantees of suitability:
+Use the observed base-game source label from `workbench_status`. These are search leads, not verified prefab names or guarantees of suitability:
 
 | Family | Resource path search terms | What to trace |
 |---|---|---|

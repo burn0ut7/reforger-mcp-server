@@ -20,7 +20,7 @@ Set `pakDirectories` in your `configuration.json`; the single `configuration.exa
 }
 ```
 
-Launch the same MCP executable with `--config <absolute-configuration-file>`. Call `pak_status`, then explicitly call `pak_prepare` if unprepared or stale. Preparation is one awaited request; allow several minutes in the client timeout. Standard MCP cancellation stops work without publishing an incomplete revision. Installed archives remain read-only.
+Launch the same MCP executable with `--config <absolute-configuration-file>`. Call `workbench_status`, then explicitly call `pak_prepare` if unprepared or stale. Preparation is one awaited request; allow several minutes in the client timeout. Standard MCP cancellation stops work without publishing an incomplete revision. Installed archives remain read-only.
 
 Remove roots for products you do not have installed: missing/inaccessible roots fail explicitly, while an existing empty root is reported with zero archives. A game-only user can keep just `dataDirectory` and `pakDirectories.game`. `sourceCoverage` reports archive, entry and script counts for every configured root. The roots cover nested `core`, `data` and downloaded mod folders automatically. Custom source labels are supported; these four labels are conventions, not special installation rules.
 
@@ -37,7 +37,7 @@ Use forward slashes in JSON or escape backslashes as `\\`. Drive-relative paths 
 
 Preparation hashes every archive, catalogues entries, and stores readable text from supported script/resource formats in `<dataDirectory>/paks/<revision>/content.bin`. Identical bytes share storage; every source/archive entry keeps its identity. The manifest records hashes and byte ranges. `pak_read` and `pak_extract` still read/export exact selected source entries.
 
-`pak_status` reports `supportedTextExtensions`, per-format `textCoverage`, searchable/excluded counts and bounded exclusion examples. Scripts, prefabs, layouts, configs, materials, worlds and layers participate. Binary/invalid UTF-8 candidates and entries over the 64 MiB read limit are explicitly excluded. Unsupported extensions remain path-searchable and readable/exportable within ordinary bounds. No guessed encoding, resource conversion, inheritance expansion or override precedence is applied.
+`workbench_status` reports `supportedTextExtensions`, per-format `textCoverage`, searchable/excluded counts and bounded exclusion examples. Scripts, prefabs, layouts, configs, materials, worlds and layers participate. Binary/invalid UTF-8 candidates and entries over the 64 MiB read limit are explicitly excluded. Unsupported extensions remain path-searchable and readable/exportable within ordinary bounds. No guessed encoding, resource conversion, inheritance expansion or override precedence is applied.
 
 Format 4 replaces script-only mirrors. Older catalogues require explicit `pak_prepare`; they are never silently searched as though resource contents were covered. The managed binary text store is not an authoring folder; read through the tools.
 

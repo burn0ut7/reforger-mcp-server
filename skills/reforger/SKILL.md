@@ -13,7 +13,9 @@ Base implementation decisions on the installed dataset: scripts, API declaration
 2. **Understand the relevant context.** Follow implementations, representative callers, resource parents and wiring. Investigate lifecycle, ownership and authority where they affect the task. Prefer existing game capabilities; add custom code for the actual gap.
 3. **Build and verify.** Implement the code and resource setup together. After compilation passes, choose what needs testing and why. Simple changes may need no live test; use MCP live play for runtime behavior/data and in-game UI screenshots/interactions. Batch related changes into meaningful test passes; note deferred coverage and revisit it in the relevant slice.
 
-Reuse catalogue scope/revision and inspected evidence while valid. Check `pak_status` when coverage is unknown or diagnosis needs it; prepare when unprepared, stale or deliberately changing scope. Search/read validate freshness themselves. Keep entry IDs, lines and revisions with findings. Empty matches do not establish absence; stored data does not establish active overrides or live behavior.
+Reuse catalogue scope/revision and inspected evidence while valid. Check `workbench_status` when coverage is unknown or diagnosis needs it; prepare when unprepared, stale or deliberately changing scope. Search/read validate freshness themselves. Keep entry IDs, lines and revisions with findings. Empty matches do not establish absence; stored data does not establish active overrides or live behavior.
+
+If Reforger MCP is unavailable or failing, restore it as part of the task rather than stopping at a failed connection or skipping verification. Follow [MCP recovery](references/workbench-workflow.md#mcp-recovery): diagnose and repair the configured server, connection or adapter, and restart the server or Workbench when necessary. Resume the original task and its required live verification after recovery.
 
 ## Read when relevant
 

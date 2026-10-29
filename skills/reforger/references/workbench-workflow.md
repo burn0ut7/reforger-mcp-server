@@ -12,7 +12,7 @@ For native UI operations, use returned window/control IDs and advertised actions
 
 ## Compile and test
 
-Build C#/Java tooling with its owning build system. For saved Enforce scripts, use one MCP Reload and inspect its fresh compilation diagnostics. Reload stops embedded Play when necessary; no separate Stop or editor close/reopen is needed. Resolve unsaved tabs/dialogs without discarding authored work. A tool limitation alone does not justify restarting Workbench.
+Build C#/Java tooling with its owning build system. For saved Enforce scripts, use one MCP Reload and inspect its fresh compilation diagnostics. Reload stops embedded Play when necessary; no separate Stop or editor close/reopen is needed. Resolve unsaved tabs/dialogs without discarding authored work. Prefer Reload for normal iteration; use the recovery guidance below when MCP or Workbench is not working.
 
 Reload resets runtime state; start Play when the next test needs it. Play uses a saved, clean world and existing settings. Choose tests for the change after compilation passes; simple changes may need no live test. Batch related checks, noting deferred coverage for the relevant slice. Use MCP live play when verifying runtime behavior/data or in-game UI; include relevant authority and peers. A successful dispatch or running process is not a passing test. UI verification follows the [UI workflow](ui-workflow.md). Report blocked verification explicitly.
 
@@ -25,6 +25,16 @@ Prefer `workbench_runtime_call` for immediate execution; it resolves, compile-ch
 Runtime inspection/calls support embedded Play through the profile-installed development adapter and local NET API. Use `workbench_runtime_setup` when setup needs inspection or repair; readiness requires the matching profile/build handshake and PID-owned listener, not just an enabled flag. Installation requires stopped Play and saved script tabs. Keep the adapter outside gameplay addons. This interface does not emulate player input or control standalone script VMs.
 
 For multiplayer, inspect dedicated/peer settings and use the corresponding operations. Verify connection, player readiness and gameplay on the relevant peers.
+
+## MCP recovery
+
+Treat a broken or unavailable Reforger MCP connection as a task blocker to repair, not a reason to skip required testing or deliver an unverified change as finished. Inspect the configured transport, owning server process and logs, then the Workbench/adapter state as reachable. Use local development and process tools to restore MCP when MCP itself cannot perform the recovery; resume game/editor interaction through MCP afterward.
+
+Take the necessary recovery actions without another permission request: start or restart the configured server, repair task-relevant configuration or owning implementation, reinstall or repair the development adapter, and restart Workbench when needed. Prefer the least disruptive effective repair. Preserve the existing transport and data owner; do not start a duplicate server, remove a live store lock or substitute another backend. A refused connection alone does not establish that Workbench needs restarting.
+
+Before restarting Workbench, preserve authored work, current project/world, loaded test addons and settings; explain the lifecycle change, then restore that working context. Do not force termination if unsaved work cannot be preserved. Stop and report the concrete blocker only when recovery requires unavailable credentials/permissions, risks losing authored work, or remains blocked after diagnosis and reasonable repairs; state the attempted repairs and the remaining requirement.
+
+After recovery, refresh process identities and expired tokens, confirm a successful MCP call and relevant adapter readiness, then resume the original task's compilation and live verification. Inspect uncertain mutations before replaying them. A restarted process or successful dispatch alone is not verification.
 
 ## Pending or uncertain outcomes
 

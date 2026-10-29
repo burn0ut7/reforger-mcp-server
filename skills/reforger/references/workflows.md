@@ -1,6 +1,6 @@
 # Research installed sources
 
-Start with the requested behavior and likely symbols or resources. Reuse established scope, revisions and evidence; consult `pak_status` for unknown coverage and `pak_prepare` for an unprepared/stale catalogue or deliberate scope change.
+Start with the requested behavior and likely symbols or resources. Reuse established scope, revisions and evidence; consult `workbench_status` for unknown coverage and `pak_prepare` for an unprepared/stale catalogue or deliberate scope change.
 
 ## Search and read
 

@@ -63,14 +63,14 @@ never used as a fallback. Both transports expose the same tools and services.
 
 ## Tools
 
-Start with `pak_status`, then use `pak_search_text` for API declarations, call sites, prefab components and layout properties, `pak_search` for resources, and `pak_read` for bounded context. Follow base classes, implementations, and prefab references before drawing conclusions. See the [source research workflow](skills/reforger/references/workflows.md).
+Start with `workbench_status`, then use `pak_search_text` for API declarations, call sites, prefab components and layout properties, `pak_search` for resources, and `pak_read` for bounded context. Follow base classes, implementations, and prefab references before drawing conclusions. See the [source research workflow](skills/reforger/references/workflows.md).
 
 | Tool | Purpose |
 |---|---|
 | `capture_windows` | List eligible editor/client windows with process IDs, titles and temporary selection IDs. |
 | `capture_screenshot` | Return a selected window as a PNG image plus metadata, without activating it. |
 | `capture_sequence` | Return a short sequence of window frames with native timestamps for motion inspection. |
-| `workbench_status` | Observe Workbench processes/window titles and the current server session's last launch/exit; project readiness remains unverified. |
+| `workbench_status` | Combined `workbench` process/window observations and `pak` catalogue freshness, source coverage and revision; project readiness remains unverified. |
 | `workbench_project_context` | Observe the actual current project and loaded/available addons, mounted paths, on-disk dependencies and local module declarations; return a token for packed/unpacked project preparation. |
 | `workbench_script_status` | Inspect native editor windows/dialogs and current compiler output/diagnostics, which may be historical. |
 | `workbench_reload_scripts` | Full native validation/reload of Game and Workbench modules; takes only `processId`. |
@@ -105,7 +105,6 @@ Start with `pak_status`, then use `pak_search_text` for API declarations, call s
 | `workbench_controls` | Discover accessible menus, buttons, text fields and tree rows with their current state. |
 | `workbench_window_action` | Invoke controls, set text, select/expand tree rows, toggle menus/checkboxes or close windows through native actions. |
 | `workbench_window_action_status` | Poll a queued UI action while inspecting and resolving any dialogs it opens. |
-| `pak_status` | Catalogue freshness, source coverage, file types and searchable/excluded text coverage. |
 | `pak_prepare` | Prepare configured or explicitly selected project sources, including packed and loose files, into a new revision. |
 | `pak_search` | Bounded path/type searches, including all sounds, scripts, prefabs and layouts. |
 | `pak_search_text` | Find declarations, examples, usages and resource literals. Use `query` for one search or `queries` for up to eight searches sharing one scan and bounded previews. |

@@ -46,8 +46,31 @@ async Task Reject(Func<Task<object>> action, string name)
     { Console.WriteLine("PASS " + name); return; }
     throw new Exception("Expected rejection: " + name);
 }
+using var workbench = new Workbench(config);
+var readiness = new WorkbenchTools(workbench, store);
+var combined = Json(await readiness.Status());
+Check(combined.GetProperty("workbench").GetProperty("state").GetString() == "not_configured" &&
+    combined.GetProperty("pak").GetProperty("state").GetString() == "unavailable",
+    "combined status reports unconfigured Workbench and unprepared catalogue independently");
+Check(!Directory.Exists(Path.Combine(config.DataDirectory, "paks")), "status does not prepare catalogue");
+using (var cancelled = new CancellationTokenSource())
+{
+    cancelled.Cancel();
+    try { await readiness.Status(cancelled.Token); throw new Exception("Status ignored cancellation"); }
+    catch (OperationCanceledException) { Console.WriteLine("PASS combined status preserves cancellation"); }
+}
 var status = Json(await store.Prepare(default));
 var revision = status.GetProperty("revision").GetString()!;
+combined = Json(await readiness.Status());
+Check(JsonElement.DeepEquals(combined.GetProperty("pak"), Json(await store.Status(default))),
+    "combined status preserves full catalogue readiness and provenance");
+File.WriteAllText(Path.Combine(loose, "status-stale.et"), ladder);
+combined = Json(await readiness.Status());
+Check(combined.GetProperty("pak").GetProperty("state").GetString() == "unavailable" &&
+    combined.GetProperty("pak").GetProperty("reason").GetString()!.Contains("stale") &&
+    combined.GetProperty("workbench").GetProperty("state").GetString() == "not_configured",
+    "stale catalogue retains independent Workbench observation");
+File.Delete(Path.Combine(loose, "status-stale.et"));
 Check(status.GetProperty("searchableFiles").GetInt32() == 8, "packed and loose resource/script coverage");
 Check(status.GetProperty("excludedTextFiles").GetInt32() == 2, "binary/invalid UTF-8 exclusions explicit");
 var manifestPath = status.GetProperty("manifest").GetString()!;

@@ -14,10 +14,6 @@ public sealed class PakTools(PakStore store)
         { throw new McpException(ex.Message); }
     }
 
-    [McpServerTool(Name = "pak_status", ReadOnly = true, OpenWorld = false)]
-    [Description("Inspect disk catalogue readiness, sources and revision.")]
-    public Task<object> Status(CancellationToken cancellationToken) => Report(() => store.Status(cancellationToken));
-
     [McpServerTool(Name = "pak_prepare", ReadOnly = false, Destructive = false, OpenWorld = false)]
     [Description("Replace disk catalogue from configured roots or workbench_project_context projectToken. Project scope uses loaded addons; includeAvailable adds available addons; addonGuids filters. Failure retires previous catalogue. Disk data excludes unsaved edits and effective override resolution.")]
     public Task<object> Prepare(string? projectToken = null, bool includeAvailable = false, string[]? addonGuids = null, CancellationToken cancellationToken = default)

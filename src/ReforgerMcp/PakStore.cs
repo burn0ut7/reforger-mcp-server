@@ -343,7 +343,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
     private static void ValidateSource(PakSnapshot s, string? source)
     {
         if (source is not null && !s.Roots.ContainsKey(source) && !s.LooseRoots.ContainsKey(source))
-            throw new ArgumentException("Unknown source; use pak_status sourceCoverage.");
+            throw new ArgumentException("Unknown source; use workbench_status pak.sourceCoverage.");
     }
     private static readonly Dictionary<string, string[]> Kinds = new()
     {
@@ -467,7 +467,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
         return Task.FromResult(result);
     }, ct);
 
-    private const string TextSearchScope = "Literal text, all terms on one line; no inherited-value or override resolution. Binary/unsupported formats excluded; pak_status reports coverage.";
+    private const string TextSearchScope = "Literal text, all terms on one line; no inherited-value or override resolution. Binary/unsupported formats excluded; workbench_status reports coverage.";
     private sealed record TextHit(string EntryId, int Line, string Text, bool Truncated, string Sha256);
 
     private static object[] GroupHits(List<TextHit> hits) => hits.GroupBy(h => (h.EntryId, h.Sha256))
