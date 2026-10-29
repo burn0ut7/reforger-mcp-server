@@ -32,17 +32,17 @@ public sealed partial class WorkbenchSession
 public sealed class WorkbenchHistoryTools(WorkbenchSession session)
 {
     [McpServerTool(Name = "workbench_save_world", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Save the existing named world through the editor's resource save owner, without UI traversal. Requires exact loadedWorld and processId. Refuses Play, prefab mode and active edit actions. Returns native save result and remaining modified state. Saves the editor's world/layer changes, including user edits; not Save As or prefab export. Invalidates edit tokens. Poll pending workbench_operation; never replay after uncertainty without inspecting state and files.")]
+    [Description("Save ALL pending edits in the existing named expectedWorld; invalidates edit tokens. Requires stopped Play and world mode.")]
     public Task<object> Save(int processId, string expectedWorld, CancellationToken cancellationToken = default)
         => Run(processId, expectedWorld, "save_world", cancellationToken);
 
     [McpServerTool(Name = "workbench_history_status", ReadOnly = true, OpenWorld = false)]
-    [Description("Observe the normal World Editor undo-history position and availability through its owning functions. Requires exact loadedWorld; refuses Play, dialogs and prefab mode. History includes user actions, not just MCP edits. Pending uses workbench_operation.")]
+    [Description("Read undo/redo history, including user actions, in exact expectedWorld. Requires stopped Play and world mode.")]
     public Task<object> Status(int processId, string expectedWorld, CancellationToken cancellationToken = default)
         => Run(processId, expectedWorld, "history", cancellationToken);
 
     [McpServerTool(Name = "workbench_history", ReadOnly = false, Destructive = true, OpenWorld = false)]
-    [Description("Undo or redo one current World Editor history action through the owning editor function. action is undo or redo. Includes user actions; inspect history and current state before acting. Invalidates edit tokens, leaves world unsaved, and reports observed index change. No UI traversal or automatic retry. Requires exact loadedWorld; refuses Play, dialogs and prefab mode. Pending uses workbench_operation.")]
+    [Description("action=undo|redo in exact expectedWorld, including user actions. Consumes edit tokens; changes remain unsaved. Requires stopped Play and world mode.")]
     public Task<object> Edit(int processId, string expectedWorld, string action, CancellationToken cancellationToken = default)
     {
         if (action is not ("undo" or "redo")) throw new McpException("action must be undo or redo.");

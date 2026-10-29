@@ -35,7 +35,7 @@ The existing native dispatcher controls editor entities, components, prefab expo
 1. Obtain `processId` from `workbench_script_status`. Create a named entity, inspect it and add your component with the entity tools. Export a prefab using `workbench_save_prefab`, and save the world normally.
 2. Start Play with `workbench_play`. Check a fresh log interval to establish that the method did not run automatically.
 3. Call `workbench_runtime_call(processId, entityName, componentType, method)` for immediate execution. Component and method names must be ASCII identifiers, up to 96 characters; entity names accept up to 240 UTF-8 bytes without control characters. Entity lookup uses the engine's named-entity lookup; use a unique name. Exactly one component assignable to the requested type must exist. Supply `arguments` as at most nine `{type,value}` objects, using int, float, bool, string or vector (`[x,y,z]`). Supply every declared argument, including optional ones. `returnType` accepts those same types or void (default, explicitly discards the result). The compiler checks the typed signature and public access. Successful invocation returns the supported value in `returned`. The temporary validation function is never executed and no ScriptInvoker instance is created.
-4. The adapter validates and invokes within one request, returning a receipt, the typed result, `invocationAttempted`, and timings. No caller-managed preparation token is needed. `prepareMs` includes target resolution and compilation; `compileMs` is its compilation subset, not additional time. `invokeMs` includes final target checks and the synchronous wrapper call. Engine timings are integer milliseconds; missing phases are absent/null in the server timings. `serverMs` covers the runtime operation after process/token selection, including live preflight and transport; it excludes caller latency and initial C# wrapper generation. It is not a gameplay-completion measurement.
+4. The adapter validates and invokes within one request, returning a receipt, the complete typed result, `invocationAttempted`, timings and an `operationId`. No caller-managed preparation token is needed. `prepareMs` includes target resolution and compilation; `compileMs` is its compilation subset, not additional time. `invokeMs` includes final target checks and the synchronous wrapper call. Engine timings are integer milliseconds; missing phases are absent/null in the server timings. `serverMs` covers the runtime operation after process/token selection, including live preflight and transport; it excludes caller latency and initial C# wrapper generation. It is not a gameplay-completion measurement.
 
    For validation without execution or intentional two-step use, `workbench_runtime_prepare` remains available with the same target/signature arguments. Invoke its token with `workbench_runtime_invoke` within 55 seconds on the same server. Any preparation, including the internal preparation in `workbench_runtime_call`, supersedes the globally prepared call. Invocation consumes the token before entering user code, including transport failures at the server. The adapter checks the original world/entity/component immediately before calling. Both interfaces share the same validation and executor.
 5. Read fresh logs using `log_read`, locating `RST_MCP_BEGIN <receipt>` and `RST_MCP_END <receipt> invoked`. Check the method's output and intended game-state assertions between/after those markers. For the fixture, require exactly one `Hello world | <selected-name> | call=1` and none from the control entity.
@@ -43,6 +43,30 @@ The existing native dispatcher controls editor entities, components, prefab expo
 Operations may return `pending`; poll `workbench_operation` on the same connection. Cancellation after acceptance does not cancel engine work. The TCP deadline is 15 seconds; timeout/disconnection after sending is uncertain, never permission to replay. A method can block, destroy objects, schedule effects or change external state. No rollback or exactly-once guarantee across process loss is claimed.
 
 Runtime activity logging identifies the requested target/component/method and argument types, but never argument values or returned content. See [tool activity](tool-activity.md) for correlation, timing totals and comparison limits.
+
+## Compact results and compatibility
+
+Successful `workbench_runtime_call` and `workbench_runtime_invoke` responses are compact
+by default. They retain the complete `returned` value, process and target identity
+(world, entity, resolved component and method), receipt, invocation flag and timings.
+`completion: "synchronous_call_only"` explicitly distinguishes return from gameplay
+success. Empty adapter fields, duplicate `resultJson`, duplicate elapsed time and
+repeated scope prose are omitted. Returned values are never shortened or summarized.
+Other runtime observations and non-success responses keep their detailed diagnostics.
+
+Clients reading `adapter`, `scope` or `elapsedMs` on success must request `details=true`
+on the original call/invoke to retain those fields. Prefer the compact default for
+normal work. A pending call preserves its requested presentation when polled.
+
+Use `workbench_operation(operationId, details=true)` to inspect the original detailed
+result after either immediate or pending completion. This reads the existing operation
+record; it performs no runtime call, does not consume a prepared token, and cannot
+refresh observations. No new cache or persistent payload log is created. History is
+shared with other native operations: only the last 16 records on the same server are
+retained, and server restart clears them. Expired/unknown IDs fail explicitly; never
+re-execute an action merely to recover its diagnostics. Failure responses continue to
+include available adapter error text/line and uncertainty evidence without requiring
+an extra detail request.
 
 ## Result meanings
 
@@ -92,3 +116,13 @@ logs omitted the argument sentinel and returned text. The interleaved getter com
 of 138.3 ms for prepare-plus-invoke and 72.6 ms for the combined call. Client timing includes
 response persistence, excludes AI deliberation, and is not a compilation-speed or gameplay
 throughput claim. No gameplay source or project selection was changed.
+
+
+Compact-response validation on 2026-10-28 is retained in
+`.temp/local/evidence/runtime-compact-20261028/`. Live MCP checks verified compact and
+explicit detailed responses, repeated original-result retrieval, unchanged receipts,
+full report values, compiler diagnostics, legacy token behavior and history expiry.
+Repeated reads produced no additional BEGIN/END receipt pairs. Ten interleaved getter
+samples per format measured median text sizes of 468 bytes compact and 1,234 bytes
+detailed (about 62% smaller); this is UTF-8 MCP text size, not model token usage.
+Unit checks additionally cover long Unicode/escaped values and media-safe size logging.

@@ -14,11 +14,11 @@ public sealed class LogTools(ConsoleLogs logs)
     }
 
     [McpServerTool(Name = "log_sessions", ReadOnly = true, OpenWorld = false)]
-    [Description("List configured console-log sources, or newest session folders for one source. Workbench and peer profiles use the same reader. Newest folder is not proof of a running process. Only console.log is read; requires logDirectories configuration.")]
+    [Description("List configured console.log sources or newest sessions for source; newest does not imply running. Requires logDirectories.")]
     public object Sessions(string? source = null, int limit = 10) => Report(() => logs.Sessions(source, limit));
 
     [McpServerTool(Name = "log_read", ReadOnly = true, OpenWorld = false)]
-    [Description("Read bounded console.log evidence. Default latest scope starts at the latest whole script reload/initial compilation and includes subsequent runtime logs. Repeated reload headings stay in one cycle. Missing boundaries error explicitly; session/tail are explicit alternatives. Counts are physical lines before filtering, not distinct problems; untimestamped lines inherit category/severity. cycle.completionLine is a timing marker, not proof of success. After reload_failed, start with severity:error; broaden if needed. Times are local as logged; header supplies session date/UTC. Case-insensitive category/severity/text filters; regex is opt-in with timeout. For context read session scope from an observed line without filters. Pass returned session, revision and nextLine as startLine with identical filters to page a fixed byte prefix; appends are excluded, overwritten/truncated/replaced prefixes reject revision. Omit revision to refresh. partialLastLineOmitted appears only when an unfinished trailing line was excluded. 80 lines default, max 200 and 24KB entry budget; individual lines clip at 2000 characters. Scans limited to 256MiB/10s. No editor mutations.")]
+    [Description("Read console.log; scope=latest|session|tail. latest starts at the latest compilation cycle. Case-insensitive filters; regex opt-in. Page with returned session/revision/nextLine as startLine and unchanged filters; omit revision to refresh. limit=1-200; 24KB/page, lines clip at 2000 characters. Completion markers do not prove success; timestamps are local.")]
     public object Read(string source, string? session = null, string scope = "latest", int cycleOffset = 0,
         string? severity = null, string? category = null, string? query = null, bool regex = false,
         int startLine = 1, int limit = 80, string? revision = null, CancellationToken cancellationToken = default)

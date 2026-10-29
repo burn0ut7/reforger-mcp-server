@@ -99,7 +99,7 @@ public sealed class ProjectContext(WorkbenchSession session)
 public sealed class ProjectTools(ProjectContext projects)
 {
     [McpServerTool(Name = "workbench_project_context", ReadOnly = true, OpenWorld = false)]
-    [Description("Observe the actual Workbench project, loaded and available addons and mounted roots through the native project owner. Requires processId from workbench_status and the exact supported Workbench build. Does not infer context from launch arguments or window titles. Returns projectToken for explicit project-scoped pak_prepare. No editor mutations, adapter or Play required.")]
+    [Description("Read live project, addons and mounted roots; scope=loaded|available|all, limit=1-100. Returns projectToken for pak_prepare. No adapter or Play required.")]
     public async Task<object> Context(int processId, string scope = "loaded", string query = "", int offset = 0, int limit = 32,
         string? projectToken = null, CancellationToken cancellationToken = default)
     {

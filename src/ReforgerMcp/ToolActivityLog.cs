@@ -25,11 +25,21 @@ public sealed record RuntimeActivity(string Action, string Receipt, string Entit
 public sealed class ToolActivityLog : IDisposable
 {
     public const int MaxBytes = 1_000_000;
-    private const int SummaryReserve = 32_000;
+    private const int SummaryReserve = 64_000;
     private readonly object gate = new();
     private readonly long started = Stopwatch.GetTimestamp();
     private readonly string session = Guid.NewGuid().ToString("N");
     private readonly Dictionary<string, long> usage = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ResponseTotals> responseUsage = new(StringComparer.Ordinal);
+    private readonly record struct ResponseSize(long TextBytes, long StructuredBytes, int NonTextBlocks);
+    private sealed class ResponseTotals
+    {
+        public long Responses { get; set; }
+        public long TextBytes { get; set; }
+        public long MaxTextBytes { get; set; }
+        public long StructuredBytes { get; set; }
+        public long NonTextBlocks { get; set; }
+    }
     private static readonly AsyncLocal<Action<RuntimeActivity>?> runtimeObserver = new();
     private readonly Dictionary<string, RuntimeTotals> runtimeUsage = new(StringComparer.Ordinal);
     private sealed class RuntimeTotals
@@ -74,24 +84,40 @@ public sealed class ToolActivityLog : IDisposable
         McpRequestHandler<CallToolRequestParams, CallToolResult> next, CancellationToken cancellationToken)
     {
         var tool = Label(request.Params?.Name ?? "unknown");
+        var usageKey = tool;
         long id = 0;
         TryLog(() =>
         {
             if (closed) return;
             id = ++calls;
-            var key = usage.ContainsKey(tool) || usage.Count < 128 ? tool : "other";
-            usage[key] = usage.GetValueOrDefault(key) + 1;
+            usageKey = usage.ContainsKey(tool) || usage.Count < 128 ? tool : "other";
+            usage[usageKey] = usage.GetValueOrDefault(usageKey) + 1;
             Detail($"START call={id} tool={tool} params={SafeParameters(request.Params?.Arguments, tool)}");
             Summary(false);
         });
         var start = Stopwatch.GetTimestamp();
         var error = "none";
+        ResponseSize? responseSize = null;
         var previousObserver = runtimeObserver.Value;
         runtimeObserver.Value = activity => Runtime(id, activity);
         try
         {
             var result = await next(request, cancellationToken).ConfigureAwait(false);
             if (result.IsError == true) error = "tool-reported-error (body omitted)";
+            // Count the actual SDK text payload outside the log lock. No payload is
+            // retained, and images/audio are never decoded or copied for telemetry.
+            try
+            {
+                long textBytes = 0;
+                var nonTextBlocks = 0;
+                foreach (var block in result.Content)
+                    if (block is TextContentBlock text) textBytes += Encoding.UTF8.GetByteCount(text.Text);
+                    else nonTextBlocks++;
+                var structuredBytes = result.StructuredContent is { } structured
+                    ? Encoding.UTF8.GetByteCount(structured.GetRawText()) : 0;
+                responseSize = new(textBytes, structuredBytes, nonTextBlocks);
+            }
+            catch (Exception) { /* Measurement must never replace a tool result. */ }
             return result;
         }
         catch (Exception ex)
@@ -110,7 +136,19 @@ public sealed class ToolActivityLog : IDisposable
                 if (error != "none") failures++;
                 totalMs += duration;
                 if (duration >= slowestMs) { slowestMs = duration; slowestTool = tool; slowestCall = id; }
-                Detail($"{(error == "none" ? "OK" : "FAIL")} call={id} tool={tool} duration_ms={Number(duration)} error={error}");
+                if (responseSize is { } size)
+                {
+                    if (!responseUsage.TryGetValue(usageKey, out var totals)) responseUsage[usageKey] = totals = new();
+                    totals.Responses++;
+                    totals.TextBytes += size.TextBytes;
+                    totals.MaxTextBytes = Math.Max(totals.MaxTextBytes, size.TextBytes);
+                    totals.StructuredBytes += size.StructuredBytes;
+                    totals.NonTextBlocks += size.NonTextBlocks;
+                }
+                Detail($"{(error == "none" ? "OK" : "FAIL")} call={id} tool={tool} duration_ms={Number(duration)} error={error}" +
+                    $" response_text_bytes={responseSize?.TextBytes.ToString(CultureInfo.InvariantCulture) ?? "unavailable"}" +
+                    $" response_structured_bytes={responseSize?.StructuredBytes.ToString(CultureInfo.InvariantCulture) ?? "unavailable"}" +
+                    $" response_nontext_blocks={responseSize?.NonTextBlocks.ToString(CultureInfo.InvariantCulture) ?? "unavailable"}");
                 Summary(false);
             });
         }
@@ -125,7 +163,7 @@ public sealed class ToolActivityLog : IDisposable
         foreach (var pair in arguments.Take(16))
         {
             var key = Label(pair.Key);
-            var scalar = pair.Key is "limit" or "offset" or "maxResults" or "maxLines" or "line" or "count" or "timeoutMs" or "recursive" or "dryRun";
+            var scalar = pair.Key is "limit" or "offset" or "maxResults" or "maxLines" or "line" or "count" or "timeoutMs" or "recursive" or "dryRun" or "details";
             var runtimeName = tool is "workbench_runtime_call" or "workbench_runtime_prepare" &&
                 pair.Key is "entityName" or "componentType" or "method" or "returnType";
             safe[key] = runtimeName && pair.Value.ValueKind == JsonValueKind.String
@@ -189,7 +227,7 @@ public sealed class ToolActivityLog : IDisposable
     private void Summary(bool final)
     {
         if (stream is null) return;
-        var text = Line($"SUMMARY state={(final ? "ended" : "active")} calls={calls} completed={completed} failures={failures} in_flight={calls - completed} elapsed_ms={Number(Stopwatch.GetElapsedTime(started).TotalMilliseconds)} accumulated_tool_ms={Number(totalMs)} slowest_call={slowestCall} slowest_tool={slowestTool} slowest_ms={Number(slowestMs)} omitted_detail_lines={omitted} per_tool={JsonSerializer.Serialize(usage)} runtime_per_method={JsonSerializer.Serialize(runtimeUsage)}");
+        var text = Line($"SUMMARY state={(final ? "ended" : "active")} calls={calls} completed={completed} failures={failures} in_flight={calls - completed} elapsed_ms={Number(Stopwatch.GetElapsedTime(started).TotalMilliseconds)} accumulated_tool_ms={Number(totalMs)} slowest_call={slowestCall} slowest_tool={slowestTool} slowest_ms={Number(slowestMs)} omitted_detail_lines={omitted} per_tool={JsonSerializer.Serialize(usage)} runtime_per_method={JsonSerializer.Serialize(runtimeUsage)} response_per_tool={JsonSerializer.Serialize(responseUsage)}");
         var bytes = Encoding.UTF8.GetBytes(text);
         stream.Position = detailEnd;
         stream.Write(bytes.AsSpan(0, Math.Min(bytes.Length, SummaryReserve)));

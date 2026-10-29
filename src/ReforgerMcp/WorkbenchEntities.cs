@@ -58,17 +58,17 @@ public sealed class WorkbenchEntityTools(WorkbenchSession session)
     }
 
     [McpServerTool(Name = "workbench_entity", ReadOnly = true, OpenWorld = false)]
-    [Description("Observe whether a named entity exists in the expected World Editor world and read the active layer. Requires processId and exact loadedWorld from workbench_open_world. Refuses play mode or a changed world. Native main-thread observation; no script bridge. Poll pending results with workbench_operation on this connection.")]
+    [Description("Inspect named editor entity and active layer in exact expectedWorld; requires stopped Play.")]
     public Task<object> Inspect(int processId, string expectedWorld, string name, CancellationToken cancellationToken = default)
         => Report(() => session.Entity("inspect", processId, expectedWorld, name, "", [0,0,0], [0,0,0], cancellationToken));
 
     [McpServerTool(Name = "workbench_create_entity", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("Create one root entity from an entity class name or GUID-qualified prefab resource ({GUID}path.et) in the active World Editor layer, using native entity-source creation and an undo action. Bare prefab paths are rejected because they can lose resource identity. Use prefabResource from workbench_save_prefab or a known resource ID. Requires a unique name and exact loadedWorld from workbench_open_world. Position is [x,y,z] in world meters; angles are the engine's [x,y,z] Euler degrees. Changes are unsaved. Refuses changed worlds, play, existing names and active edit actions. Does not retry. Poll pending workbench_operation; inspect the named entity after uncertain outcomes before considering another request.")]
+    [Description("Create uniquely named entity from class or GUID-qualified prefab in active layer of expectedWorld. position=XYZ meters; angles=XYZ Euler degrees. Requires stopped Play; unsaved undo action.")]
     public Task<object> Create(int processId, string expectedWorld, string name, string asset, float[] position, float[]? angles = null, CancellationToken cancellationToken = default)
         => Report(() => session.Entity("create", processId, expectedWorld, name, asset, position, angles ?? [0,0,0], cancellationToken));
 
     [McpServerTool(Name = "workbench_save_prefab", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("Export a named World Editor entity as a new .et prefab using native CreateEntityTemplate. prefabPath must be an absolute new path in an existing directory; use a writable addon available to the project for a resolvable resource. Existing prefab or metadata is rejected. Export is outside world undo and may clear preceding edit history during resource processing. Completion waits up to five seconds for native resource database acknowledgement; export_incomplete can leave files and must not be replayed blindly. Does not replace the world entity with an instance, save the world, or add a script bridge. Requires exact loadedWorld and processId; refuses play or changed worlds. Inspect files after a failure or uncertainty; never replay blindly. Poll pending workbench_operation on this connection.")]
+    [Description("Export named entity as new absolute .et prefabPath in an existing directory; does not replace the instance. Requires stopped Play/exact expectedWorld. Outside undo; may clear history or leave files on failure.")]
     public Task<object> SavePrefab(int processId, string expectedWorld, string name, string prefabPath, CancellationToken cancellationToken = default)
         => Report(() => session.Entity("export", processId, expectedWorld, name, prefabPath, [0,0,0], [0,0,0], cancellationToken));
 }

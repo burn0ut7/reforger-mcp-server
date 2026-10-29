@@ -19,7 +19,7 @@ public sealed partial class WorkbenchSession
 
     internal Task<object> Runtime(string action, int processId, string? targetToken, string? entityName,
         string? componentType, string? method, CancellationToken ct, int offset = 0, int limit = 32,
-        JsonElement[]? arguments = null, string returnType = "void")
+        JsonElement[]? arguments = null, string returnType = "void", bool details = false)
     {
         if (action is not ("status" or "prepare" or "invoke" or "inspect" or "call")) throw new ArgumentException("Invalid runtime action.");
         if (action == "inspect" && (string.IsNullOrWhiteSpace(entityName) || Encoding.UTF8.GetByteCount(entityName) > 240 ||
@@ -114,14 +114,13 @@ public sealed partial class WorkbenchSession
                 activity = activity with { State = state!, Dispatch = "returned", InvocationAttempted = attempted,
                     PrepareMs = Timing("prepareMs"), CompileMs = Timing("compileMs"), InvokeMs = Timing("invokeMs"),
                     ElapsedMs = watch.Elapsed.TotalMilliseconds };
-                return new { state, processId = process.Id, targetToken = action == "prepare" && state == "prepared" ? receipt : null,
-                    receipt, returnType = action is "prepare" or "invoke" or "call" ? returnType : null, returned,
-                    invocationAttempted = attempted,
-                    timings = new { prepareMs = activity.PrepareMs, compileMs = activity.CompileMs, invokeMs = activity.InvokeMs, serverMs = activity.ElapsedMs },
-                    elapsedMs = watch.ElapsedMilliseconds, adapter = response,
-                    scope = action == "inspect"
+                return new RuntimeResult(state!, process.Id, action == "prepare" && state == "prepared" ? receipt : null,
+                    receipt, action is "prepare" or "invoke" or "call" ? returnType : null, returned, attempted,
+                    new { prepareMs = activity.PrepareMs, compileMs = activity.CompileMs, invokeMs = activity.InvokeMs, serverMs = activity.ElapsedMs },
+                    watch.ElapsedMilliseconds, response,
+                    action == "inspect"
                         ? "Live embedded Play observation. Components are ScriptComponent-derived; reflected primitive fields only, not properties/getters or an atomic multi-request snapshot. Unsupported values remain explicit."
-                        : "Embedded Workbench Play only. Invoked means the synchronous named call returned true; inspect logs and gameplay state for script exceptions/deferred effects. Return values use the requested compiler-checked type; void explicitly discards results. Never replay an uncertain call." };
+                        : "Embedded Workbench Play only. Invoked means the synchronous named call returned true; inspect logs and gameplay state for script exceptions/deferred effects. Return values use the requested compiler-checked type; void explicitly discards results. Never replay an uncertain call.", details);
             }
             catch (Exception ex)
             {
@@ -134,6 +133,34 @@ public sealed partial class WorkbenchSession
                 if (trace) ToolActivityLog.RecordRuntime(activity with { ElapsedMs = watch.Elapsed.TotalMilliseconds });
             }
         }, ct);
+    }
+}
+
+// Kept in the existing bounded operation history. Presentation never calls the engine.
+internal sealed record RuntimeResult(string State, int ProcessId, string? TargetToken, string Receipt,
+    string? ReturnType, JsonElement? Returned, bool? InvocationAttempted, object Timings,
+    long ElapsedMs, JsonElement Adapter, string Scope, bool Details)
+{
+    internal object Present(string operationId, bool details = false)
+    {
+        if (details || Details || State != "invoked")
+            return new
+            {
+                state = State, processId = ProcessId, operationId, targetToken = TargetToken, receipt = Receipt,
+                returnType = ReturnType, returned = Returned, invocationAttempted = InvocationAttempted,
+                timings = Timings, elapsedMs = ElapsedMs, adapter = Adapter, scope = Scope
+            };
+        return new
+        {
+            state = State, processId = ProcessId, operationId, receipt = Receipt, returnType = ReturnType,
+            returned = Returned, invocationAttempted = InvocationAttempted, timings = Timings,
+            target = new
+            {
+                world = Adapter.GetProperty("world"), entityName = Adapter.GetProperty("entityName"),
+                componentType = Adapter.GetProperty("componentType"), method = Adapter.GetProperty("method")
+            },
+            completion = "synchronous_call_only"
+        };
     }
 }
 
@@ -221,30 +248,30 @@ public sealed class WorkbenchRuntimeTools(WorkbenchSession session)
         catch (Exception e) when (e is not (McpException or OperationCanceledException)) { throw new McpException(e.Message); }
     }
     [McpServerTool(Name = "workbench_runtime_status", ReadOnly = true, OpenWorld = false)]
-    [Description("Observe the explicitly installed Workbench runtime adapter and embedded Play state. Requires workbench.runtimePort and processId. The configured local listener must belong to that process. No native VM or transport fallback. Pending uses workbench_operation.")]
+    [Description("Read installed adapter readiness and embedded Play state; requires configured runtimePort owned by processId.")]
     public Task<object> Status(int processId, CancellationToken cancellationToken = default)
         => Report(() => session.Runtime("status", processId, null, null, null, null, cancellationToken));
 
     [McpServerTool(Name = "workbench_runtime_inspect", ReadOnly = true, OpenWorld = false)]
-    [Description("Observe a named live entity during embedded Play: identity, transform and a page of script components; supply componentType to read a page of reflected fields on exactly one matching component. Primitive int/float/bool/string/vector values are read without calling gameplay methods. Unsupported field types and truncation are explicit. Does not inspect editor authoring values or separate clients/servers. Requires the installed development adapter and configured runtimePort; pending uses workbench_operation.")]
+    [Description("Inspect named entity during embedded Play; componentType selects one component for primitive fields, otherwise lists components. Requires installed adapter/runtimePort; separate clients/servers unsupported.")]
     public Task<object> Inspect(int processId, string entityName, string? componentType = null, int offset = 0, int limit = 32,
         CancellationToken cancellationToken = default)
         => Report(() => session.Runtime("inspect", processId, null, entityName, componentType, null, cancellationToken, offset, limit));
 
     [McpServerTool(Name = "workbench_runtime_call", ReadOnly = false, Destructive = true, OpenWorld = true)]
-    [Description("Call a public component method during embedded Workbench Play. Preferred for immediate execution: resolves the named entity and unique matching component, compiler-checks the typed signature, then invokes once in one adapter request. Uses the same executor and checks as prepare/invoke; no preparation token or separate invoke needed. arguments contains at most nine {type,value} items (int, float, bool, string, vector); supply every declared argument. returnType selects a supported primitive result or void to discard it. Returns receipt, typed result, invocationAttempted and phase timings. invoked means the synchronous call returned, not proof of error-free gameplay or deferred completion; inspect receipt-correlated logs and relevant state. No automatic retries. Timeout/disconnection is uncertain; engine code cannot be cancelled after dispatch. Poll pending workbench_operation. Requires the matching installed development adapter. Separate clients/servers, object/array results and out/inout updates are unsupported. Target/method names and argument types are logged; argument values/results are omitted.")]
-    public Task<object> Call(int processId, string entityName, string componentType, string method, JsonElement[]? arguments = null,
-        string returnType = "void", CancellationToken cancellationToken = default)
-        => Report(() => session.Runtime("call", processId, null, entityName, componentType, method, cancellationToken, arguments: arguments, returnType: returnType));
+    [Description("Validate and invoke one public component method during embedded Play; requires installed adapter/runtimePort. Synchronous return only; no deferred completion or out/inout updates. details includes raw diagnostics; recover original details with workbench_operation, never re-execute. Accepted code cannot be cancelled.")]
+    public Task<object> Call(int processId, string entityName, string componentType, string method, [Description("All declared arguments, including optional ones; max 9 {type,value} items. type=int|float|bool|string|vector; vector=[x,y,z]. Inputs only.")] JsonElement[]? arguments = null,
+        [Description("int|float|bool|string|vector|void; void discards result. Objects/arrays unsupported.")] string returnType = "void", bool details = false, CancellationToken cancellationToken = default)
+        => Report(() => session.Runtime("call", processId, null, entityName, componentType, method, cancellationToken, arguments: arguments, returnType: returnType, details: details));
 
     [McpServerTool(Name = "workbench_runtime_prepare", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("For validation without execution or an intentional two-step call. Prefer workbench_runtime_call for immediate execution. During embedded Play, resolve the engine's named entity and exactly one component assignable to componentType, then compile-check a public method against the supplied typed signature without invoking it. arguments is an array of at most nine {type,value} objects; types are int, float, bool, string and vector ([x,y,z]). returnType is one of those types or void (default). Supply all declared arguments, including optional ones. Returns a single-use targetToken valid for 55 seconds on this connection. Any prepare replaces the adapter's previous prepared call globally. Object destruction, reload and world replacement invalidate it. Requires explicit development adapter installation and workbench.runtimePort. Invocation returns the requested supported value; void discards the result. Object references and arrays are unsupported. Arguments are inputs only: Enforce may accept out/inout methods, but argument updates are not returned. Pending uses workbench_operation.")]
-    public Task<object> Prepare(int processId, string entityName, string componentType, string method, JsonElement[]? arguments = null,
-        string returnType = "void", CancellationToken cancellationToken = default)
+    [Description("Validate a component call without execution during embedded Play; requires installed adapter/runtimePort. Returns single-use targetToken valid 55 seconds; any prepare/call supersedes it globally. Reload, world replacement or target destruction invalidates it. For immediate execution use workbench_runtime_call.")]
+    public Task<object> Prepare(int processId, string entityName, string componentType, string method, [Description("All declared arguments, including optional ones; max 9 {type,value} items. type=int|float|bool|string|vector; vector=[x,y,z]. Inputs only.")] JsonElement[]? arguments = null,
+        [Description("int|float|bool|string|vector|void; void discards result. Objects/arrays unsupported.")] string returnType = "void", CancellationToken cancellationToken = default)
         => Report(() => session.Runtime("prepare", processId, null, entityName, componentType, method, cancellationToken, arguments: arguments, returnType: returnType));
 
     [McpServerTool(Name = "workbench_runtime_invoke", ReadOnly = false, Destructive = true, OpenWorld = true)]
-    [Description("Consume a prepared live-component targetToken and synchronously call its method through the owning game ScriptModule in embedded Workbench Play. Runs arbitrary project behavior with its normal authority; does not emulate player interaction or await deferred effects. Receipt brackets RST_MCP_BEGIN/END in console.log. invoked means ScriptModule.Call returned true, not proof that the method finished without script errors or that gameplay assertions passed. No retries. Timeout/disconnection is uncertain; cancellation after acceptance cannot cancel engine code. Poll pending with workbench_operation on this connection, inspect logs after uncertainty. Returns the compiler-checked primitive result selected at prepare time. Separate game clients/servers are unsupported.")]
-    public Task<object> Invoke(string targetToken, CancellationToken cancellationToken = default)
-        => Report(() => session.Runtime("invoke", 0, targetToken, null, null, null, cancellationToken));
+    [Description("Consume prepared targetToken and invoke once during embedded Play. Synchronous return only; no deferred completion or out/inout updates. Accepted code cannot be cancelled. details includes raw diagnostics; recover original details with workbench_operation.")]
+    public Task<object> Invoke(string targetToken, bool details = false, CancellationToken cancellationToken = default)
+        => Report(() => session.Runtime("invoke", 0, targetToken, null, null, null, cancellationToken, details: details));
 }

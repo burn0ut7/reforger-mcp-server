@@ -77,3 +77,25 @@ legacy prepare-plus-invoke end-to-end time with the combined call, interleaving 
 and excluding warm-up. Count completed invocations separately from public requests.
 Do not treat fewer requests as proof of faster compilation. Preserve baseline files
 before session retention removes them; capped details cannot reconstruct every call.
+
+## Response size accounting
+
+Each returned tool result records `response_text_bytes`: the sum of UTF-8 byte counts
+of SDK `TextContentBlock.Text` values. `response_structured_bytes` counts the raw JSON
+text of `StructuredContent` separately when present; it may describe the same content,
+so do not assume both are shown to the model. `response_nontext_blocks` counts image,
+audio and other non-text blocks without reading or decoding their payloads. These
+measurements exclude JSON-RPC/SSE framing and are neither network sizes nor token
+counts. No response content is written to the activity log.
+
+The `response_per_tool` footer preserves response count, total/max text bytes,
+structured bytes and non-text block count for the same bounded tool groups as
+`per_tool` (128 names, then `other`). Totals continue after the detail cap. The 1 MB
+file cap reserves 64 KB for the growing summary. Returned MCP errors are measured;
+thrown exceptions have unavailable size because no result reached this filter.
+
+Every delivered response counts, including repeated polls and detail retrievals:
+these also consume client context. They are attributed to `workbench_operation`,
+not counted as fresh runtime executions. Use `runtime_per_method`/receipt records
+for execution counts and `response_per_tool` for output volume. Compare calls on
+matching server builds and workloads, and separate text from media-heavy tools.

@@ -129,6 +129,6 @@ public sealed class WorkbenchChoices(WorkbenchSession session, ILogger<Workbench
 public sealed class WorkbenchChoicesTools(WorkbenchChoices choices)
 {
     [McpServerTool(Name = "workbench_dynamic_choices", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("Enable, disable or observe automatic native inline choices for one Workbench process. Requires this server's installed editor adapter. Only explicitly marked string combo fields participate. Providers in the loaded addon supply live values; saved properties are not changed by refresh. Refreshes every second while this server runs; stops on errors. Enable again only after resolving an unavailable status. Native support is exact-version checked.")]
+    [Description("action=status|enable|disable: automatic inline choices for marked string combos; requires installed editor adapter. Refreshes live providers every second, changes no saved properties; stops on error.")]
     public object Configure(string action = "status", int processId = 0) => choices.Configure(action, processId);
 }

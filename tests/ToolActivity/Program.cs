@@ -82,9 +82,56 @@ using (var runtimeLog = new ToolActivityLog(runtimeDir, "http-stateless"))
         }, default);
     text = ReadLog(Directory.GetFiles(runtimeDir).Single());
     var footer = text.Split('\n', StringSplitOptions.RemoveEmptyEntries).Last();
-    using var totals = JsonDocument.Parse(footer[(footer.IndexOf("runtime_per_method=", StringComparison.Ordinal) + "runtime_per_method=".Length)..]);
+    var runtimeTotalsJson = footer.Split("runtime_per_method=")[1].Split(" response_per_tool=")[0];
+    using var totals = JsonDocument.Parse(runtimeTotalsJson);
     Check(totals.RootElement.EnumerateObject().Count() == 33 && totals.RootElement.GetProperty("other").GetProperty("Uncertain").GetInt64() > 0, "runtime method cardinality bounded with explicit overflow");
 }
+
+var sizesDir = Path.Combine(root, "response-sizes");
+using (var sizes = new ToolActivityLog(sizesDir, "stdio"))
+{
+    var result = new CallToolResult
+    {
+        Content = [new TextContentBlock { Text = "é😀" }, new ImageContentBlock { MimeType = "image/png", Data = Encoding.UTF8.GetBytes("not-decoded") }],
+        StructuredContent = JsonSerializer.SerializeToElement(new { message = "NEVER-LOG-THIS" })
+    };
+    Check(ReferenceEquals(await sizes.Invoke(Request("workbench_runtime_call"), (_, _) => ValueTask.FromResult(result), default), result), "response measurement preserves original result");
+    await sizes.Invoke(Request("workbench_operation"), (_, _) => ValueTask.FromResult(result), default);
+    await sizes.Invoke(Request("workbench_operation"), (_, _) => ValueTask.FromResult(failure), default);
+    try { await sizes.Invoke(Request("throws"), (_, _) => throw expected, default); } catch (InvalidOperationException) { }
+    text = ReadLog(Directory.GetFiles(sizesDir).Single());
+    Check(text.Contains("response_text_bytes=6 ") && text.Contains("response_nontext_blocks=1"), "counts UTF-8 bytes and non-text blocks without decoding media");
+    Check(!text.Contains("NEVER-LOG-THIS") && !text.Contains("not-decoded"), "response metrics never log content");
+    using var sizeTotals = JsonDocument.Parse(text.Split("response_per_tool=").Last().Trim());
+    Check(sizeTotals.RootElement.GetProperty("workbench_runtime_call").GetProperty("TextBytes").GetInt64() == 6 &&
+        sizeTotals.RootElement.GetProperty("workbench_operation").GetProperty("Responses").GetInt64() == 2,
+        "poll response volume accounted separately from runtime execution");
+    Check(sizeTotals.RootElement.GetProperty("workbench_runtime_call").GetProperty("StructuredBytes").GetInt64() ==
+        Encoding.UTF8.GetByteCount(result.StructuredContent!.Value.GetRawText()), "structured JSON measured separately");
+    Check(!sizeTotals.RootElement.TryGetProperty("throws", out _) && text.Contains("response_text_bytes=unavailable"), "thrown exceptions do not invent response sizes");
+}
+
+// Successful projection must preserve all returned content; detail retrieval only
+// changes presentation of this original object, never validation or execution.
+var longValue = string.Concat(Enumerable.Repeat("é\"\\\n", 3000));
+var adapter = JsonSerializer.SerializeToElement(new
+{
+    world = "test-world", entityName = "entity", componentType = "Component", method = "Method",
+    resultJson = JsonSerializer.Serialize(new { called = true, value = longValue }),
+    error = "", errorLine = 0
+});
+var stored = new RuntimeResult("invoked", 123, null, "receipt", "string", JsonSerializer.SerializeToElement(longValue), true,
+    new { prepareMs = 1, compileMs = 1, invokeMs = 2, serverMs = 10 }, 10, adapter, "scope", false);
+var compact = JsonSerializer.SerializeToElement(stored.Present("operation"));
+var detailed = JsonSerializer.SerializeToElement(stored.Present("operation", true));
+Check(compact.GetProperty("returned").GetString() == longValue && !compact.TryGetProperty("adapter", out _), "compact response retains full Unicode/escaped long result once");
+Check(compact.GetProperty("target").GetProperty("method").GetString() == "Method" &&
+    compact.GetProperty("completion").GetString() == "synchronous_call_only", "compact identity and completion semantics preserved");
+Check(detailed.GetProperty("adapter").GetProperty("resultJson").GetString() == adapter.GetProperty("resultJson").GetString() &&
+    detailed.GetProperty("receipt").GetString() == compact.GetProperty("receipt").GetString(), "detailed projection preserves original diagnostics and receipt");
+Check(JsonSerializer.SerializeToElement((stored with { Details = true }).Present("operation")).TryGetProperty("adapter", out _), "explicit details survives operation polling");
+Check(JsonSerializer.SerializeToElement((stored with { State = "compile_rejected" }).Present("operation")).TryGetProperty("adapter", out _), "non-success diagnostics remain full by default");
+Check(!JsonSerializer.SerializeToElement(stored.Present("operation")).TryGetProperty("adapter", out _), "reading details never mutates the stored default presentation");
 
 var capped = Path.Combine(root, "cap");
 using (var cap = new ToolActivityLog(capped, "http-stateless"))
@@ -92,13 +139,14 @@ using (var cap = new ToolActivityLog(capped, "http-stateless"))
     {
         ToolActivityLog.RecordRuntime(new RuntimeActivity("call", "rtest", "entity", "Component", "Method", "int", [])
             { State = "invoked", Dispatch = "returned", PrepareMs = 3, CompileMs = 2, InvokeMs = 1 });
-        return ValueTask.FromResult(new CallToolResult());
+        return ValueTask.FromResult(new CallToolResult { Content = [new TextContentBlock { Text = "é😀" }] });
     }, default);
 var capFile = Directory.GetFiles(capped).Single();
 text = ReadLog(capFile);
 Check(new FileInfo(capFile).Length <= ToolActivityLog.MaxBytes && text.Contains("calls=4000 completed=4000"), "byte cap with complete summary");
 Check(!text.Contains("omitted_detail_lines=0 "), "overflow details counted");
 Check(text.Contains("\"Invoked\":4000") && text.Contains("\"CompileMs\":8000"), "runtime totals continue after detail cap");
+Check(text.Contains("\"TextBytes\":24000") && text.Contains("\"Responses\":4000"), "response sizes continue after detail cap");
 for (var i = 0; i < 7; i++) { using var retained = new ToolActivityLog(capped, "stdio"); }
 Check(Directory.GetFiles(capped).Length == 5, "five-session retention");
 var blocked = Path.Combine(root, "blocked");

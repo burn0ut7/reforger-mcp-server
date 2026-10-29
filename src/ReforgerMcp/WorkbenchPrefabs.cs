@@ -39,7 +39,7 @@ public sealed partial class WorkbenchSession
 public sealed class WorkbenchPrefabTools(WorkbenchSession session)
 {
     [McpServerTool(Name = "workbench_create_child_prefab", ReadOnly = false, Destructive = false, OpenWorld = false)]
-    [Description("Create a new inherited .et prefab through Workbench's native resource-creation owner. ancestorResource must be GUID-qualified; prefabPath must be an absolute new path in an existing writable addon directory. Rejects existing resource or metadata. Creates a detached child with an explicit ancestor and a new resource identity; does not create a world entity or export an instance. Waits for resource database acknowledgement and returns metadata identity evidence. Creation is outside world undo; incomplete results can leave files. Never blindly replay. Poll pending workbench_operation on this connection.")]
+    [Description("Create detached inherited prefab from GUID-qualified ancestorResource at new absolute .et prefabPath in an existing directory. Outside undo; does not place an entity.")]
     public async Task<object> CreateChild(int processId, string ancestorResource, string prefabPath, CancellationToken cancellationToken = default)
     {
         try { return await session.CreateChildPrefab(processId, ancestorResource, prefabPath, cancellationToken); }

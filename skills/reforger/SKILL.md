@@ -35,7 +35,7 @@ Include the authoring work that makes code usable: appropriate script module, ed
 
 Read [Workbench guidance](references/workbench-workflow.md) before editor mutations or live tests. Prefer the semantic MCP operation for the task. If the server is disconnected or the operation unsupported, report that boundary; do not invent tools or substitute another execution backend.
 
-For immediate live component method execution, use `workbench_runtime_call`; it performs target resolution, signature validation and one invocation internally. Use separate prepare/invoke only for intentional validation-only or two-step work. The receipt and synchronous result still need relevant state/log verification.
+For immediate live component method execution, use `workbench_runtime_call`; it performs target resolution, signature validation and one invocation internally. Use separate prepare/invoke only for intentional validation-only or two-step work. The receipt and synchronous result still need relevant state/log verification. Keep compact success responses; request `workbench_operation(operationId, details=true)` only when original adapter diagnostics are needed. Never rerun a method to recover details; operation history is bounded and is not fresh observation.
 
 Verify the requested behavior and saved result, not just compilation. For scenarios, follow the player's path from joining and spawning through objectives and completion; for multiplayer, check the relevant authority and peers. Report what was tested and what remains unverified. Publishing is a separate user-directed action.
 
