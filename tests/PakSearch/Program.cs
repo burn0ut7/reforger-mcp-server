@@ -16,7 +16,7 @@ var files = new Dictionary<string, byte[]>
 {
     ["ladder.et"] = Encoding.UTF8.GetBytes(ladder),
     ["ladder-copy.et"] = Encoding.UTF8.GetBytes(ladder),
-    ["screen.layout"] = Encoding.UTF8.GetBytes("FrameWidgetClass {\n Text \"échelle\"\n}\n"),
+    ["screen.layout"] = Encoding.UTF8.GetBytes("FrameWidgetClass {\n Text \"échelle\"\n}\n" + new string('x', 2100) + "long-marker\n" + string.Concat(Enumerable.Repeat(new string('界', 700) + "\n", 50))),
     ["settings.conf"] = Encoding.UTF8.GetBytes("Config { LadderStepLength 0.33 }\n"),
     ["world.ent"] = Encoding.UTF8.GetBytes("Entity { LadderComponent {} }\n"),
     ["terrain.layer"] = Encoding.UTF8.GetBytes("Entity { LadderComponent {} }\n"),
@@ -31,11 +31,18 @@ var config = new Configuration { DataDirectory = Path.Combine(root, "store"),
     PakDirectories = new() { ["packed"] = packed }, UnpackedDirectories = new() { ["local"] = loose } };
 var store = new PakStore(config);
 JsonElement Json(object value) => JsonSerializer.SerializeToElement(value, Configuration.Json);
+JsonElement[] Hits(JsonElement result) => result.GetProperty("files").EnumerateArray().SelectMany(file =>
+    file.GetProperty("matches").EnumerateArray().Select(hit => Json(new
+    {
+        entryId = file.GetProperty("entryId").GetString(), line = hit.GetProperty("line").GetInt32(),
+        text = hit.GetProperty("text").GetString(), truncated = hit.GetProperty("truncated").GetBoolean(),
+        sha256 = file.GetProperty("sha256").GetString()
+    }))).ToArray();
 void Check(bool value, string name) { if (!value) throw new Exception(name); Console.WriteLine("PASS " + name); }
 async Task Reject(Func<Task<object>> action, string name)
 {
     try { await action(); }
-    catch (Exception e) when (e is InvalidOperationException or InvalidDataException or ArgumentException or OperationCanceledException)
+    catch (Exception e) when (e is InvalidOperationException or InvalidDataException or ArgumentException or OperationCanceledException or ModelContextProtocol.McpException)
     { Console.WriteLine("PASS " + name); return; }
     throw new Exception("Expected rejection: " + name);
 }
@@ -53,18 +60,53 @@ Check(result.GetProperty("total").GetInt32() == 6, "case-insensitive matches inc
 Check(result.GetProperty("excludedUnreadableFiles").GetInt32() == 2, "search reports exclusions");
 Check(result.GetProperty("nextOffset").GetInt32() == 2, "bounded continuation");
 var next = Json(await store.SearchText("laddercomponent", "", 2, 10, revision, default));
-Check(next.GetProperty("items").GetArrayLength() == 4, "continuation covers remaining entries including duplicate provenance");
+Check(Hits(next).Length == 4, "continuation covers remaining entries including duplicate provenance");
 var prefabs = Json(await store.SearchText("LadderComponent", ".et", 0, 10, revision, default, "packed"));
 Check(prefabs.GetProperty("total").GetInt32() == 2, "existing source/path filters narrow resource search");
-var hit = prefabs.GetProperty("items")[0];
+var hit = Hits(prefabs)[0];
 Check(hit.GetProperty("line").GetInt32() == 3, "CRLF line numbers preserved");
 var read = Json(await store.ReadText(hit.GetProperty("entryId").GetString()!, 2, 2, revision, default));
 Check(read.GetProperty("lines")[0].GetProperty("text").GetString() == hit.GetProperty("text").GetString(), "search hits read back exactly");
 Check(read.GetProperty("sha256").GetString() == hit.GetProperty("sha256").GetString(), "search/read byte provenance agrees");
+var readRequests = new[] { new PakReadRequest(hit.GetProperty("entryId").GetString()!, 2, 2),
+    new PakReadRequest(hit.GetProperty("entryId").GetString()!, 0, 1),
+    new PakReadRequest("packed/sample.pak/broken.et"), new PakReadRequest("missing") };
+var reads = Json(await store.ReadBatch(readRequests, revision, default));
+var firstRead = reads.GetProperty("results")[0];
+Check(reads.GetProperty("results").GetArrayLength() == 4 && JsonElement.DeepEquals(firstRead.GetProperty("lines"), read.GetProperty("lines")) &&
+    firstRead.GetProperty("sha256").GetString() == read.GetProperty("sha256").GetString(), "batch windows match single read content and provenance");
+Check(reads.GetProperty("results")[1].GetProperty("offset").GetInt32() == 0 &&
+    reads.GetProperty("results")[2].TryGetProperty("error", out _) && reads.GetProperty("results")[3].GetProperty("entryId").GetString() == "missing",
+    "batch preserves repeated-file request order and isolated decode/identity errors");
+var budgetReads = Enumerable.Range(0, 8).Select(_ => new PakReadRequest("packed/sample.pak/screen.layout", 4, 20)).ToArray();
+var bounded = Json(await store.ReadBatch(budgetReads, revision, default));
+Check(bounded.GetProperty("limited").GetBoolean() && JsonSerializer.SerializeToUtf8Bytes(bounded, Configuration.Json).Length <= 32 * 1024,
+    "aggregate byte budget includes escaped Unicode and metadata");
+foreach (var item in bounded.GetProperty("results").EnumerateArray())
+    Check(item.GetProperty("nextOffset").GetInt32() == item.GetProperty("offset").GetInt32() + item.GetProperty("lines").GetArrayLength(),
+        "budget continuation covers omitted lines");
+var continued = bounded.GetProperty("results")[0];
+var resumed = Json(await store.ReadText(continued.GetProperty("entryId").GetString()!, continued.GetProperty("nextOffset").GetInt32(), 2, revision, default));
+Check(resumed.GetProperty("lines")[0].GetProperty("line").GetInt32() == continued.GetProperty("nextOffset").GetInt32() + 1,
+    "limited batch continues through ordinary single read");
+await Reject(() => store.ReadBatch([], revision, default), "empty read batch rejected");
+await Reject(() => store.ReadBatch(Enumerable.Repeat(readRequests[0], 9).ToArray(), revision, default), "oversized read batch rejected");
+await Reject(() => store.ReadBatch([new("missing", 0, 100), new("missing", 0, 100), new("missing", 0, 1)], revision, default), "aggregate line limit enforced");
+await Reject(() => store.ReadBatch(readRequests, "wrong", default), "wrong batch revision fails whole request");
+await Reject(() => store.ReadBatch([readRequests[0]], null, default), "batch paging requires revision");
+var pakTools = new PakTools(store);
+await Reject(() => pakTools.Read(entryId: "missing", reads: readRequests), "single and batch inputs mutually exclusive");
+await Reject(() => pakTools.Read(reads: readRequests, limit: 10), "batch limits belong to each request");
 var batch = Json(await store.SearchBatch(["LadderComponent", "LadderStepLength 0.33", "échelle"], revision: revision));
-Check(batch.GetProperty("groups")[0].GetProperty("items").GetArrayLength() == 3, "batch previews bounded");
+Check(Hits(batch.GetProperty("groups")[0]).Length == 3, "batch previews bounded");
 Check(batch.GetProperty("groups")[1].GetProperty("total").GetInt32() == 4, "attribute/value all-term line search");
 Check(batch.GetProperty("groups")[2].GetProperty("total").GetInt32() == 1, "Unicode layout text searchable");
+var longSingle = Json(await store.SearchText("long-marker", ".layout", 0, 10, revision, default));
+var longBatch = Json(await store.SearchBatch(["long-marker"], pathQuery: ".layout", revision: revision));
+Check(Hits(longSingle)[0].GetProperty("truncated").GetBoolean() && Hits(longSingle)[0].GetProperty("text").GetString()!.Length == 2000 &&
+    Hits(longBatch.GetProperty("groups")[0])[0].GetProperty("truncated").GetBoolean() &&
+    Hits(longBatch.GetProperty("groups")[0])[0].GetProperty("text").GetString()!.Length == 180,
+    "grouped matches preserve single/batch truncation bounds");
 await Reject(() => store.SearchText("x", "", 1, 10, null, default), "paging requires revision");
 await Reject(() => store.SearchText("x", "", 0, 10, "wrong", default), "wrong revision rejected");
 using (var cancel = new CancellationTokenSource())
@@ -132,8 +174,24 @@ using (var released = new FileStream(parallelContent, FileMode.Open, FileAccess.
     Check(released.Length > 0, "cancelled workers release corpus handle");
 var recovered = Json(await parallelStore.SearchText("LadderComponent", "resource11.et", 109_998, 10,
     parallelStatus.GetProperty("revision").GetString(), default));
-Check(recovered.GetProperty("total").GetInt32() == 110_000 && recovered.GetProperty("items").GetArrayLength() == 2,
+Check(recovered.GetProperty("total").GetInt32() == 110_000 && Hits(recovered).Length == 2,
     "search recovers after cancellation and preserves deep pagination");
+Check(recovered.GetProperty("files").GetArrayLength() == 1 && recovered.GetProperty("files")[0].GetProperty("matches").GetArrayLength() == 2,
+    "multiple hits share one file identity and hash");
+var sameFileBatch = Json(await parallelStore.SearchBatch(["LadderComponent"], pathQuery: "resource11.et"));
+var group = sameFileBatch.GetProperty("groups")[0];
+var continuation = Json(await parallelStore.SearchText("LadderComponent", "resource11.et", group.GetProperty("nextOffset").GetInt32(), 2,
+    parallelStatus.GetProperty("revision").GetString(), default));
+Check(group.GetProperty("files").GetArrayLength() == 1 && Hits(group).Length == 3 &&
+    Hits(continuation)[0].GetProperty("line").GetInt32() == Hits(group)[2].GetProperty("line").GetInt32() + 1 &&
+    Hits(continuation)[0].GetProperty("entryId").GetString() == Hits(group)[0].GetProperty("entryId").GetString(),
+    "batch continuation inside one file preserves matching-line offsets");
+var empty = Json(await parallelStore.SearchText("nonexistent-marker", "resource11.et", 0, 10, null, default));
+Check(empty.GetProperty("files").GetArrayLength() == 0 && empty.GetProperty("total").GetInt32() == 0,
+    "empty search returns empty file groups");
+Check(!result.TryGetProperty("items", out _) && result.GetProperty("files").EnumerateArray().All(file =>
+    file.GetProperty("matches").EnumerateArray().All(hit => !hit.TryGetProperty("entryId", out _) && !hit.TryGetProperty("sha256", out _))),
+    "response has one authoritative grouped representation");
 Console.WriteLine("Evidence: " + root);
 
 // Small PAC1 fixture with alternating raw/zlib entries exercises the production archive reader.

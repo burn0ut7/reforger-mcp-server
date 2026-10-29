@@ -4,6 +4,8 @@ These notes describe the Reforger MCP contracts inspected on 2026-10-21. Use the
 
 ## Observe the intended session
 
+Reuse the known process/project identity within the established session; refresh live observations when a state-dependent decision needs them. Status calls are not a preamble to every operation: semantic operations validate their own prerequisites, and their results include state and polling information. Poll the returned operation rather than redispatching it.
+
 Use `workbench_status` before launching an existing `.gproj` with `workbench_open_project`; this is not a project-creation tool. Obtain the process ID through `workbench_script_status`, and confirm the intended project/world from available editor evidence. Process existence and window titles alone do not prove project readiness. Capture the selected window when a visual check matters. Preserve settings and unrelated unsaved work.
 
 Use semantic tools for supported operations. For native UI inspection, list windows once, descend through returned control IDs, and invoke only advertised actions. Refresh selections after actions or expiry; use header-only listings only when window identity/close is sufficient. Adding multiplayer peer entries uses `add_item` on the array row in the relevant configuration dialog. Inspect settings before launch; never change them during an unsettled launch.

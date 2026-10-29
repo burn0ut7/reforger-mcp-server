@@ -17,6 +17,7 @@ public sealed record PakSnapshot(int Format, string Revision, DateTimeOffset Pre
 }
 public sealed record LooseIdentity(string Source, string Path, long Length, long LastWriteUtcTicks, string Sha256);
 public sealed record PakPointer(string Revision, string ManifestSha256);
+public sealed record PakReadRequest(string EntryId, int Offset = 0, int Limit = 20);
 
 // Owns all PAK operations and derived files. A revision becomes visible only after a complete
 // catalogue and byte-preserving text store have been saved. No partial or stale fallback.
@@ -389,26 +390,93 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
         if (file.Length > PakArchive.MaxPayload) throw new InvalidDataException("Loose read exceeds 64 MiB.");
         var bytes = new byte[(int)file.Length]; file.ReadExactly(bytes); return bytes;
     }
-    private static object[] Lines(string text, int offset, int limit, out int total)
+    private sealed record TextLine(int Line, string Text, bool Truncated);
+    private sealed record TextDocument(PakEntry Entry, string Sha256, string[] Lines);
+    private sealed record TextPage(PakEntry Entry, string Sha256, int Total, int Offset, TextLine[] Lines);
+
+    private TextDocument ReadDocument(PakSnapshot snapshot, string entryId, CancellationToken ct)
     {
-        var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-        total = lines.Length;
-        return lines.Skip(offset).Take(limit).Select((line, i) => (object)new
-        { line = offset + i + 1, text = line[..Math.Min(line.Length, 2000)], truncated = line.Length > 2000 }).ToArray();
+        var entry = Entry(snapshot, entryId);
+        var bytes = Read(snapshot, entry, ct);
+        return new(entry, Hash(bytes), PakArchive.Text(bytes).Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'));
     }
+
+    private static TextPage ReadPage(TextDocument document, int offset, int limit) => new(
+        document.Entry, document.Sha256, document.Lines.Length, offset,
+        document.Lines.Skip(offset).Take(limit).Select((line, i) =>
+            new TextLine(offset + i + 1, line[..Math.Min(line.Length, 2000)], line.Length > 2000)).ToArray());
+
     public Task<object> ReadText(string entryId, int offset, int limit, string? revision, CancellationToken ct) => Run(() =>
     {
         Page(offset, limit, revision);
-        var s = Load(revision, ct); var entry = Entry(s, entryId);
-        var bytes = Read(s, entry, ct);
-        var lines = Lines(PakArchive.Text(bytes), offset, limit, out int total);
+        var s = Load(revision, ct);
+        var page = ReadPage(ReadDocument(s, entryId, ct), offset, limit);
         Fresh(s, ct);
-        return Task.FromResult<object>(new { revision = s.Revision, entry, sha256 = Hash(bytes),
-            evidence = entry.Extension == ".c" ? "Existing Enforce source; proto external declarations do not contain native bodies." : "Archive text; no resource conversion.",
-            total, offset, nextOffset = offset + lines.Length < total ? (int?)(offset + lines.Length) : null, lines });
+        return Task.FromResult<object>(new { revision = s.Revision, entry = page.Entry, sha256 = page.Sha256,
+            evidence = page.Entry.Extension == ".c" ? "Existing Enforce source; proto external declarations do not contain native bodies." : "Archive text; no resource conversion.",
+            total = page.Total, offset, nextOffset = offset + page.Lines.Length < page.Total ? (int?)(offset + page.Lines.Length) : null, lines = page.Lines });
+    }, ct);
+
+    public Task<object> ReadBatch(PakReadRequest[] reads, string? revision, CancellationToken ct) => Run(() =>
+    {
+        if (reads is null || reads.Length is < 1 or > 8 || reads.Any(r => r is null || string.IsNullOrWhiteSpace(r.EntryId) || r.EntryId.Length > 4096))
+            throw new ArgumentException("reads must contain 1-8 entryId/offset/limit requests; entryId length 1-4096.");
+        foreach (var request in reads) Page(request.Offset, request.Limit, revision);
+        if (reads.Sum(r => r.Limit) > 200) throw new ArgumentException("Batch requested limits must total at most 200 lines.");
+        var s = Load(revision, ct);
+        var pages = new TextPage?[reads.Length];
+        var errors = new string?[reads.Length];
+        foreach (var group in reads.Select((request, index) => (request, index)).GroupBy(r => r.request.EntryId))
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                var document = ReadDocument(s, group.Key, ct);
+                foreach (var (request, index) in group) pages[index] = ReadPage(document, request.Offset, request.Limit);
+            }
+            catch (Exception ex) when (ex is ArgumentException or DecoderFallbackException or InvalidDataException or IOException)
+            {
+                var error = ex.Message[..Math.Min(ex.Message.Length, 500)];
+                foreach (var (_, index) in group) errors[index] = error;
+            }
+        }
+        Fresh(s, ct); // A stale catalogue invalidates the entire batch, never just one item.
+        var lengths = pages.Select(p => p?.Lines.Length ?? 0).ToArray();
+        bool limited = false;
+        object Result() => new
+        {
+            revision = s.Revision, limited,
+            results = reads.Select((request, i) => pages[i] is { } p
+                ? (object)new { entryId = p.Entry.Id, sha256 = p.Sha256, total = p.Total, offset = p.Offset,
+                    nextOffset = p.Offset + lengths[i] < p.Total ? (int?)(p.Offset + lengths[i]) : null,
+                    lines = p.Lines.Take(lengths[i]).ToArray() }
+                : new { entryId = request.EntryId, offset = request.Offset, error = errors[i] }).ToArray()
+        };
+        // Budget includes metadata, escaping and whitespace, not just source characters.
+        var result = Result();
+        while (JsonSerializer.SerializeToUtf8Bytes(result, Configuration.Json).Length > 32 * 1024)
+        {
+            ct.ThrowIfCancellationRequested();
+            var largest = Enumerable.Range(0, pages.Length).Where(i => lengths[i] > 0)
+                .OrderByDescending(i => pages[i]!.Lines.Take(lengths[i]).Sum(l => l.Text.Length)).FirstOrDefault(-1);
+            if (largest < 0) throw new ArgumentException("Batch identities exceed the response budget; reduce batch size.");
+            lengths[largest]--;
+            limited = true;
+            result = Result();
+        }
+        return Task.FromResult(result);
     }, ct);
 
     private const string TextSearchScope = "Literal text, all terms on one line; no inherited-value or override resolution. Binary/unsupported formats excluded; pak_status reports coverage.";
+    private sealed record TextHit(string EntryId, int Line, string Text, bool Truncated, string Sha256);
+
+    private static object[] GroupHits(List<TextHit> hits) => hits.GroupBy(h => (h.EntryId, h.Sha256))
+        .Select(g => (object)new
+        {
+            entryId = g.Key.EntryId, sha256 = g.Key.Sha256,
+            matches = g.Select(h => new { line = h.Line, text = h.Text, truncated = h.Truncated }).ToArray()
+        }).ToArray();
+
     public Task<object> SearchText(string query, string pathQuery, int offset, int limit, string? revision,
         CancellationToken ct, string? source = null) =>
         ScanText([query], pathQuery, offset, limit, revision, ct, source, false);
@@ -431,7 +499,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
             StringComparison.OrdinalIgnoreCase);
         var s = Load(revision, ct);
         ValidateSource(s, source);
-        var items = queries.Select(_ => new List<object>()).ToArray();
+        var items = queries.Select(_ => new List<TextHit>()).ToArray();
         var totals = new int[queries.Length];
         int searched = 0, excluded = 0;
         var contentPath = Path.Combine(RevisionDirectory(s.Revision), "content.bin");
@@ -524,8 +592,8 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
                     if (skips is not null && takes is not null && found[q] >= skips[q] && takes[q] > 0)
                     {
                         int max = batch ? 180 : 2000;
-                        items[q].Add(new { entryId = document.EntryId, line = lineNumber,
-                            text = line[..Math.Min(line.Length, max)].ToString(), truncated = line.Length > max, sha256 = document.Sha256 });
+                        items[q].Add(new(document.EntryId, lineNumber,
+                            line[..Math.Min(line.Length, max)].ToString(), line.Length > max, document.Sha256));
                         takes[q]--;
                     }
                     found[q]++;
@@ -537,12 +605,12 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
         if (!batch)
             return Task.FromResult<object>(new { revision = s.Revision, total = totals[0], offset,
                 nextOffset = offset + items[0].Count < totals[0] ? (int?)(offset + items[0].Count) : null,
-                searchedFiles = searched, excludedUnreadableFiles = excluded, excludedExamples, scope = TextSearchScope, items = items[0] });
+                searchedFiles = searched, excludedUnreadableFiles = excluded, excludedExamples, scope = TextSearchScope, files = GroupHits(items[0]) });
         return Task.FromResult<object>(new { revision = s.Revision, searchedFiles = searched,
             excludedUnreadableFiles = excluded, excludedExamples, scope = TextSearchScope,
             continuation = "For more matches, call pak_search_text with the group's query, nextOffset as offset, this revision, and the same source/pathQuery.",
             groups = queries.Select((query, q) => new { query, total = totals[q],
-                nextOffset = items[q].Count < totals[q] ? (int?)items[q].Count : null, items = items[q] }).ToArray() });
+                nextOffset = items[q].Count < totals[q] ? (int?)items[q].Count : null, files = GroupHits(items[q]) }).ToArray() });
     }, ct);
 
     public Task<object> Extract(string entryId, string? revision, CancellationToken ct) => Run<object>(async () =>

@@ -43,13 +43,17 @@ Format 4 replaces script-only mirrors. Older catalogues require explicit `pak_pr
 
 ## Useful workflows
 
+`pak_read` accepts the existing single `entryId` form or `reads: [{entryId, offset, limit}, ...]` (1–8 windows, defaults 0/20). Batch requests share one catalogue validation before/after and decode each distinct entry once. Limits total at most 200 lines; batch JSON is capped at 32 KiB. Results preserve request order with per-item identity/hash, line totals, continuation or errors. `limited=true` means the byte budget shortened one or more windows; an item can have zero lines and `nextOffset` equal to its requested offset. Continue needed windows singly or in a smaller batch. Invalid request structure, cancellation and stale catalogue state fail the whole batch. Single reads retain their existing response.
+
+Successful search/read calls already check freshness. Reuse their revision instead of issuing a status call or preparation before each operation; explicit preparation remains necessary for stale/unprepared data or deliberate scope changes.
+
 | Need | Requests |
 | --- | --- |
 | Find a class or example implementation | `pak_search_text(query: "class SCR_SoundManagerModule")`, then `pak_read(entryId: <returned ID>)`. |
 | Find usages of a method | `pak_search_text(query: "GetSoundMapTag")`; inspect the returned source lines and context. |
 | Explore several known terms together | `pak_search_text(queries: ["RplComponent", "RplRpc", "Replication"], source: "game")`. Use either `query` or `queries`. A batch accepts 1–8 queries, shares source/path filters, and returns up to three 180-character snippets per query. |
 | Continue one batch query | Use `pak_search_text(query: <group query>, offset: <group nextOffset>, revision: <returned revision>)` with the same filters. Omit offset/limit on the batch itself. |
-| Read a search hit in context | `pak_read(entryId: <hit entryId>, offset: <hit line minus 1>, limit: 20, revision: <returned revision>)`. Lines are one-based; offsets are zero-based. |
+| Read a search hit in context | `pak_read(entryId: <file.entryId>, offset: <match.line minus 1>, limit: 20, revision: <returned revision>)`. Lines are one-based; offsets are zero-based. |
 | Focus on a subsystem | `pak_search_text(query: "Sound", pathQuery: "scripts/Game/Systems")`. |
 | Find a particular sample | `pak_search(query: "DoorRattle", kind: "sound")`. |
 | List every sound | `pak_search(kind: "sound")`, following `nextOffset` with the returned `revision`. |
@@ -61,6 +65,8 @@ Format 4 replaces script-only mirrors. Older catalogues require explicit `pak_pr
 | Save an individual resource | `pak_extract(entryId: <exact ID>)`; open its returned file path. A separate provenance file accompanies it. |
 | Limit by format or source | Add `extension: ".c"` or `source: "game"` to `pak_search`. `pak_search_text` also supports exact `source`: `game`, `server`, `workbench`, or `addons` with the example configuration. Filters intersect. |
 | Focus on one downloaded add-on | Use `pak_search_text(query: <text>, source: "addons", pathQuery: <mod-folder-name>)`. Asset results also retain that folder in `archive`/`id`. |
+
+`pak_search_text` returns `files: [{entryId, sha256, matches: [{line, text, truncated}]}]`, also inside each batch query group. This replaces flat `items`; file identity/hash appear once per page group. `total`, `offset`, `limit` and `nextOffset` still count matching lines, not files. A file can span pages; source copies remain distinct.
 
 All search terms are literal, case-insensitive, separated by whitespace and ANDed. Content terms must occur on the same line. These searches do not parse Enforce syntax or prove that a native declaration is a supported callable mod API. Validate authored scripts in Workbench using the normal development workflow.
 

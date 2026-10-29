@@ -49,7 +49,7 @@ Use the observed base-game source label from `pak_status`. These are search lead
 | Icons and hints | `Icon`, `Tooltip`, `Hint` | Imageset and named image, sizing/tint, label/help, device-specific hints. |
 | Surfaces and dialogs | `Background`, `Blur`, `Dialog` | Layering, opacity, inherited resources, input context, dismissal and cleanup. |
 
-Search one term at a time: multiple terms in `pak_search` are AND conditions. Start with `kind="layout"`, then follow observed links into configs, imagesets, styles and scripts. `pak_search_text` searches scripts only; it cannot find all layout-to-layout references. Follow readable resource links and targeted screen layouts, and record where caller coverage is incomplete.
+Search one term at a time: multiple terms in `pak_search` are AND conditions. Start with `kind="layout"`, then follow observed links into configs, imagesets, styles and scripts. `pak_search_text` finds explicit text references in readable scripts, layouts and configs; it does not resolve the complete inherited resource graph. Follow readable resource links and targeted screen layouts, and record where caller coverage is incomplete.
 
 ## Add an entry only after reading it
 

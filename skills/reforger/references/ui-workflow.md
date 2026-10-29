@@ -19,7 +19,7 @@ Start with the [UI resource index](ui-resource-index.md) for useful leads, not a
 
 1. Check `pak_status` for freshness and the observed base-game source label. Search that source with `pak_search` for the nearest screen and relevant `.layout`, prefab or config; UI widget prefabs often live in `.layout` files, not entity prefabs.
 2. Read the actual resource with `pak_read`, then follow relevant inherited parents, child prefabs, linked configs, styles, fonts, imagesets and materials. Inspect sizing, spacing, opacity, blur and state effects rather than stopping at filenames.
-3. Use `pak_search_text` for the owning script components and representative callers, then `pak_read` for setup, runtime overrides and cleanup. Text search covers scripts, not arbitrary layout/config contents; use resource path searches and linked-resource reads for those.
+3. Use `pak_search_text` for the owning script components and representative callers, then `pak_read` for setup, runtime overrides and cleanup. Text search also covers readable layouts/configs; use widget classes, attributes or resource references to find examples, then read the relevant blocks.
 4. Keep a compact note of the exact source, entry IDs/lines, revision and what will be reused or overridden. Distinguish stored values from resolved/live behavior; verify the result through MCP screenshots and interaction.
 
 Use the [resource research workflow](workflows.md) for inheritance and encoding limits. [Research entry points](ui-research.md) are cached leads, not substitutes for reading the installed resources. Run PAK requests sequentially; the server allows one PAK operation at a time.
