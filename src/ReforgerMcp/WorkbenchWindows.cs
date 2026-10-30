@@ -64,13 +64,15 @@ public sealed class WorkbenchWindows(Configuration configuration)
         operationOrder.Add(id);
         return new { state = "pending", operationId = id, action = command.Action, scope = "Queued native Qt action. Inspect windows and poll workbench_window_action_status; never replay an uncertain action. Dialog-opening commands may remain pending until the dialog closes." };
     }
-    public async Task<object> Status(string operationId, CancellationToken ct)
+    public async Task<object> Status(string operationId, CancellationToken ct, bool details = false, string? knownRevision = null)
     {
         if (!operations.TryGetValue(operationId, out var operation)) throw new ArgumentException("Unknown UI operationId (up to 64 results retained on this server; oldest completed results are pruned at capacity).");
         ct.ThrowIfCancellationRequested();
         await Task.WhenAny(operation.Work, Task.Delay(100, ct));
-        return await PendingResult(operation.Work, operationId, operation.ProcessId, operation.ProcessStart,
+        var result = await PendingResult(operation.Work, operationId, operation.ProcessId, operation.ProcessStart,
             "workbench_window_action_status", ct);
+        var completed = ReferenceEquals(result, operation.Work.IsCompletedSuccessfully ? operation.Work.Result : null);
+        return OperationPresentation.Present(result, operationId, completed, "workbench_window_action_status", knownRevision, details);
     }
 
     // Observation uses the existing UI lane, never the native operation's mutex.

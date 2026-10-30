@@ -26,13 +26,13 @@ public sealed class PakTools(PakStore store)
         => Report(() => store.Search(query, kind, extension, source, offset, limit, revision, cancellationToken));
 
     [McpServerTool(Name = "pak_read", ReadOnly = true, OpenWorld = false)]
-    [Description("Read UTF-8 lines by entryId OR reads (1-8 {entryId,offset,limit}; defaults 0/20). Offsets zero-based, returned lines one-based; limit=1-100. Batch limits total <=200; response <=32 KiB with per-item errors/nextOffset and limited flag. Lines clip at 2000 characters; revision pins catalogue identity.")]
-    public Task<object> Read(string? entryId = null, int offset = 0, int limit = 60, string? revision = null,
+    [Description("Read UTF-8 lines by entryId OR reads (1-8 {entryId,offset,limit}; defaults 0/20). Offsets zero-based, returned lines one-based; limit=1-100, default 20. Batch limits total <=200; response <=32 KiB with per-item errors/nextOffset and limited flag. Lines clip at 2000 characters; revision pins catalogue identity.")]
+    public Task<object> Read(string? entryId = null, int offset = 0, int limit = 20, string? revision = null,
         PakReadRequest[]? reads = null, CancellationToken cancellationToken = default) => Report(() =>
         {
             if ((entryId is null) == (reads is null)) throw new ArgumentException("Supply either entryId or reads.");
             if (reads is null) return store.ReadText(entryId!, offset, limit, revision, cancellationToken);
-            if (offset != 0 || limit != 60) throw new ArgumentException("Batch offsets/limits belong inside reads.");
+            if (offset != 0 || limit != 20) throw new ArgumentException("Batch offsets/limits belong inside reads.");
             return store.ReadBatch(reads, revision, cancellationToken);
         });
 

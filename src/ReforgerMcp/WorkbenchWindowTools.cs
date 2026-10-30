@@ -17,9 +17,9 @@ public sealed class WorkbenchWindowTools(WorkbenchWindows windows)
     public Task<object> List(bool details = true, CancellationToken cancellationToken = default) => Report(() => details ? windows.List(cancellationToken) : windows.Headers(cancellationToken));
 
     [McpServerTool(Name = "workbench_window_action_status", ReadOnly = true, OpenWorld = false)]
-    [Description("Poll native UI operationId, including pending-dialog observations. Polling preserves unchanged selection IDs.")]
-    public Task<object> Status(string operationId, CancellationToken cancellationToken = default)
-        => Report(() => windows.Status(operationId, cancellationToken));
+    [Description("Poll native UI operationId. Pass knownRevision from the previous response to omit unchanged content; returned poll arguments include it. New dialog text/buttons and expired selections remain visible. details=true returns full observations. Polling preserves unchanged selection IDs.")]
+    public Task<object> Status(string operationId, CancellationToken cancellationToken = default, bool details = false, string? knownRevision = null)
+        => Report(() => windows.Status(operationId, cancellationToken, details, knownRevision));
 
     [McpServerTool(Name = "workbench_controls", ReadOnly = true, OpenWorld = false)]
     [Description("List direct children of window/control selectionId. Returned control IDs identify child containers; nextOffset continues the same parent. Non-password editable text clips at 1024 characters.")]

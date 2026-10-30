@@ -61,9 +61,15 @@ using (var cancelled = new CancellationTokenSource())
 }
 var status = Json(await store.Prepare(default));
 var revision = status.GetProperty("revision").GetString()!;
-combined = Json(await readiness.Status());
+combined = Json(await readiness.Status(details: true));
 Check(JsonElement.DeepEquals(combined.GetProperty("pak"), Json(await store.Status(default))),
     "combined status preserves full catalogue readiness and provenance");
+var compactReadiness = Json(await readiness.Status());
+Check(compactReadiness.GetProperty("pak").GetProperty("revision").GetString() == revision &&
+    compactReadiness.GetProperty("pak").GetProperty("sources").GetArrayLength() == 2 &&
+    !compactReadiness.GetProperty("pak").TryGetProperty("excludedExamples", out _) &&
+    compactReadiness.GetRawText().Length < combined.GetRawText().Length / 2,
+    "compact readiness retains revision/source identity with less than half the text");
 File.WriteAllText(Path.Combine(loose, "status-stale.et"), ladder);
 combined = Json(await readiness.Status());
 Check(combined.GetProperty("pak").GetProperty("state").GetString() == "unavailable" &&
@@ -118,6 +124,11 @@ await Reject(() => store.ReadBatch([new("missing", 0, 100), new("missing", 0, 10
 await Reject(() => store.ReadBatch(readRequests, "wrong", default), "wrong batch revision fails whole request");
 await Reject(() => store.ReadBatch([readRequests[0]], null, default), "batch paging requires revision");
 var pakTools = new PakTools(store);
+var defaultWindow = Json(await pakTools.Read(entryId: "packed/sample.pak/screen.layout", revision: revision));
+var largerWindow = Json(await pakTools.Read(entryId: "packed/sample.pak/screen.layout", limit: 30, revision: revision));
+Check(defaultWindow.GetProperty("lines").GetArrayLength() == 20 && largerWindow.GetProperty("lines").GetArrayLength() == 30 &&
+    defaultWindow.GetProperty("nextOffset").GetInt32() == 20,
+    "tool defaults to 20 lines with explicit larger windows and continuation");
 await Reject(() => pakTools.Read(entryId: "missing", reads: readRequests), "single and batch inputs mutually exclusive");
 await Reject(() => pakTools.Read(reads: readRequests, limit: 10), "batch limits belong to each request");
 var batch = Json(await store.SearchBatch(["LadderComponent", "LadderStepLength 0.33", "échelle"], revision: revision));

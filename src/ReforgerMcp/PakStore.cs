@@ -191,12 +191,19 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
             .Select(g => new { extension = g.Key, count = g.Count() }).ToArray(),
         freshness = "Source sets, sizes and times checked per operation; loose text candidates rehashed. Searched content hashes verified. Disk bytes only; no unsaved buffers, inheritance resolution or effective override precedence."
     };
-    public Task<object> Status(CancellationToken ct) => Run(() =>
+    public Task<object> Status(CancellationToken ct, bool details = true) => Run(() =>
     {
         try
         {
             var snapshot = Load(null, ct);
-            return Task.FromResult(Summary(snapshot, RevisionDirectory(snapshot.Revision)));
+            return Task.FromResult(details ? Summary(snapshot, RevisionDirectory(snapshot.Revision)) : new
+            {
+                state = "ready", revision = snapshot.Revision, project = snapshot.Project,
+                sources = snapshot.Roots.Keys.Concat(snapshot.LooseRoots.Keys).Distinct().ToArray(),
+                searchableFiles = snapshot.TextFiles.Count(p => p.TextError is null),
+                excludedTextFiles = snapshot.TextFiles.Count(p => p.TextError is not null),
+                scope = "Disk sources only; effective overrides and unsaved edits are not resolved."
+            });
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or JsonException)
         { return Task.FromResult<object>(new { state = "unavailable", reason = ex.Message }); }
@@ -343,7 +350,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
     private static void ValidateSource(PakSnapshot s, string? source)
     {
         if (source is not null && !s.Roots.ContainsKey(source) && !s.LooseRoots.ContainsKey(source))
-            throw new ArgumentException("Unknown source; use workbench_status pak.sourceCoverage.");
+            throw new ArgumentException("Unknown source; use workbench_status(details=true) pak.sourceCoverage.");
     }
     private static readonly Dictionary<string, string[]> Kinds = new()
     {

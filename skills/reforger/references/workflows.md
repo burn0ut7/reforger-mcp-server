@@ -5,7 +5,7 @@ Start with the requested behavior and likely symbols or resources. Reuse establi
 ## Search and read
 
 - `pak_search_text` finds explicit text across scripts and readable resources. Batch related identifiers with `queries`; narrow by observed `source` or `pathQuery` when useful. Terms match on one line, so component/property relationships usually need contextual reads.
-- `pak_search` finds unknown resource paths. Known entry IDs go directly to `pak_read`; use `reads` for independent windows, usually 10–30 lines around relevant matches. Continue only where context is missing.
+- `pak_search` finds unknown resource paths. Known entry IDs go directly to `pak_read` (20 lines by default); batch independent windows with `reads`, usually 10–30 lines around relevant matches. Reuse already-read windows at the same revision; fetch adjacent missing context rather than rereading the whole method or file. Continue only where context is missing.
 - Search pages count matching lines, not files. Read offsets are zero-based; returned line numbers are one-based. Keep revision and filters fixed for continuation. Follow each result's continuation and preserve errors or exclusions.
 
 Compare relevant examples rather than assuming the first hit fits. Broaden terminology or scope when needed; check coverage before claiming absence. Preserve entry IDs, lines, revisions and the distinction between observed and inferred behavior.

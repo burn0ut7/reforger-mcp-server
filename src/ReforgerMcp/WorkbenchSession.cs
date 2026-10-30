@@ -38,14 +38,16 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
             process.MainModule!.FileVersionInfo.FileVersion ?? "unknown", context);
     }, ct);
 
-    public async Task<object> Operation(string id, CancellationToken ct, bool details = false)
+    public async Task<object> Operation(string id, CancellationToken ct, bool details = false, string? knownRevision = null)
     {
         OperationRecord operation;
         lock (operationLock)
             operation = operations.SingleOrDefault(o => o.Id == id)
                 ?? throw new ArgumentException("Unknown or expired operationId. The last 16 native operations are retained on this connection; do not replay an uncertain mutation.");
         var result = await windows.PendingResult(operation.Work, id, operation.Pid, operation.Started, "workbench_operation", ct);
-        return result is RuntimeResult runtime ? runtime.Present(id, details) : result;
+        var completed = ReferenceEquals(result, operation.Work.IsCompletedSuccessfully ? operation.Work.Result : null);
+        return OperationPresentation.Present(result is RuntimeResult runtime ? runtime.Present(id, details) : result,
+            id, completed, "workbench_operation", knownRevision, details);
     }
 
     public Task<object> Status(CancellationToken ct) => Run(_ =>
@@ -150,7 +152,10 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
         }
         await Task.WhenAny(record.Work, Task.Delay(500));
         var result = await windows.PendingResult(record.Work, record.Id, record.Pid, record.Started, "workbench_operation", CancellationToken.None);
-        return result is RuntimeResult runtime ? runtime.Present(record.Id) : result;
+        var completed = ReferenceEquals(result, record.Work.IsCompletedSuccessfully ? record.Work.Result : null);
+        if (completed) return result is RuntimeResult finished ? finished.Present(record.Id) : result;
+        return OperationPresentation.Present(result is RuntimeResult runtime ? runtime.Present(record.Id) : result,
+            record.Id, completed, "workbench_operation");
     }
 
     private object ExecuteCore(int processId, CancellationToken ct)

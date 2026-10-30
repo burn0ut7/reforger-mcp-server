@@ -15,14 +15,14 @@ public sealed class WorkbenchTools(Workbench workbench, PakStore store)
     }
 
     [McpServerTool(Name = "workbench_status", ReadOnly = true, OpenWorld = false)]
-    [Description("Inspect Workbench processes and disk catalogue readiness in one call. Returns workbench (process/window observations; project readiness unverified) and pak (freshness, source coverage and revision). Does not launch Workbench or prepare the catalogue.")]
-    public async Task<object> Status(CancellationToken cancellationToken = default)
+    [Description("Inspect Workbench processes and PAK freshness together. Compact workbench/pak readiness, revision, source labels and problems by default; details=true adds configuration, launch history and full catalogue coverage. Project readiness remains unverified. Does not launch or prepare.")]
+    public async Task<object> Status(CancellationToken cancellationToken = default, bool details = false)
     {
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var observed = workbench.Status();
-            var catalogue = await store.Status(cancellationToken);
+            var observed = workbench.Status(details);
+            var catalogue = await store.Status(cancellationToken, details);
             return new { workbench = observed, pak = catalogue };
         }
         catch (Exception ex) when (ex is not (McpException or OperationCanceledException))

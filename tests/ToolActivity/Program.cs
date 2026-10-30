@@ -19,6 +19,50 @@ RequestContext<CallToolRequestParams> Request(string name = "test") => new(serve
         ["limit"] = JsonSerializer.SerializeToElement(12)
     } });
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); Console.WriteLine("PASS " + name); }
+JsonElement Presented(object result, bool completed, string? known = null, bool details = false) =>
+    JsonSerializer.SerializeToElement(OperationPresentation.Present(result, "test-operation", completed,
+        "workbench_operation", known, details), Configuration.Json);
+object Pending(string button, string observed, string expires) => new
+{
+    state = "pending", dialogInspection = new
+    {
+        state = "observed", observedAt = observed, expiresAt = expires,
+        windows = new[] { new { buttonId = button, text = "Save changes?", expiresAt = expires } }
+    }
+};
+var firstPoll = Presented(Pending("save-1", "now", "later"), false);
+var pollRevision = firstPoll.GetProperty("revision").GetString()!;
+var repeatPoll = Presented(Pending("save-1", "next", "later"), false, pollRevision);
+Check(repeatPoll.GetProperty("unchanged").GetBoolean() &&
+    !repeatPoll.TryGetProperty("dialogInspection", out _) &&
+    repeatPoll.GetProperty("poll").GetProperty("arguments").GetProperty("knownRevision").GetString() == pollRevision,
+    "unchanged poll omits repeated dialog and carries caller revision");
+Check(Presented(Pending("save-2", "next", "later-2"), false, pollRevision).TryGetProperty("dialogInspection", out _),
+    "changed or expired dialog selections are delivered");
+Check(Presented(Pending("save-1", "next", "later"), false).TryGetProperty("dialogInspection", out _) &&
+    Presented(Pending("save-1", "next", "later"), false, pollRevision, true).TryGetProperty("dialogInspection", out _),
+    "other callers and explicit details retain full observation");
+object EmptyPending(string time) => new { state = "pending", dialogInspection = new
+    { state = "observed", observedAt = time, expiresAt = time, windows = Array.Empty<object>(), disabledEditors = 0 } };
+var emptyPoll = Presented(EmptyPending("now"), false);
+Check(Presented(EmptyPending("later"), false, emptyPoll.GetProperty("revision").GetString()).GetProperty("unchanged").GetBoolean(),
+    "empty window observation timestamps do not create false progress");
+var operationFailure = new { state = "reload_failed", diagnostics = new { errors = new[] { "compile error" } } };
+var finalPoll = Presented(operationFailure, true, pollRevision);
+Check(finalPoll.GetProperty("operationCompleted").GetBoolean() && finalPoll.TryGetProperty("diagnostics", out _),
+    "completion delivers original failure diagnostics");
+var finalRevision = finalPoll.GetProperty("revision").GetString();
+Check(Presented(operationFailure, true, finalRevision).GetProperty("unchanged").GetBoolean() &&
+    Presented(operationFailure, true, finalRevision, true).TryGetProperty("diagnostics", out _) &&
+    !Presented(operationFailure, true, finalRevision).TryGetProperty("poll", out _),
+    "completed result deduplicates only for caller acknowledgement and details restores it");
+var largeResult = new { state = "reloaded", completed = 2, diagnostics = new { output = new string('x', 8000) } };
+var fullPoll = Presented(largeResult, true);
+Check(fullPoll.GetProperty("completed").GetInt32() == 2 && fullPoll.GetProperty("operationCompleted").GetBoolean(),
+    "poll completion does not overwrite native dispatch counters");
+var shortPoll = Presented(largeResult, true, fullPoll.GetProperty("revision").GetString());
+Check(JsonSerializer.SerializeToUtf8Bytes(shortPoll).Length < JsonSerializer.SerializeToUtf8Bytes(fullPoll).Length / 10,
+    "acknowledged large result shrinks by more than 90 percent");
 string ReadLog(string path) { using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); using var reader = new StreamReader(input); return reader.ReadToEnd(); }
 var dir = Path.Combine(root, "unit");
 var log = new ToolActivityLog(dir, "stdio");

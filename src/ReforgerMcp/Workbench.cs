@@ -11,7 +11,7 @@ public sealed class Workbench(Configuration configuration) : IDisposable
     private string? requestedProject;
     private DateTimeOffset? launchedAt;
 
-    public object Status()
+    public object Status(bool details = true)
     {
         lock (gate)
         {
@@ -20,6 +20,12 @@ public sealed class Workbench(Configuration configuration) : IDisposable
                 return new { state = "not_configured", message = "Configure workbench.executable and workbench.addonDirectories." };
             var missing = MissingInputs(config);
             var instances = Observe(config);
+            if (!details)
+                return new
+                {
+                    state = instances.Length > 0 ? "running" : missing.Length > 0 ? "unavailable" : "stopped",
+                    missingInputs = missing, instances, projectReadiness = "unverified"
+                };
             object? lastLaunch = null;
             if (launched is not null)
             {

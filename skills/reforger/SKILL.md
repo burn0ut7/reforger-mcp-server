@@ -9,7 +9,7 @@ Base implementation decisions on the installed dataset: scripts, API declaration
 
 ## Workflow
 
-1. **Find examples.** Search with `pak_search_text`; batch related symbols with `queries`. Use `pak_search` for unknown paths and `pak_read` for known entries. Batch independent read windows with `reads`.
+1. **Find examples.** Reuse inspected evidence while its revision is valid. Search with `pak_search_text`; batch related symbols with `queries`. Use `pak_search` for unknown paths and `pak_read` for known entries. Batch independent 10–30-line windows with `reads`; expand only where a consequential question remains.
 2. **Understand the relevant context.** Follow implementations, representative callers, resource parents and wiring. Investigate lifecycle, ownership and authority where they affect the task. Prefer existing game capabilities; add custom code for the actual gap.
 3. **Build and verify.** Implement the code and resource setup together. After compilation passes, choose what needs testing and why. Simple changes may need no live test; use MCP live play for runtime behavior/data and in-game UI screenshots/interactions. Batch related changes into meaningful test passes; note deferred coverage and revisit it in the relevant slice.
 

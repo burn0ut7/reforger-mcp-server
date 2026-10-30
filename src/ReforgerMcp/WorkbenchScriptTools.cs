@@ -48,9 +48,9 @@ public sealed class WorkbenchScriptTools(WorkbenchSession scripts)
             : throw new ArgumentException("action must be start or stop; use workbench_play_status to observe."));
 
     [McpServerTool(Name = "workbench_operation", ReadOnly = true, OpenWorld = false)]
-    [Description("Poll semantic operationId or reread stored result on this server. details=true returns original full runtime diagnostics without execution. Last 16 operations retained until restart; rereading is not fresh observation.")]
-    public Task<object> Operation(string operationId, bool details = false, CancellationToken cancellationToken = default)
-        => Report(() => scripts.Operation(operationId, cancellationToken, details));
+    [Description("Poll semantic operationId. Pass knownRevision from the previous response to omit unchanged content; returned poll arguments include it. Changed results retain diagnostics/blockers. details=true returns full stored diagnostics without execution. Last 16 operations retained until restart; completed results are not fresh observations.")]
+    public Task<object> Operation(string operationId, bool details = false, CancellationToken cancellationToken = default, string? knownRevision = null)
+        => Report(() => scripts.Operation(operationId, cancellationToken, details, knownRevision));
 }
 
 

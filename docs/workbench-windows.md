@@ -18,7 +18,7 @@ Use named `workbench_reload_scripts` and `workbench_open_world` operations for r
 
 ## Dialogs during pending operations
 
-An unfinished native operation's initial response and `workbench_operation` polls include `dialogInspection`. `workbench_window_action_status` polls use the same inspection for queued UI actions. Completed operations return their original result directly.
+An unfinished native operation's initial response and `workbench_operation` polls include `dialogInspection`. `workbench_window_action_status` polls use the same inspection for queued UI actions. Changed/completed results retain their original fields plus `operationId`, `operationCompleted` and `revision`. Returned pending `poll.arguments` includes `knownRevision`; repeat it to receive a short `unchanged=true` response when nothing relevant changed. Observation timestamps alone do not count as changes; dialog contents, control IDs and their expiry do. Omit `knownRevision` or set `details=true` to retrieve the result again. A revision belongs to the caller, so another chat cannot consume its result. History remains bounded.
 
 The inspection reports `state: observed`, process identity, observation time, visible non-editor windows (including dialogs and popups), accessible text, modal/enabled state, actionable button IDs and the number of disabled editor windows. An empty list is not proof that Workbench is responsive. A visible dialog is not proof it caused the pending operation. If the process changed, the inspector is busy, or accessibility fails/times out, `state: unavailable` explains the observation failure without failing or replaying the original operation.
 
