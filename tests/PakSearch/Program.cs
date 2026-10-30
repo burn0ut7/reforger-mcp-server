@@ -124,6 +124,16 @@ await Reject(() => store.ReadBatch([new("missing", 0, 100), new("missing", 0, 10
 await Reject(() => store.ReadBatch(readRequests, "wrong", default), "wrong batch revision fails whole request");
 await Reject(() => store.ReadBatch([readRequests[0]], null, default), "batch paging requires revision");
 var pakTools = new PakTools(store);
+try
+{
+    await pakTools.SearchText(queries: ["LadderComponent"], limit: 8);
+    throw new Exception("Batch accepted an incompatible top-level limit");
+}
+catch (ModelContextProtocol.McpException ex)
+{
+    Check(ex.Message.Contains("omit limit and offset") && ex.Message.Contains("Use query"),
+        "batch validation explains exactly how to repair the request");
+}
 var defaultWindow = Json(await pakTools.Read(entryId: "packed/sample.pak/screen.layout", revision: revision));
 var largerWindow = Json(await pakTools.Read(entryId: "packed/sample.pak/screen.layout", limit: 30, revision: revision));
 Check(defaultWindow.GetProperty("lines").GetArrayLength() == 20 && largerWindow.GetProperty("lines").GetArrayLength() == 30 &&
@@ -190,19 +200,16 @@ var parallelStatus = Json(await parallelStore.Prepare(default));
 var parallelContent = parallelStatus.GetProperty("textStore").GetString()!;
 using (var activeCancellation = new CancellationTokenSource())
 {
-    var search = Task.Run(() => parallelStore.SearchBatch(["LadderComponent", "LadderStepLength"], ct: activeCancellation.Token));
     bool scanning = false;
-    var deadline = DateTime.UtcNow.AddSeconds(10);
-    while (!search.IsCompleted && DateTime.UtcNow < deadline)
+    parallelStore.ScanReadForTesting = () =>
     {
-        try { using var probe = new FileStream(parallelContent, FileMode.Open, FileAccess.Read, FileShare.None); }
-        catch (IOException) { scanning = true; break; }
-        Thread.Sleep(1);
-    }
-    Check(scanning, "observed active parallel scan before cancellation");
-    activeCancellation.Cancel();
-    try { await search; throw new Exception("Active search ignored cancellation"); }
+        scanning = true;
+        activeCancellation.Cancel();
+    };
+    try { await parallelStore.SearchBatch(["LadderComponent", "LadderStepLength"], ct: activeCancellation.Token); throw new Exception("Active search ignored cancellation"); }
     catch (OperationCanceledException) { Console.WriteLine("PASS active parallel cancellation retains cancellation error type"); }
+    finally { parallelStore.ScanReadForTesting = null; }
+    Check(scanning, "parallel worker read corpus before cancellation");
 }
 using (var released = new FileStream(parallelContent, FileMode.Open, FileAccess.Read, FileShare.None))
     Check(released.Length > 0, "cancelled workers release corpus handle");

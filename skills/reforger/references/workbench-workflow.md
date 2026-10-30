@@ -36,6 +36,8 @@ Before restarting Workbench, preserve authored work, current project/world, load
 
 After recovery, refresh process identities and expired tokens, confirm a successful MCP call and relevant adapter readiness, then resume the original task's compilation and live verification. Inspect uncertain mutations before replaying them. A restarted process or successful dispatch alone is not verification.
 
+After a tool-contract upgrade, refresh the client's MCP discovery and check that its exposed inputs match the server's `tools/list`. A server restart alone may leave an open chat using an old schema. Verify `knownRevision` is exposed before claiming unchanged-poll savings; if the client cannot refresh during the chat, report that limitation rather than adding a compatibility tool or repeatedly restarting the server.
+
 ## Pending or uncertain outcomes
 
 Follow returned `poll` instructions: semantic operations use `workbench_operation`; UI actions use `workbench_window_action_status`. Keep the same connection and use returned poll arguments, including `knownRevision`, to omit unchanged observations. `unchanged=true` refers to the result you already hold; it does not prove progress or success. Stop polling at `operationCompleted=true`; use `details=true` to retrieve original diagnostics without replay. Inspect returned `dialogInspection` or `blockerInspection`; blocked dispatch is not completion. Resolve observed prompts, then poll the original operation. Refresh expired selections; unchanged polls may retain IDs. Read correlated logs when results lack enough detail.

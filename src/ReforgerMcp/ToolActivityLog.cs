@@ -25,12 +25,20 @@ public sealed record RuntimeActivity(string Action, string Receipt, string Entit
 public sealed class ToolActivityLog : IDisposable
 {
     public const int MaxBytes = 1_000_000;
-    private const int SummaryReserve = 64_000;
+    private const int SummaryReserve = 96_000;
     private readonly object gate = new();
     private readonly long started = Stopwatch.GetTimestamp();
     private readonly string session = Guid.NewGuid().ToString("N");
     private readonly Dictionary<string, long> usage = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ResponseTotals> responseUsage = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, TimingTotals> timingUsage = new(StringComparer.Ordinal);
+    private sealed class TimingTotals
+    {
+        public long Completed { get; set; }
+        public long Failures { get; set; }
+        public double TotalMs { get; set; }
+        public double MaxMs { get; set; }
+    }
     private readonly record struct ResponseSize(long TextBytes, long StructuredBytes, int NonTextBlocks);
     private sealed class ResponseTotals
     {
@@ -135,6 +143,11 @@ public sealed class ToolActivityLog : IDisposable
                 completed++;
                 if (error != "none") failures++;
                 totalMs += duration;
+                if (!timingUsage.TryGetValue(usageKey, out var timing)) timingUsage[usageKey] = timing = new();
+                timing.Completed++;
+                if (error != "none") timing.Failures++;
+                timing.TotalMs = Math.Round(timing.TotalMs + duration, 1);
+                timing.MaxMs = Math.Max(timing.MaxMs, Math.Round(duration, 1));
                 if (duration >= slowestMs) { slowestMs = duration; slowestTool = tool; slowestCall = id; }
                 if (responseSize is { } size)
                 {
@@ -227,7 +240,7 @@ public sealed class ToolActivityLog : IDisposable
     private void Summary(bool final)
     {
         if (stream is null) return;
-        var text = Line($"SUMMARY state={(final ? "ended" : "active")} calls={calls} completed={completed} failures={failures} in_flight={calls - completed} elapsed_ms={Number(Stopwatch.GetElapsedTime(started).TotalMilliseconds)} accumulated_tool_ms={Number(totalMs)} slowest_call={slowestCall} slowest_tool={slowestTool} slowest_ms={Number(slowestMs)} omitted_detail_lines={omitted} per_tool={JsonSerializer.Serialize(usage)} runtime_per_method={JsonSerializer.Serialize(runtimeUsage)} response_per_tool={JsonSerializer.Serialize(responseUsage)}");
+        var text = Line($"SUMMARY state={(final ? "ended" : "active")} calls={calls} completed={completed} failures={failures} in_flight={calls - completed} elapsed_ms={Number(Stopwatch.GetElapsedTime(started).TotalMilliseconds)} accumulated_tool_ms={Number(totalMs)} slowest_call={slowestCall} slowest_tool={slowestTool} slowest_ms={Number(slowestMs)} omitted_detail_lines={omitted} per_tool={JsonSerializer.Serialize(usage)} timing_per_tool={JsonSerializer.Serialize(timingUsage)} runtime_per_method={JsonSerializer.Serialize(runtimeUsage)} response_per_tool={JsonSerializer.Serialize(responseUsage)}");
         var bytes = Encoding.UTF8.GetBytes(text);
         stream.Position = detailEnd;
         stream.Write(bytes.AsSpan(0, Math.Min(bytes.Length, SummaryReserve)));

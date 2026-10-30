@@ -89,6 +89,33 @@ Check(text.Contains("state=ended calls=23 completed=23 failures=3 in_flight=0"),
 Check(!text.Contains("NEVER-LOG-THIS") && text.Contains("redacted") && text.Contains("12"), "parameters and errors redacted");
 Check(text.Contains("accumulated_tool_ms=") && text.Contains("elapsed_ms=") && text.Contains("slowest_call="), "timing summary fields");
 Check(text.Split('\n').Count(l => l.Contains("START call=")) == 23, "all starts present");
+var reportStart = new ProcessStartInfo("pwsh") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+var reportInputs = Path.Combine(root, "summary-inputs");
+Directory.CreateDirectory(reportInputs);
+File.Copy(Directory.GetFiles(dir).Single(), Path.Combine(reportInputs, "session-valid.log"));
+File.WriteAllText(Path.Combine(reportInputs, "session-truncated.log"), "2026-10-30T00:00:00Z SUMMARY calls=1 omitted_detail_lines=0 per_tool={");
+foreach (var argument in new[] { "-NoProfile", "-File", "scripts/summarize-activity.ps1", "-Path", reportInputs, "-Json" })
+    reportStart.ArgumentList.Add(argument);
+using (var reportProcess = Process.Start(reportStart)!)
+{
+    var reportOutput = reportProcess.StandardOutput.ReadToEndAsync();
+    var reportError = reportProcess.StandardError.ReadToEndAsync();
+    await reportProcess.WaitForExitAsync();
+    Check(reportProcess.ExitCode == 0 && (await reportError).Contains("Skipping"), "local summary skips truncated input on stderr");
+    using var report = JsonDocument.Parse(await reportOutput);
+    Check(report.RootElement.GetArrayLength() == 1, "JSON output remains parseable with mixed valid/truncated logs");
+    var row = report.RootElement[0];
+    Check(row.GetProperty("calls").GetInt64() == 23 && row.GetProperty("textBytes").GetInt64() == 14 &&
+        row.GetProperty("perTool")[0].GetProperty("failures").GetInt64() == 3,
+        "summary reports response bytes rather than file size and includes failures");
+}
+using (var timing = JsonDocument.Parse(text.Split("timing_per_tool=").Last().Split(" runtime_per_method=")[0]))
+{
+    var totals = timing.RootElement.GetProperty("test");
+    Check(totals.GetProperty("Completed").GetInt64() == 23 && totals.GetProperty("Failures").GetInt64() == 3 &&
+        totals.GetProperty("TotalMs").GetDouble() >= totals.GetProperty("MaxMs").GetDouble(),
+        "per-tool timing counts exceptions, cancellations and returned errors");
+}
 
 var runtimeDir = Path.Combine(root, "runtime");
 using (var runtimeLog = new ToolActivityLog(runtimeDir, "http-stateless"))
@@ -129,6 +156,12 @@ using (var runtimeLog = new ToolActivityLog(runtimeDir, "http-stateless"))
     var runtimeTotalsJson = footer.Split("runtime_per_method=")[1].Split(" response_per_tool=")[0];
     using var totals = JsonDocument.Parse(runtimeTotalsJson);
     Check(totals.RootElement.EnumerateObject().Count() == 33 && totals.RootElement.GetProperty("other").GetProperty("Uncertain").GetInt64() > 0, "runtime method cardinality bounded with explicit overflow");
+    using var timings = JsonDocument.Parse(footer.Split("timing_per_tool=")[1].Split(" runtime_per_method=")[0]);
+    using var responses = JsonDocument.Parse(footer.Split("response_per_tool=")[1]);
+    Check(timings.RootElement.EnumerateObject().Count() == 129 &&
+        timings.RootElement.GetProperty("other").GetProperty("Completed").GetInt64() > 0 &&
+        responses.RootElement.EnumerateObject().Count() == 129,
+        "all bounded timing and response groups fit the summary reserve");
 }
 
 var sizesDir = Path.Combine(root, "response-sizes");
@@ -191,6 +224,9 @@ Check(new FileInfo(capFile).Length <= ToolActivityLog.MaxBytes && text.Contains(
 Check(!text.Contains("omitted_detail_lines=0 "), "overflow details counted");
 Check(text.Contains("\"Invoked\":4000") && text.Contains("\"CompileMs\":8000"), "runtime totals continue after detail cap");
 Check(text.Contains("\"TextBytes\":24000") && text.Contains("\"Responses\":4000"), "response sizes continue after detail cap");
+using (var timing = JsonDocument.Parse(text.Split("timing_per_tool=").Last().Split(" runtime_per_method=")[0]))
+    Check(timing.RootElement.GetProperty("test").GetProperty("Completed").GetInt64() == 4000,
+        "per-tool timing totals continue after detail cap");
 for (var i = 0; i < 7; i++) { using var retained = new ToolActivityLog(capped, "stdio"); }
 Check(Directory.GetFiles(capped).Length == 5, "five-session retention");
 var blocked = Path.Combine(root, "blocked");

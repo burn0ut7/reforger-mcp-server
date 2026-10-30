@@ -39,7 +39,6 @@ configuration*.json
 *.rep/
 *.gdt
 *.gzf
-*.c
 *.ent
 *.et
 *.layer

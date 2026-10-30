@@ -91,7 +91,7 @@ counts. No response content is written to the activity log.
 The `response_per_tool` footer preserves response count, total/max text bytes,
 structured bytes and non-text block count for the same bounded tool groups as
 `per_tool` (128 names, then `other`). Totals continue after the detail cap. The 1 MB
-file cap reserves 64 KB for the growing summary. Returned MCP errors are measured;
+file cap reserves 96 KB for the growing summary. Returned MCP errors are measured;
 thrown exceptions have unavailable size because no result reached this filter.
 
 Every delivered response counts, including repeated polls and detail retrievals:
@@ -99,3 +99,9 @@ these also consume client context. They are attributed to `workbench_operation`,
 not counted as fresh runtime executions. Use `runtime_per_method`/receipt records
 for execution counts and `response_per_tool` for output volume. Compare calls on
 matching server builds and workloads, and separate text from media-heavy tools.
+
+## Compact local review
+
+Run `pwsh -File scripts/summarize-activity.ps1 -Path <dataDirectory>/tool-activity` for a bounded report, or add `-Json` for structured output. Use `-SortBy totalMs` or `-SortBy failures` to rank server cost or errors; `-Top` bounds the table. Older files retain unknown timing fields rather than inventing zeroes. `timing_per_tool` records completed calls, failures (including cancellation and returned errors), accumulated milliseconds and the slowest call per tool, within the same bounded tool groups. These totals continue after detail logging fills up; concurrent durations overlap and are not task elapsed time.
+
+Parameter-shape adoption counts come only from retained START records. When details are capped, these are partial samples. Redacted identifiers cannot establish duplicate calls or repeated reads. Text bytes are not tokens, and success does not prove gameplay correctness.

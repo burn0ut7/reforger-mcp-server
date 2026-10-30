@@ -37,7 +37,7 @@ public sealed class PakTools(PakStore store)
         });
 
     [McpServerTool(Name = "pak_search_text", ReadOnly = true, OpenWorld = false)]
-    [Description("Search readable scripts, prefabs, layouts and resource text; case-insensitive all-term line match. pathQuery filters entry paths; no inherited-value resolution. query OR queries (1-8); batches return 3 matches/query with fixed offset/limit defaults. files groups matches under entryId/sha256; total, offset, limit and nextOffset count matching lines. nextOffset continues a single query with the same revision/filters.")]
+    [Description("Search readable scripts, prefabs, layouts and resource text; case-insensitive all-term line match. pathQuery filters entry paths; no inherited-value resolution. query OR queries (1-8); batches return 3 matches/query: omit offset and limit with queries. files groups matches under entryId/sha256; total, offset, limit and nextOffset count matching lines. nextOffset continues a single query with the same revision/filters.")]
     public Task<object> SearchText(string? query = null, string pathQuery = "", int offset = 0, int limit = 20,
         string? revision = null, string? source = null, string[]? queries = null, CancellationToken cancellationToken = default)
         => Report(() =>
@@ -45,7 +45,7 @@ public sealed class PakTools(PakStore store)
             if ((query is null) == (queries is null)) throw new ArgumentException("Supply either query or queries.");
             if (queries is null) return store.SearchText(query!, pathQuery, offset, limit, revision, cancellationToken, source);
             if (offset != 0 || limit != 20)
-                throw new ArgumentException("Batch uses fixed first-page limits. Continue with a single query.");
+                throw new ArgumentException("For queries, omit limit and offset (batch returns up to 3 matches per query). Use query for custom limits or paging.");
             return store.SearchBatch(queries, pathQuery, source, revision, cancellationToken);
         });
 

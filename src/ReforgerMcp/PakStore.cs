@@ -24,6 +24,7 @@ public sealed record PakReadRequest(string EntryId, int Offset = 0, int Limit = 
 public sealed class PakStore(Configuration config, ProjectContext? projects = null)
 {
     private readonly SemaphoreSlim gate = new(1);
+    internal Action? ScanReadForTesting { get; set; }
     private PakSnapshot? cached;
     private PakPointer? cachedPointer;
     // Resource source formats, not compiled textures, models, audio or terrain tiles.
@@ -578,6 +579,7 @@ public sealed class PakStore(Configuration config, ProjectContext? projects = nu
                 int n = RandomAccess.Read(content, bytes.AsSpan(read), document.Offset + read);
                 if (n == 0) throw new EndOfStreamException("Truncated text store.");
                 read += n;
+                ScanReadForTesting?.Invoke();
             }
             if (Hash(bytes) != document.Sha256) throw new InvalidDataException("Text store changed; run pak_prepare: " + document.EntryId);
             var text = PakArchive.Text(bytes).Replace("\r\n", "\n").Replace('\r', '\n');

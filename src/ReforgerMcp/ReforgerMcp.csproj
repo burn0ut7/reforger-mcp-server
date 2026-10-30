@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ToolActivity" />
+    <InternalsVisibleTo Include="PakSearch" />
     <FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
