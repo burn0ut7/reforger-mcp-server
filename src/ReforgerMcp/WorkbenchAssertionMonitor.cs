@@ -48,14 +48,7 @@ internal sealed class WorkbenchAssertionMonitor(Configuration configuration, Wor
             try
             {
                 var result = JsonSerializer.SerializeToElement(
-                    await session.ResourceLeakAssertion("suppress", identity.Pid, stoppingToken), Configuration.Json);
-                while (result.GetProperty("state").GetString() == "pending")
-                {
-                    Report("pending", identity.Pid, result);
-                    await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
-                    result = JsonSerializer.SerializeToElement(await session.Operation(
-                        result.GetProperty("operationId").GetString()!, stoppingToken), Configuration.Json);
-                }
+                    await session.SuppressResourceLeaksAutomatically(identity.Pid, stoppingToken), Configuration.Json);
                 var state = result.GetProperty("state").GetString()!;
                 Report(state, identity.Pid, state == "blocked" ? result.GetProperty("reason").GetString() : result);
                 if (state != "blocked")
