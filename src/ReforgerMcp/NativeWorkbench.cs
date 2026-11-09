@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace ReforgerMcp;
-// Private ABI profile for Workbench 1.8.0.13 + Qt 6.8.3. See docs/workbench-native-reload.md.
+// Private 1.8 editor ABI plus scoped 1.9 maintenance ABI, with exact Qt 6.8.3 modules.
 internal static partial class NativeWorkbench
 {
     internal sealed record UiCommand(string Action, uint AccessibleId = 0, long WindowHandle = 0, string? Text = null);
@@ -65,9 +65,10 @@ internal static partial class NativeWorkbench
         }
         public void Dispose() { foreach (var file in files.Values) file.Dispose(); files.Clear(); }
     }
-    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null, ChoicesCommand? choices = null, int? runtimePort = null)
+    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null, ChoicesCommand? choices = null, int? runtimePort = null, bool? scriptAuthorization = null)
     {
         ct.ThrowIfCancellationRequested();
+
         using var dispatchLease = ui is null ? new DispatchLease(process) : null;
         if (runtimePort is not null && (runtimeSetup != true || runtimePort is < 1 or > 65535)) throw new ArgumentException("Runtime port requires explicit setup and a port from 1 to 65535.");
         if (RuntimeInformation.ProcessArchitecture != Architecture.X64) throw new InvalidOperationException("Native Workbench operations require an x64 server.");
@@ -82,12 +83,18 @@ internal static partial class NativeWorkbench
             if (field.Kind == "bool" && plugin.Value is not ("true" or "false")) throw new ArgumentException("Setting requires true or false.");
             if (field.Kind is "array" or "process") throw new ArgumentException("Peer count and process observations are read-only.");
         }
-        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null && resourceLeakAssertion is null && choices is null;
+        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null && resourceLeakAssertion is null && choices is null && scriptAuthorization is null;
         var suppressResourceLeakAssertion = resourceLeakAssertion == true || runReload || world is not null || ui is not null || play is "start" or "stop";
         using var ownVerification = verification is null ? new VerificationScope() : null;
         void CheckHash(string path, string hash) => (verification ?? ownVerification!).Verify(path, hash);
         var exe = process.MainModule!;
-        CheckHash(exe.FileName, "7dd36ca1f662b0c13669a4f2f7f10e3c461c2906b021e742272d64b3ab7e9798");
+        var profile = Profile(exe.FileName, verification ?? ownVerification!);
+        if (profile.Limited && !(projectContext || resourceLeakAssertion is not null || scriptAuthorization is not null))
+            throw new InvalidOperationException("Workbench 1.9 native profile supports project context and maintenance policies only; this editor operation is not yet validated. No call dispatched.");
+        if (profile.Limited && (world is not null || ui is not null || play is not null || plugin is not null ||
+            entity is not null || childPrefab is not null || runtimeSetup is not null || choices is not null))
+            throw new InvalidOperationException("Unvalidated operation combined with maintenance request.");
+        FocusPolicy(process, "ensure");
         var qt = process.Modules.Cast<ProcessModule>().Single(m => m.ModuleName == "Qt6Core.dll");
         CheckHash(qt.FileName, "0cc62e841959fb8f6d366ea116c6f6bbc273e30f0ef90d8aa2e4adeb81fd63f8");
         var hp = N.OpenProcess(0x10047a, false, process.Id);
@@ -103,17 +110,21 @@ internal static partial class NativeWorkbench
                 byte[] Read(nint p, int n) { var b = new byte[n]; Check(N.ReadProcessMemory(hp, p, b, (nuint)n, out var got) && got == (nuint)n); return b; }
                 void Write(nint p, byte[] b) => Check(N.WriteProcessMemory(hp, p, b, (nuint)b.Length, out var got) && got == (nuint)b.Length);
                 nint Ptr(nint p) => (nint)BitConverter.ToInt64(Read(p, 8));
-                var app = Ptr(exe.BaseAddress + 0x3db6598);
-                if (Ptr(app) != exe.BaseAddress + 0x2b922c8) throw new Exception("Application vtable mismatch");
+                var app = Ptr(exe.BaseAddress + profile.Application);
+                if (Ptr(app) != exe.BaseAddress + profile.ApplicationVtable) throw new Exception("Application vtable mismatch");
                 // app+164e can be set during Play: it blocks reload/world opening,
                 // but must not prevent Play observation or its normal stop lifecycle.
-                if (ui is null && (Read(exe.BaseAddress + 0x3db65e5, 1)[0] != 0 || (play is null && plugin is null && resourceLeakAssertion is null && Read(app + 0x164e, 1)[0] != 0))) throw new WorkbenchBusyException("Application busy");
-                CheckCode(exe, 0x222c70); CheckCode(qt, 0x20980);
+                if (ui is null && (Read(exe.BaseAddress + profile.Busy, 1)[0] != 0 || (!profile.Limited && play is null && plugin is null && resourceLeakAssertion is null && scriptAuthorization is null && Read(app + 0x164e, 1)[0] != 0))) throw new WorkbenchBusyException("Application busy");
+                if (!profile.Limited) CheckCode(exe, 0x222c70); CheckCode(qt, 0x20980);
+                CheckCode(exe, profile.AuthorizationSetter); CheckCode(exe, profile.AuthorizationHandler);
+                if (Ptr(app + 0x12c0) != exe.BaseAddress + profile.AuthorizationVtable ||
+                    !ValidScriptAuthorizationDecision(BitConverter.ToInt32(Read(app + 0x12cc, 4))))
+                    throw new InvalidOperationException("Unsupported Workbench script authorization handler/state.");
                 if (suppressResourceLeakAssertion || resourceLeakAssertion is not null)
                 {
                     // Validate the complete assertion branch, not just its owning function entry.
-                    CheckCode(exe, 0x1a6a881); CheckCode(exe, 0x1a6a8a1); CheckCode(exe, 0x1a6a8bc);
-                    if (Read(exe.BaseAddress + ResourceLeakSuppressionRva, 1)[0] > 1)
+                    foreach (var rva in profile.LeakCode) CheckCode(exe, rva);
+                    if (Read(exe.BaseAddress + profile.LeakLatch, 1)[0] > 1)
                         throw new InvalidOperationException("Unsupported resource-leak assertion flag state.");
                 }
                 if (runtimeSetup is not null)
@@ -126,7 +137,7 @@ internal static partial class NativeWorkbench
                         throw new InvalidOperationException("Unsupported Workbench settings layout.");
                 }
                 if (projectContext)
-                    foreach (var rva in new[] { 0x1ea3f00, 0x1ea3e70, 0x2061610, 0x2060e60, 0x2060c80, 0x2060d70, 0x1e90630, 0x3a9a10 }) CheckCode(exe, rva);
+                    foreach (var rva in profile.ProjectCode) CheckCode(exe, rva);
                 if (world is not null)
                     foreach (var rva in new[] { 0x20ea70, 0x20fec0, 0x2832b0, 0x1e35d50, 0x269dc0, 0x1e90630 }) CheckCode(exe, rva);
                 if (childPrefab is not null)
@@ -178,7 +189,7 @@ internal static partial class NativeWorkbench
                 // expected thread; actual thread; reload flag; bool result; completion; queue result.
                 var bytes = new byte[512];
                 void Q(int o, long v) => BitConverter.GetBytes(v).CopyTo(bytes, o);
-                Q(0, 1); Q(8, code + 128); Q(16, app); Q(24, exe.BaseAddress + 0x222c70);
+                Q(0, 1); Q(8, code + 128); Q(16, app); Q(24, profile.Limited ? 0 : exe.BaseAddress + 0x222c70);
                 Q(32, remoteEvent); Q(40, Export("SetEvent")); Q(48, Export("GetCurrentThreadId"));
                 BitConverter.GetBytes(uiThread).CopyTo(bytes, 56); Q(64, runReload ? 1 : 0);
                 Write(data, bytes);
@@ -237,7 +248,8 @@ internal static partial class NativeWorkbench
                 var cb = new E(); cb.B(0x53, 0x48, 0x83, 0xec, 0x40, 0x48, 0x89, 0xd3); // rbx=self; 64-byte aligned call frame
                 cb.B(0x83, 0xf9, 0); cb.J(0x84, "destroy"); cb.B(0x83, 0xf9, 1); cb.J(0x85, "return");
                 cb.B(0xff, 0x53, 48, 0x89, 0x43, 60, 0x3b, 0x43, 56); cb.J(0x85, "wrong");
-                if (suppressResourceLeakAssertion) EmitSuppressResourceLeakAssertion(cb, exe.BaseAddress);
+                if (scriptAuthorization != false) EmitAllowScriptAuthorization(cb, exe.BaseAddress, profile.AuthorizationSetter);
+                if (suppressResourceLeakAssertion) EmitSuppressResourceLeakAssertion(cb, exe.BaseAddress, profile.LeakLatch);
                 if (runReload)
                     cb.B(0x48, 0x8b, 0x4b, 16, 0x31, 0xd2, 0xff, 0x53, 24, 0x0f, 0xb6, 0xc0, 0x89, 0x43, 68);
                 else if (ui is not null)
@@ -266,9 +278,14 @@ internal static partial class NativeWorkbench
                     foreach (var rva in new[] { 0x22910, 0x1a7e10, 0x38f0, 0xe5400 }) CheckCode(qt, rva);
                     EmitChoices(cb, choices, exe.BaseAddress, widgets.BaseAddress, qt.BaseAddress);
                 }
-                else if (resourceLeakAssertion is not null) EmitReadResourceLeakAssertion(cb, exe.BaseAddress);
+                else if (scriptAuthorization is not null) EmitReadScriptAuthorization(cb, 68);
+                else if (resourceLeakAssertion is not null)
+                {
+                    EmitReadResourceLeakAssertion(cb, exe.BaseAddress, profile.LeakLatch);
+                    EmitReadScriptAuthorization(cb, 104);
+                }
                 else if (runtimeSetup is not null) EmitRuntimeSetup(cb, exe.BaseAddress, runtimeSetup.Value, runtimePort);
-                else if (projectContext) EmitProjectContext(cb, exe.BaseAddress);
+                else if (projectContext) EmitProjectContext(cb, exe.BaseAddress, profile);
                 else if (childPrefab is not null) EmitChildPrefab(cb, exe.BaseAddress);
                 else if (entity is not null) EmitEntity(cb, exe.BaseAddress, entity);
                 else if (plugin is not null) EmitPlugin(cb, exe.BaseAddress, plugin);
@@ -361,10 +378,17 @@ internal static partial class NativeWorkbench
                 var completed = BitConverter.ToUInt32(result, 72);
                 var succeeded = BitConverter.ToUInt32(result, 68) == 1;
                 var resourceAcknowledged = BitConverter.ToInt32(result, 116) == 1;
+                if (scriptAuthorization is not null)
+                    return new { state = completed == 2 ? "observed" : "outcome_unknown", processId = process.Id,
+                        allowAll = completed == 2 ? BitConverter.ToInt32(result, 68) == 0x8000 : (bool?)null,
+                        decision = completed == 2 ? BitConverter.ToInt32(result, 68) : (int?)null,
+                        scope = "Workbench's built-in Yes to All for all protected script methods until process exit, including container/file access and process operations. Existing open prompts are not dismissed. Future MCP launches use -scriptAuthorizeAll.",
+                        expectedThread = uiThread, actualThread = BitConverter.ToUInt32(result, 60), allocationsReleased = true };
                 if (resourceLeakAssertion is not null)
                     return new { state = completed == 2 ? resourceLeakAssertion.Value ? succeeded ? "suppressed" : "suppression_failed" : "observed" : "outcome_unknown",
                         processId = process.Id, suppressed = completed == 2 ? BitConverter.ToInt32(result, 68) == 1 : (bool?)null,
                         assertion = "Resources are leaking! Check log!", scope = "This Workbench process until exit; leak diagnostics remain enabled.",
+                        scriptAuthorizationAllowAll = completed == 2 ? BitConverter.ToInt32(result, 104) == 0x8000 : (bool?)null,
                         expectedThread = uiThread, actualThread = BitConverter.ToUInt32(result, 60), allocationsReleased = true };
                 if (childPrefab is not null)
                     return ChildPrefabResult(childPrefab, process.Id, completed, succeeded, resourceAcknowledged, watch.ElapsedMilliseconds);
@@ -855,6 +879,7 @@ internal static partial class NativeWorkbench
     sealed class E
     {
         readonly List<byte> bytes = []; readonly Dictionary<string, int> labels = []; readonly List<(int, string)> jumps = [];
+        public int Count => bytes.Count;
         public void B(params byte[] b) => bytes.AddRange(b); public void Q(long n) => bytes.AddRange(BitConverter.GetBytes(n));
         public void Label(string name) => labels.Add(name, bytes.Count);
         public void J(byte condition, string label, bool always = false) { if (always) B(0xe9); else B(0x0f, condition); jumps.Add((bytes.Count, label)); B(0, 0, 0, 0); }
@@ -888,5 +913,7 @@ internal static partial class NativeWorkbench
     }
 
 }
+
+
 
 

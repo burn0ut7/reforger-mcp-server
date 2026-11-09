@@ -10,6 +10,14 @@ Inspect entities/components and supplying ancestors before editing. Inspection t
 
 For native UI operations, use returned window/control IDs and advertised actions. Refresh selections after actions or expiry. Multiplayer peer array entries use `add_item`. Preserve settings through an unsettled launch.
 
+Keep the automatic background focus policy enabled during AI work. If an observed
+operation genuinely requires foreground interaction, inspect `workbench_focus_policy`
+status, explain the concrete dependency, and use `disable` only for that exception.
+Restore `enable` afterward, including after failure. Disabling does not itself focus
+Workbench. Do not disable suppression merely because an operation is pending or
+failed; inspect its outcome and dialogs first. The policy covers the supported Qt
+platform, not pre-attachment startup or separate game clients.
+
 ## Compile and test
 
 Build C#/Java tooling with its owning build system. For saved Enforce scripts, use one MCP Reload and inspect its fresh compilation diagnostics. Reload stops embedded Play when necessary; no separate Stop or editor close/reopen is needed. Resolve unsaved tabs/dialogs without discarding authored work. Prefer Reload for normal iteration; use the recovery guidance below when MCP or Workbench is not working.
@@ -45,3 +53,10 @@ Follow returned `poll` instructions: semantic operations use `workbench_operatio
 Never replay a mutation merely to poll, recover diagnostics or bypass an uncertain outcome. Inspect state/logs first; stop dependent work if the outcome remains unknown. Expired history does not authorize replay.
 
 Gray authorizes task-required Workbench actions and prompts, including script authorization, access prompts and necessary project/restart changes, without another permission request. Prefer Reload, explain consequential lifecycle changes and preserve authored work. This authorization is limited to Workbench, not external services.
+
+Workbench script permissions use the automatic Yes to All policy (`-scriptAuthorizeAll`
+on MCP launches and the same native owner on attachment/dispatch). Do not spend
+calls deciding each protected script/method. A Script Authorization Required dialog
+that predates activation can be accepted with Yes to All once; other dialogs still
+require interpreting their actual purpose. Use `workbench_script_authorization`
+status only when diagnosis needs fresh permission readback, not as a routine preamble.

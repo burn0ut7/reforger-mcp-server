@@ -10,6 +10,10 @@ $allowed = @(
     '^docs/[A-Za-z0-9-]+\.md$',
     '^scripts/[A-Za-z0-9-]+\.(ps1|mjs)$',
     '^tests/ToolActivity/(Program\.cs|ToolActivity\.csproj)$',
+    '^tests/WorkbenchMaintenance/(Program\.cs|LiveMaintenance\.cs|WorkbenchMaintenance\.csproj)$',
+    '^tests/WorkbenchFocus/(Program\.cs|WorkbenchFocus\.csproj)$',
+    '^tests/McpAcceptance/(Program\.cs|McpAcceptance\.csproj)$',
+    '^tests/NativeHookUpdate/(Program\.cs|NativeHookUpdate\.csproj)$',
     '^src/ReforgerMcp/([A-Za-z0-9.]+\.(cs|csproj)|packages\.lock\.json|Ghidra/ReforgerBridge\.java)$',
     '^adapters/workbench/Scripts/WorkbenchGame/RST_(Runtime|EditorChoices)\.c$',
     '^skills/reforger/(SKILL\.md|references/[a-z-]+\.md|agents/openai\.yaml)$'
@@ -28,7 +32,7 @@ foreach ($relative in $files) {
     if ((Get-Item -LiteralPath $path).Length -gt 2MB) { $problems.Add("Oversized source file: $relative"); continue }
     $text = Get-Content -LiteralPath $path -Raw
     $normalized = $text.Replace('\\','/').Replace('\','/')
-    if ($privatePrefix -and $normalized.Contains($privatePrefix, [StringComparison]::OrdinalIgnoreCase)) {
+    if ($privatePrefix -and ($normalized.IndexOf($privatePrefix, [StringComparison]::OrdinalIgnoreCase) -ge 0)) {
         $problems.Add("Builder's private home path in: $relative")
     }
     if ($text -match '-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\bgh[pousr]_[A-Za-z0-9]{30,}\b') {
@@ -45,4 +49,5 @@ foreach ($relative in $files) {
 }
 if ($problems.Count) { throw ($problems -join "`n") }
 Write-Output "Source audit passed: $($files.Count) public candidates; local links, paths and file allowlist checked."
+
 

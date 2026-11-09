@@ -1,0 +1,377 @@
+RIP ntdll.dll+0x7439
+REGS 120:0xCB4 128:0x34D 136:0xEEDE9121 144:0x2B5A6060150 152:0xC1C85496D0 160:0xB8000CB4 168:0x2B5A6060000 176:0x2B5A60660B0 184:0x2B7664BE000 192:0x10010 200:0x2B5A5FD01E0 208:0xC1C85498E8 216:0x3FF 224:0x0 232:0x1001 240:0x2B71D1EE020
+UNWOUND STACK:
+ntdll.dll+0x7439
+ntdll.dll+0x54160
+ntdll.dll+0x32431
+ntdll.dll+0x3200B
+ntdll.dll+0x33599
+ntdll.dll+0x32144
+ntdll.dll+0x3200B
+ucrtbase.dll+0x50D9
+Qt6Core.dll+0x1A7DCF
+Qt6Core.dll+0x1A7C8B
+Qt6Gui.dll+0x1C30B
+Qt6Gui.dll+0x3FD8F
+Qt6Gui.dll+0x40DF17
+Qt6Gui.dll+0x40F3F0
+Qt6Gui.dll+0x40A110
+Qt6Gui.dll+0x40C410
+qwindows.dll+0x7C9C7
+UIAutomationCore.DLL+0x201C8
+UIAutomationCore.DLL+0x1FF3A
+UIAutomationCore.DLL+0x16C048
+UIAutomationCore.DLL+0x5A4FC
+UIAutomationCore.DLL+0x59CE4
+UIAutomationCore.DLL+0x5BB85
+UIAutomationCore.DLL+0xBBBDD
+UIAutomationCore.DLL+0xBB06E
+UIAutomationCore.DLL+0xBACDF
+UIAutomationCore.DLL+0x177B2D
+UIAutomationCore.DLL+0x16C048
+UIAutomationCore.DLL+0x22F4A
+UIAutomationCore.DLL+0x240E5
+UIAutomationCore.DLL+0x23D63
+UIAutomationCore.DLL+0x1D832
+OneCoreCommonProxyStub.dll+0x10BF
+RPCRT4.dll+0xD5882
+RPCRT4.dll+0x4C000
+combase.dll+0xA813D
+RPCRT4.dll+0x67CA6
+combase.dll+0xA8082
+combase.dll+0xA75F6
+combase.dll+0xA6908
+combase.dll+0xF11DF
+combase.dll+0x861F4
+combase.dll+0x24B35
+combase.dll+0x23602
+combase.dll+0x157987
+USER32.dll+0x152E6
+USER32.dll+0x15DBD
+Qt6Core.dll+0x230D14
+Qt6Gui.dll+0x3A8619
+Qt6Core.dll+0xAA694
+Qt6Core.dll+0xA2082
+ArmaReforgerWorkbenchSteamDiag.exe+0x1F1F12
+ArmaReforgerWorkbenchSteamDiag.exe+0x2A68700
+ArmaReforgerWorkbenchSteamDiag.exe+0x2A65A82
+KERNEL32.DLL+0x2DDA7
+ntdll.dll+0x7EE4C
+Possible stack pointers (not unwound):
+58 ntdll.dll+0x54160
+188 ntdll.dll+0x32431
+218 ntdll.dll+0x3200B
+240 UIAutomationCore.DLL+0x0
+308 ntdll.dll+0x32144
+378 ntdll.dll+0x33599
+398 ntdll.dll+0x3200B
+448 ntdll.dll+0x32144
+480 ucrtbase.dll+0x1398B0
+4D8 ntdll.dll+0x3200B
+4F8 ucrtbase.dll+0x50D9
+528 Qt6Core.dll+0x1A7C0C
+568 Qt6Core.dll+0x14C8ED
+590 ucrtbase.dll+0xADA0
+598 ucrtbase.dll+0xAC5D
+5A8 Qt6Core.dll+0x159C53
+5C8 Qt6Core.dll+0x175B6A
+5E8 ntdll.dll+0x32144
+620 ucrtbase.dll+0x1398B0
+638 ucrtbase.dll+0x50D9
+668 Qt6Core.dll+0x1A7DCF
+6A8 Qt6Core.dll+0x1A7C8B
+6F8 Qt6Gui.dll+0x1C30B
+738 Qt6Gui.dll+0x3FD8F
+778 Qt6Gui.dll+0x1C30B
+7A0 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+7B8 Qt6Gui.dll+0x40DF17
+7D8 ucrtbase.dll+0x12D7B
+7E8 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+808 Qt6Gui.dll+0x40F3F0
+828 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+838 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+858 ucrtbase.dll+0x12D7B
+868 Qt6Gui.dll+0x40A110
+888 Qt6Gui.dll+0x40F4BA
+8A8 Qt6Widgets.dll+0x2C18B7
+8B8 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+8D8 Qt6Widgets.dll+0x2C18B7
+8E8 Qt6Gui.dll+0x40A125
+908 Qt6Widgets.dll+0x2B2123
+918 ucrtbase.dll+0x12D7B
+958 Qt6Core.dll+0xAC13C
+968 OLEAUT32.dll+0x6A74
+970 ucrtbase.dll+0x1398B0
+988 Qt6Widgets.dll+0x2AEEE9
+9B8 Qt6Gui.dll+0x40C410
+9E8 ucrtbase.dll+0xACDB
+A38 qwindows.dll+0x7C9C7
+A78 UIAutomationCore.DLL+0x5492E
+AE8 ucrtbase.dll+0x12D7B
+AF8 OLEAUT32.dll+0x167CC
+B18 ucrtbase.dll+0xACDB
+B30 UIAutomationCore.DLL+0x2DB9E0
+B48 UIAutomationCore.DLL+0x201C8
+BA8 UIAutomationCore.DLL+0x311290
+BC8 ntdll.dll+0x32144
+BE8 UIAutomationCore.DLL+0x2DB9E0
+C20 combase.dll+0x33C160
+C88 ntdll.dll+0x32144
+CB8 UIAutomationCore.DLL+0x2DBB20
+CC8 combase.dll+0xD66DE
+CE0 combase.dll+0x33C160
+CE8 UIAutomationCore.DLL+0x105E32
+D48 UIAutomationCore.DLL+0x1FF3A
+D78 UIAutomationCore.DLL+0x2DB9E0
+D88 combase.dll+0xD66DE
+D98 UIAutomationCore.DLL+0x103B10
+DF8 UIAutomationCore.DLL+0x16C048
+E58 UIAutomationCore.DLL+0x103B10
+E78 ucrtbase.dll+0x5001
+EA0 ucrtbase.dll+0xADA0
+EA8 ucrtbase.dll+0xAC5D
+ED0 UIAutomationCore.DLL+0x2DC2E0
+EF8 UIAutomationCore.DLL+0x5A4FC
+F08 UIAutomationCore.DLL+0x18B57E
+F20 UIAutomationCore.DLL+0x2DC2E0
+F48 UIAutomationCore.DLL+0x59CE4
+RIP ntdll.dll+0x7439
+REGS 120:0xCB4 128:0x34D 136:0xEEDE9121 144:0x2B5A6060150 152:0xC1C85496D0 160:0xB8000CB4 168:0x2B5A6060000 176:0x2B5A60660B0 184:0x2B7664BE000 192:0x10010 200:0x2B5A5FD01E0 208:0xC1C85498E8 216:0x3FF 224:0x0 232:0x1001 240:0x2B71D1EE020
+Possible stack pointers (not unwound):
+58 ntdll.dll+0x54160
+188 ntdll.dll+0x32431
+218 ntdll.dll+0x3200B
+240 UIAutomationCore.DLL+0x0
+308 ntdll.dll+0x32144
+378 ntdll.dll+0x33599
+398 ntdll.dll+0x3200B
+448 ntdll.dll+0x32144
+480 ucrtbase.dll+0x1398B0
+4D8 ntdll.dll+0x3200B
+4F8 ucrtbase.dll+0x50D9
+528 Qt6Core.dll+0x1A7C0C
+568 Qt6Core.dll+0x14C8ED
+590 ucrtbase.dll+0xADA0
+598 ucrtbase.dll+0xAC5D
+5A8 Qt6Core.dll+0x159C53
+5C8 Qt6Core.dll+0x175B6A
+5E8 ntdll.dll+0x32144
+620 ucrtbase.dll+0x1398B0
+638 ucrtbase.dll+0x50D9
+668 Qt6Core.dll+0x1A7DCF
+6A8 Qt6Core.dll+0x1A7C8B
+6F8 Qt6Gui.dll+0x1C30B
+738 Qt6Gui.dll+0x3FD8F
+778 Qt6Gui.dll+0x1C30B
+7A0 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+7B8 Qt6Gui.dll+0x40DF17
+7D8 ucrtbase.dll+0x12D7B
+7E8 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+808 Qt6Gui.dll+0x40F3F0
+828 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+838 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+858 ucrtbase.dll+0x12D7B
+868 Qt6Gui.dll+0x40A110
+888 Qt6Gui.dll+0x40F4BA
+8A8 Qt6Widgets.dll+0x2C18B7
+8B8 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+8D8 Qt6Widgets.dll+0x2C18B7
+8E8 Qt6Gui.dll+0x40A125
+908 Qt6Widgets.dll+0x2B2123
+918 ucrtbase.dll+0x12D7B
+958 Qt6Core.dll+0xAC13C
+968 OLEAUT32.dll+0x6A74
+970 ucrtbase.dll+0x1398B0
+988 Qt6Widgets.dll+0x2AEEE9
+9B8 Qt6Gui.dll+0x40C410
+9E8 ucrtbase.dll+0xACDB
+A38 qwindows.dll+0x7C9C7
+A78 UIAutomationCore.DLL+0x5492E
+AE8 ucrtbase.dll+0x12D7B
+AF8 OLEAUT32.dll+0x167CC
+B18 ucrtbase.dll+0xACDB
+B30 UIAutomationCore.DLL+0x2DB9E0
+B48 UIAutomationCore.DLL+0x201C8
+BA8 UIAutomationCore.DLL+0x311290
+BC8 ntdll.dll+0x32144
+BE8 UIAutomationCore.DLL+0x2DB9E0
+C20 combase.dll+0x33C160
+C88 ntdll.dll+0x32144
+CB8 UIAutomationCore.DLL+0x2DBB20
+CC8 combase.dll+0xD66DE
+CE0 combase.dll+0x33C160
+CE8 UIAutomationCore.DLL+0x105E32
+D48 UIAutomationCore.DLL+0x1FF3A
+D78 UIAutomationCore.DLL+0x2DB9E0
+D88 combase.dll+0xD66DE
+D98 UIAutomationCore.DLL+0x103B10
+DF8 UIAutomationCore.DLL+0x16C048
+E58 UIAutomationCore.DLL+0x103B10
+E78 ucrtbase.dll+0x5001
+EA0 ucrtbase.dll+0xADA0
+EA8 ucrtbase.dll+0xAC5D
+ED0 UIAutomationCore.DLL+0x2DC2E0
+EF8 UIAutomationCore.DLL+0x5A4FC
+F08 UIAutomationCore.DLL+0x18B57E
+F20 UIAutomationCore.DLL+0x2DC2E0
+F48 UIAutomationCore.DLL+0x59CE4
+RIP ntdll.dll+0x7439
+REGS 120:0xCB4 128:0x34D 136:0xEEDE9121 144:0x2B5A6060150 152:0xC1C85496D0 160:0xB8000CB4 168:0x2B5A6060000 176:0x2B5A60660B0 184:0x2B7664BE000 192:0x10010 200:0x2B5A5FD01E0 208:0xC1C85498E8 216:0x3FF 224:0x0 232:0x1001 240:0x2B71D1EE020
+Possible stack pointers (not unwound):
+58 ntdll.dll+0x54160
+188 ntdll.dll+0x32431
+218 ntdll.dll+0x3200B
+240 UIAutomationCore.DLL+0x0
+308 ntdll.dll+0x32144
+378 ntdll.dll+0x33599
+398 ntdll.dll+0x3200B
+448 ntdll.dll+0x32144
+480 ucrtbase.dll+0x1398B0
+4D8 ntdll.dll+0x3200B
+4F8 ucrtbase.dll+0x50D9
+528 Qt6Core.dll+0x1A7C0C
+568 Qt6Core.dll+0x14C8ED
+590 ucrtbase.dll+0xADA0
+598 ucrtbase.dll+0xAC5D
+5A8 Qt6Core.dll+0x159C53
+5C8 Qt6Core.dll+0x175B6A
+5E8 ntdll.dll+0x32144
+620 ucrtbase.dll+0x1398B0
+638 ucrtbase.dll+0x50D9
+668 Qt6Core.dll+0x1A7DCF
+6A8 Qt6Core.dll+0x1A7C8B
+6F8 Qt6Gui.dll+0x1C30B
+738 Qt6Gui.dll+0x3FD8F
+778 Qt6Gui.dll+0x1C30B
+7A0 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+7B8 Qt6Gui.dll+0x40DF17
+7D8 ucrtbase.dll+0x12D7B
+7E8 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+808 Qt6Gui.dll+0x40F3F0
+828 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+838 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+858 ucrtbase.dll+0x12D7B
+868 Qt6Gui.dll+0x40A110
+888 Qt6Gui.dll+0x40F4BA
+8A8 Qt6Widgets.dll+0x2C18B7
+8B8 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+8D8 Qt6Widgets.dll+0x2C18B7
+8E8 Qt6Gui.dll+0x40A125
+908 Qt6Widgets.dll+0x2B2123
+918 ucrtbase.dll+0x12D7B
+958 Qt6Core.dll+0xAC13C
+968 OLEAUT32.dll+0x6A74
+970 ucrtbase.dll+0x1398B0
+988 Qt6Widgets.dll+0x2AEEE9
+9B8 Qt6Gui.dll+0x40C410
+9E8 ucrtbase.dll+0xACDB
+A38 qwindows.dll+0x7C9C7
+A78 UIAutomationCore.DLL+0x5492E
+AE8 ucrtbase.dll+0x12D7B
+AF8 OLEAUT32.dll+0x167CC
+B18 ucrtbase.dll+0xACDB
+B30 UIAutomationCore.DLL+0x2DB9E0
+B48 UIAutomationCore.DLL+0x201C8
+BA8 UIAutomationCore.DLL+0x311290
+BC8 ntdll.dll+0x32144
+BE8 UIAutomationCore.DLL+0x2DB9E0
+C20 combase.dll+0x33C160
+C88 ntdll.dll+0x32144
+CB8 UIAutomationCore.DLL+0x2DBB20
+CC8 combase.dll+0xD66DE
+CE0 combase.dll+0x33C160
+CE8 UIAutomationCore.DLL+0x105E32
+D48 UIAutomationCore.DLL+0x1FF3A
+D78 UIAutomationCore.DLL+0x2DB9E0
+D88 combase.dll+0xD66DE
+D98 UIAutomationCore.DLL+0x103B10
+DF8 UIAutomationCore.DLL+0x16C048
+E58 UIAutomationCore.DLL+0x103B10
+E78 ucrtbase.dll+0x5001
+EA0 ucrtbase.dll+0xADA0
+EA8 ucrtbase.dll+0xAC5D
+ED0 UIAutomationCore.DLL+0x2DC2E0
+EF8 UIAutomationCore.DLL+0x5A4FC
+F08 UIAutomationCore.DLL+0x18B57E
+F20 UIAutomationCore.DLL+0x2DC2E0
+F48 UIAutomationCore.DLL+0x59CE4
+RIP ntdll.dll+0x7439
+REGS 120:0xCB4 128:0x34D 136:0xEEDE9121 144:0x2B5A6060150 152:0xC1C85496D0 160:0xB8000CB4 168:0x2B5A6060000 176:0x2B5A60660B0 184:0x2B7664BE000 192:0x10010 200:0x2B5A5FD01E0 208:0xC1C85498E8 216:0x3FF 224:0x0 232:0x1001 240:0x2B71D1EE020
+Possible stack pointers (not unwound):
+58 ntdll.dll+0x54160
+188 ntdll.dll+0x32431
+218 ntdll.dll+0x3200B
+240 UIAutomationCore.DLL+0x0
+308 ntdll.dll+0x32144
+378 ntdll.dll+0x33599
+398 ntdll.dll+0x3200B
+448 ntdll.dll+0x32144
+480 ucrtbase.dll+0x1398B0
+4D8 ntdll.dll+0x3200B
+4F8 ucrtbase.dll+0x50D9
+528 Qt6Core.dll+0x1A7C0C
+568 Qt6Core.dll+0x14C8ED
+590 ucrtbase.dll+0xADA0
+598 ucrtbase.dll+0xAC5D
+5A8 Qt6Core.dll+0x159C53
+5C8 Qt6Core.dll+0x175B6A
+5E8 ntdll.dll+0x32144
+620 ucrtbase.dll+0x1398B0
+638 ucrtbase.dll+0x50D9
+668 Qt6Core.dll+0x1A7DCF
+6A8 Qt6Core.dll+0x1A7C8B
+6F8 Qt6Gui.dll+0x1C30B
+738 Qt6Gui.dll+0x3FD8F
+778 Qt6Gui.dll+0x1C30B
+7A0 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+7B8 Qt6Gui.dll+0x40DF17
+7D8 ucrtbase.dll+0x12D7B
+7E8 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+808 Qt6Gui.dll+0x40F3F0
+828 ArmaReforgerWorkbenchSteamDiag.exe+0x2DCC7F0
+838 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+858 ucrtbase.dll+0x12D7B
+868 Qt6Gui.dll+0x40A110
+888 Qt6Gui.dll+0x40F4BA
+8A8 Qt6Widgets.dll+0x2C18B7
+8B8 ArmaReforgerWorkbenchSteamDiag.exe+0x2D9D8B0
+8D8 Qt6Widgets.dll+0x2C18B7
+8E8 Qt6Gui.dll+0x40A125
+908 Qt6Widgets.dll+0x2B2123
+918 ucrtbase.dll+0x12D7B
+958 Qt6Core.dll+0xAC13C
+968 OLEAUT32.dll+0x6A74
+970 ucrtbase.dll+0x1398B0
+988 Qt6Widgets.dll+0x2AEEE9
+9B8 Qt6Gui.dll+0x40C410
+9E8 ucrtbase.dll+0xACDB
+A38 qwindows.dll+0x7C9C7
+A78 UIAutomationCore.DLL+0x5492E
+AE8 ucrtbase.dll+0x12D7B
+AF8 OLEAUT32.dll+0x167CC
+B18 ucrtbase.dll+0xACDB
+B30 UIAutomationCore.DLL+0x2DB9E0
+B48 UIAutomationCore.DLL+0x201C8
+BA8 UIAutomationCore.DLL+0x311290
+BC8 ntdll.dll+0x32144
+BE8 UIAutomationCore.DLL+0x2DB9E0
+C20 combase.dll+0x33C160
+C88 ntdll.dll+0x32144
+CB8 UIAutomationCore.DLL+0x2DBB20
+CC8 combase.dll+0xD66DE
+CE0 combase.dll+0x33C160
+CE8 UIAutomationCore.DLL+0x105E32
+D48 UIAutomationCore.DLL+0x1FF3A
+D78 UIAutomationCore.DLL+0x2DB9E0
+D88 combase.dll+0xD66DE
+D98 UIAutomationCore.DLL+0x103B10
+DF8 UIAutomationCore.DLL+0x16C048
+E58 UIAutomationCore.DLL+0x103B10
+E78 ucrtbase.dll+0x5001
+EA0 ucrtbase.dll+0xADA0
+EA8 ucrtbase.dll+0xAC5D
+ED0 UIAutomationCore.DLL+0x2DC2E0
+EF8 UIAutomationCore.DLL+0x5A4FC
+F08 UIAutomationCore.DLL+0x18B57E
+F20 UIAutomationCore.DLL+0x2DC2E0
+F48 UIAutomationCore.DLL+0x59CE4

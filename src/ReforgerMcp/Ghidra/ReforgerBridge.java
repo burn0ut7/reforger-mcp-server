@@ -39,6 +39,8 @@ public class ReforgerBridge extends HeadlessScript {
                 case "search": search(response); break;
                 case "references": references(response); break;
                 case "function": function(response); break;
+                case "hook_export": hookExport(response); break;
+                case "hook_match": hookMatch(response); break;
                 default: throw new IllegalArgumentException("Unknown operation");
             }
             response.addProperty("ok", true);
@@ -49,6 +51,129 @@ public class ReforgerBridge extends HeadlessScript {
         Files.writeString(Path.of(args[1]), gson.toJson(response), StandardCharsets.UTF_8);
     }
     private String text(String key) { return request.get(key).getAsString(); }
+    // Maintenance evidence only. These matches never authorize a native call.
+    // Keep immediates/layout offsets; mask only operands with resolved memory references.
+    private final Map<Address,String> hookFingerprintCache = new HashMap<>();
+    private String hookFingerprint(Function f) throws Exception {
+        String cached = hookFingerprintCache.get(f.getEntryPoint()); if (cached != null) return cached;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        InstructionIterator it = currentProgram.getListing().getInstructions(f.getBody(), true);
+        while (it.hasNext()) {
+            monitor.checkCancelled(); Instruction i = it.next();
+            byte[] bytes = i.getBytes(); byte[] mask = new byte[bytes.length];
+            Arrays.fill(mask, (byte)0xff);
+            for (Reference ref : i.getReferencesFrom()) {
+                int op = ref.getOperandIndex();
+                if (!ref.getToAddress().isMemoryAddress() || op < 0) continue;
+                var operandMask = i.getPrototype().getOperandValueMask(op);
+                if (operandMask == null) throw new IllegalStateException("Missing operand mask at " + i.getAddress());
+                byte[] m = operandMask.getBytes();
+                if (m.length != bytes.length) throw new IllegalStateException("Operand mask length mismatch");
+                for (int n = 0; n < bytes.length; n++) mask[n] &= (byte)~m[n];
+                // Preserve intra-function control-flow topology and reference kinds.
+                String edge = op + ":" + ref.getReferenceType() + ":" +
+                    (f.getBody().contains(ref.getToAddress()) ? ref.getToAddress().subtract(f.getEntryPoint()) : "external");
+                digest.update(edge.getBytes(StandardCharsets.UTF_8)); digest.update((byte)0);
+                // Operand masks can cover register bits as well as displacement bits.
+                // Preserve registers explicitly so e.g. [rax+address] cannot match [rcx+address].
+                for (Object object : i.getOpObjects(op))
+                    if (object instanceof ghidra.program.model.lang.Register register)
+                        digest.update(("reg:" + register.getName() + ";").getBytes(StandardCharsets.UTF_8));
+                Data target = currentProgram.getListing().getDataAt(ref.getToAddress());
+                if (target != null && target.getValue() instanceof String string)
+                    digest.update(("string:" + string + "\0").getBytes(StandardCharsets.UTF_8));
+            }
+            digest.update((i.getAddress().subtract(f.getEntryPoint()) + ":" + i.getMnemonicString() + ":" + bytes.length + ":").getBytes(StandardCharsets.UTF_8));
+            digest.update(mask);
+            for (int n = 0; n < bytes.length; n++) bytes[n] &= mask[n];
+            digest.update(bytes);
+        }
+        String hash = HexFormat.of().formatHex(digest.digest()); hookFingerprintCache.put(f.getEntryPoint(), hash); return hash;
+    }
+    private JsonObject hookAnchor(Function f, Address from, Reference ref) throws Exception {
+        JsonObject a = new JsonObject();
+        a.addProperty("functionRva", Long.toHexString(f.getEntryPoint().subtract(currentProgram.getImageBase())));
+        a.addProperty("bodyBytes", f.getBody().getNumAddresses());
+        a.addProperty("fingerprint", hookFingerprint(f));
+        a.addProperty("instructionOffset", from.subtract(f.getEntryPoint()));
+        a.addProperty("operand", ref == null ? -1 : ref.getOperandIndex());
+        a.addProperty("referenceType", ref == null ? "code" : ref.getReferenceType().toString());
+        return a;
+    }
+    private void hookExport(JsonObject out) throws Exception {
+        JsonArray hooks = request.getAsJsonArray("hooks");
+        if (hooks.size() < 1 || hooks.size() > 512) throw new IllegalArgumentException("Use 1-512 hooks");
+        JsonArray rows = new JsonArray();
+        for (JsonElement element : hooks) {
+            monitor.checkCancelled(); JsonObject h = element.getAsJsonObject();
+            Address address = currentProgram.getImageBase().add(Long.parseUnsignedLong(h.get("rva").getAsString(), 16));
+            JsonObject row = h.deepCopy(); JsonArray anchors = new JsonArray();
+            Function owner = currentProgram.getFunctionManager().getFunctionContaining(address);
+            Instruction containing = currentProgram.getListing().getInstructionContaining(address);
+            if (owner != null && containing != null) {
+                row.addProperty("kind", "code");
+                JsonObject anchor = hookAnchor(owner, containing.getAddress(), null);
+                anchor.addProperty("byteOffset", address.subtract(containing.getAddress())); anchors.add(anchor);
+            } else {
+                row.addProperty("kind", "data");
+                ReferenceIterator refs = currentProgram.getReferenceManager().getReferencesTo(address);
+                int seen = 0;
+                while (refs.hasNext() && seen++ < 128 && anchors.size() < 8) {
+                    Reference ref = refs.next(); Function f = currentProgram.getFunctionManager().getFunctionContaining(ref.getFromAddress());
+                    if (f != null && ref.getOperandIndex() >= 0 && currentProgram.getListing().getInstructionAt(ref.getFromAddress()) != null)
+                        anchors.add(hookAnchor(f, ref.getFromAddress(), ref));
+                }
+            }
+            row.add("anchors", anchors); row.addProperty("state", anchors.isEmpty() ? "unresolved" : "anchored"); rows.add(row);
+        }
+        out.addProperty("algorithm", "masked-function-v1"); out.add("hooks", rows);
+        out.addProperty("coverage", "Defined instructions and up to eight resolved inbound anchors per data hook; layouts and calling conventions still require review.");
+    }
+    private void hookMatch(JsonObject out) throws Exception {
+        JsonObject baseline = request.getAsJsonObject("baseline");
+        if (!baseline.get("algorithm").getAsString().equals("masked-function-v1")) throw new IllegalArgumentException("Unknown hook algorithm");
+        JsonArray hooks = baseline.getAsJsonArray("hooks");
+        if (hooks.size() < 1 || hooks.size() > 512) throw new IllegalArgumentException("Use 1-512 hooks");
+        Set<Long> sizes = new HashSet<>(); Set<String> hashes = new HashSet<>();
+        for (JsonElement h : hooks) for (JsonElement ae : h.getAsJsonObject().getAsJsonArray("anchors")) {
+            JsonObject a = ae.getAsJsonObject(); sizes.add(a.get("bodyBytes").getAsLong()); hashes.add(a.get("fingerprint").getAsString());
+        }
+        Map<String,List<Function>> matches = new HashMap<>();
+        FunctionIterator functions = currentProgram.getFunctionManager().getFunctions(true);
+        while (functions.hasNext()) {
+            monitor.checkCancelled(); Function f = functions.next();
+            if (f.isExternal() || !sizes.contains(f.getBody().getNumAddresses())) continue;
+            String hash = hookFingerprint(f);
+            if (hashes.contains(hash)) matches.computeIfAbsent(hash, k -> new ArrayList<>()).add(f);
+        }
+        JsonArray results = new JsonArray();
+        for (JsonElement he : hooks) {
+            JsonObject h = he.getAsJsonObject(); TreeSet<Long> candidates = new TreeSet<>(); JsonArray evidence = new JsonArray();
+            for (JsonElement ae : h.getAsJsonArray("anchors")) {
+                JsonObject a = ae.getAsJsonObject();
+                for (Function f : matches.getOrDefault(a.get("fingerprint").getAsString(), List.of())) {
+                    Address at = f.getEntryPoint().add(a.get("instructionOffset").getAsLong());
+                    Instruction i = currentProgram.getListing().getInstructionAt(at); if (i == null) continue;
+                    if (a.get("referenceType").getAsString().equals("code")) {
+                        int within = a.get("byteOffset").getAsInt();
+                        if (within >= 0 && within < i.getLength()) candidates.add(at.add(within).subtract(currentProgram.getImageBase()));
+                    }
+                    else for (Reference ref : i.getReferencesFrom())
+                        if (ref.getOperandIndex() == a.get("operand").getAsInt() && ref.getReferenceType().toString().equals(a.get("referenceType").getAsString()) && ref.getToAddress().isMemoryAddress())
+                            candidates.add(ref.getToAddress().subtract(currentProgram.getImageBase()));
+                    if (evidence.size() < 16) { JsonObject e = at(f.getEntryPoint()); e.addProperty("fingerprint", a.get("fingerprint").getAsString()); evidence.add(e); }
+                }
+            }
+            JsonObject r = new JsonObject(); r.add("id", h.get("id")); r.add("oldRva", h.get("rva")); r.add("kind", h.get("kind"));
+            r.addProperty("state", candidates.isEmpty() ? "unresolved" : candidates.size() == 1 ? "candidate" : "ambiguous");
+            r.addProperty("candidateCount", candidates.size()); JsonArray positions = new JsonArray();
+            for (long candidate : candidates.stream().limit(32).toList()) positions.add(Long.toHexString(candidate));
+            r.add("candidateRvas", positions); r.add("evidence", evidence); results.add(r);
+        }
+        out.addProperty("algorithm", "masked-function-v1"); out.add("hooks", results);
+        out.addProperty("runtimeApproved", false);
+        out.addProperty("caution", "Unique structural candidates are not ABI proof. Review call targets, object layouts, lifetime, thread ownership and live tests before changing the runtime profile.");
+    }
     private boolean matches(String value, String[] terms) {
         String lower = value.toLowerCase(Locale.ROOT);
         for (String term : terms) if (!lower.contains(term)) return false;

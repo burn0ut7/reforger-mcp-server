@@ -9,11 +9,22 @@ Current capability: directly launch Workbench, open worlds and reload scripts th
 
 Configure Workbench in your single `configuration.json`; see the [Workbench guide](docs/workbench.md). Workbench launch itself needs no Ghidra, Java or scripted bridge.
 
+[Background focus suppression](docs/workbench-focus.md) automatically prevents the
+supported Qt platform from activating or raising Workbench while another app is
+foreground and suppresses explicit taskbar flashing. Manual switching remains
+available; `workbench_focus_policy` exposes status and an explicit exception switch.
+
+[Script authorization](docs/workbench-script-authorization.md) automatically uses
+Workbench's built-in Yes to All policy for protected script operations. MCP launches
+pass `-scriptAuthorizeAll`; the current session is enabled through the same native owner.
+
 For the actual loaded project, working addon files and other available addons, use [project context](docs/project-context.md). `workbench_project_context` returns native addon identities and project locations; `pak_prepare(projectToken)` indexes both packed and unpacked files through the existing source tools. Offline configurations can also specify `unpackedDirectories`. Disk content and local module declarations are distinguished from unsaved buffers and effective compiler/resource precedence.
 
 For Workbench and independent peer logs, configure `logDirectories` and use [console-log reading](docs/console-logs.md). `log_read` defaults to the latest script reload/compilation and subsequent runtime output, with bounded pages, severity/category filters and literal or regex search.
 
 The same Workbench configuration enables [native script compilation/reload](docs/workbench-scripts.md). Reload uses a temporary in-process adapter, without menus, keyboard input or a foreground requirement; its native return value confirms completion. The exact supported binary profile and update procedure are [documented separately](docs/workbench-native-reload.md). No project bridge is installed.
+
+For game updates, the [native hook maintenance workflow](docs/native-hook-updates.md) freezes source inputs, builds a separate server and produces reproducible candidate-address evidence against preserved Ghidra analyses. It retains ambiguity and requires ABI/live validation before changing runtime compatibility.
 
 [Opening a world](docs/workbench-worlds.md) uses that same native dispatcher. It creates World Editor if needed, opens a supplied `.ent` resource, and reports the native loaded world path. It requires no focus or keyboard input and refuses unsaved/play state. Script reload still requires World Editor to be closed.
 
@@ -149,3 +160,4 @@ Use the official [C# MCP SDK](https://github.com/modelcontextprotocol/csharp-sdk
 
 See [Workbench controls and dialogs](docs/workbench-windows.md) for native menu/button actions, popup inspection and screenshots during pending operations.
 
+Run the [live MCP acceptance gate](docs/mcp-acceptance.md) after deploying an update. It reports every tool and refuses approval for failed, blocked or untested capabilities.

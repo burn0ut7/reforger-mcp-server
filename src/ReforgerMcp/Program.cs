@@ -19,9 +19,15 @@ try
         Console.WriteLine(JsonSerializer.Serialize(check, Configuration.Json));
         return check.Success ? 0 : 1;
     }
+    if (args.Length == 4 && args[0] == "--config" && args[2] == "--hook-update")
+    {
+        var result = await NativeHookUpdate.Run(Configuration.Load(args[1]), args[3], CancellationToken.None);
+        Console.WriteLine(JsonSerializer.Serialize(result, Configuration.Json));
+        return 0; // Discovery completed; run.json explicitly requires review, never runtime approval.
+    }
     var serveHttp = args.Length == 3 && args[2] == "--serve-http";
     if (args.Length < 2 || args[0] != "--config" || (args.Length != 2 && !serveHttp && !(args.Length == 4 && args[2] is "--prepare" or "--setup-runtime")))
-        throw new ArgumentException("Usage: ReforgerMcp --config <json-path> [--serve-http | --setup-runtime <status|install|enable> | --prepare <target|all>] | --check-config <json-path>");
+        throw new ArgumentException("Usage: ReforgerMcp --config <json-path> [--serve-http | --setup-runtime <status|install|enable> | --prepare <target|all> | --hook-update <request.json>] | --check-config <json-path>");
     var config = Configuration.Load(args[1]);
     using var activityLifetime = new ActivityLifetime();
     WebApplicationBuilder? webBuilder = null;
@@ -54,6 +60,7 @@ try
     builder.Services.AddSingleton<WorkbenchChoices>();
     if (args.Length == 2 || serveHttp) builder.Services.AddHostedService(sp => sp.GetRequiredService<WorkbenchChoices>());
     if (args.Length == 2 || serveHttp) builder.Services.AddHostedService<WorkbenchAssertionMonitor>();
+    if (args.Length == 2 || serveHttp) builder.Services.AddHostedService<WorkbenchFocusMonitor>();
     if (args.Length == 2 || serveHttp)
     {
         var mcp = builder.Services.AddMcpServer()

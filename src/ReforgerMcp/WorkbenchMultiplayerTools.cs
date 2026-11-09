@@ -19,7 +19,7 @@ public sealed class WorkbenchMultiplayerTools(WorkbenchSession workbench)
         => Report(() => workbench.Multiplayer(tool, "status", processId, null, null, null, cancellationToken));
 
     [McpServerTool(Name = "workbench_multiplayer", ReadOnly = false, Destructive = true, OpenWorld = true)]
-    [Description("tool=dedicated|peers; action=start|stop|configure (configure: peers only). Dedicated start opens its normal dialog and requires installed adapter/runtimePort. Peers start does not start server/Play. Stop terminates owned processes and delayed launches. Dispatch is not readiness.")]
+    [Description("tool=dedicated|peers; action=start|stop|configure (configure: peers only). Dedicated start opens the stock plugin dialog; addon paths follow stock Workbench behavior. Peers start does not start server/Play. Stop terminates owned processes and delayed launches. Dispatch is not readiness.")]
     public Task<object> Execute(string tool, string action, int processId, CancellationToken cancellationToken = default)
         => Report(() => action is "start" or "stop" or "configure"
             ? workbench.Multiplayer(tool, action, processId, null, null, null, cancellationToken)

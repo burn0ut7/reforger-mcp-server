@@ -32,13 +32,21 @@ internal static partial class NativeWorkbench
         }).ToArray());
     }
 
+    internal static byte[] ProjectContextProbe(nint image, MaintenanceProfile profile)
+    {
+        var e = new E();
+        e.B(0x53, 0x48, 0x83, 0xec, 0x40, 0x48, 0x89, 0xcb);
+        EmitProjectContext(e, image, profile);
+        e.Label("return"); e.B(0x48, 0x83, 0xc4, 0x40, 0x5b, 0xc3);
+        return e.Done();
+    }
     // Same project owner/arrays as GameProject.GetLoadedAddons/GetAvailableAddons.
     // Copy on the editor thread: no engine pointers escape this callback.
-    private static void EmitProjectContext(E e, nint image)
+    private static void EmitProjectContext(E e, nint image, MaintenanceProfile profile)
     {
         void I(int n) => e.B(BitConverter.GetBytes(n));
         void Call(int rva) { e.B(0x48, 0xb8); e.Q(image + rva); e.B(0xff, 0xd0); }
-        Call(0x1ea3f00);
+        Call(profile.ProjectOwner);
         e.B(0x48, 0x85, 0xc0); e.J(0x84, "projectInvalid");
         e.B(0x48, 0x89, 0x43, 96);
         e.B(0x8b, 0x88); I(0xd4); e.B(0x89, 0x4b, 104, 0x85, 0xc9); e.J(0x8e, "projectInvalid");
@@ -74,11 +82,48 @@ internal static partial class NativeWorkbench
             e.B(0x41, 0x8a, 0x44, 0x08, 64, 0x84, 0xc0); e.J(0x84, label + "MountEnd");
             e.B(0x41, 0x88, 0x84, 0x08); I(3073); e.B(0xff, 0xc1); e.J(0x84, label + "Mount", true);
             e.Label(label + "MountEnd"); e.B(0x41, 0xc6, 0x84, 0x08); I(3073); e.B(0x3a);
-            Call(0x1e90630);
-            e.B(0x48, 0x89, 0xc1, 0x48, 0x8b, 0x00, 0x48, 0x8b, 0x93); I(256);
-            e.B(0x4c, 0x8d, 0x82); I(2048); e.B(0x48, 0x81, 0xc2); I(3072);
-            e.B(0x45, 0x31, 0xc9, 0xff, 0x90); I(0x140);
-            e.B(0x48, 0x8b, 0x93); I(256); e.B(0x88, 0x82); I(3328);
+            if (!profile.Limited)
+            {
+                Call(0x1e90630);
+                e.B(0x48, 0x89, 0xc1, 0x48, 0x8b, 0x00, 0x48, 0x8b, 0x93); I(256);
+                e.B(0x4c, 0x8d, 0x82); I(2048); e.B(0x48, 0x81, 0xc2); I(3072);
+                e.B(0x45, 0x31, 0xc9, 0xff, 0x90); I(0x140);
+                e.B(0x48, 0x8b, 0x93); I(256); e.B(0x88, 0x82); I(3328);
+            }
+            else
+            {
+                // 1.9 GetAbsolutePath owner produces an engine string, not a raw buffer.
+                // Scratch pointer at row+3344 is zero-initialized. Copy bounded bytes,
+                // then release our reference using the same destructor sequence as the wrapper.
+                e.B(0x48, 0x8b, 0x8b); I(256);
+                e.B(0x48, 0x8d, 0x91); I(3344);
+                e.B(0x48, 0x81, 0xc1); I(3072);
+                e.B(0x45, 0x31, 0xc0, 0x45, 0x31, 0xc9, 0xc7, 0x44, 0x24, 0x20); I(-1);
+                Call(profile.ResolvePath);
+                e.B(0x4c, 0x8b, 0x83); I(256);
+                e.B(0x41, 0x88, 0x80); I(3328);
+                e.B(0x49, 0x8b, 0x90); I(3344);
+                e.B(0x48, 0x85, 0xd2); e.J(0x84, label + "MountReleased");
+                e.B(0x8b, 0x4a, 0xf8, 0x81, 0xf9); I(1024);
+                e.J(0x82, label + "MountCopyStart");
+                e.B(0x41, 0xc6, 0x80); I(3360); e.B(1);
+                e.J(0x84, label + "MountRelease", true);
+                e.Label(label + "MountCopyStart");
+                e.B(0x45, 0x31, 0xc9);
+                e.Label(label + "MountCopy");
+                e.B(0x44, 0x39, 0xc9); e.J(0x84, label + "MountRelease");
+                e.B(0x42, 0x8a, 0x04, 0x0a, 0x43, 0x88, 0x84, 0x08); I(2048);
+                e.B(0x41, 0xff, 0xc1); e.J(0x84, label + "MountCopy", true);
+                e.Label(label + "MountRelease");
+                e.B(0x48, 0x89, 0xd1, 0xf0, 0xff, 0x49, 0xfc);
+                e.J(0x85, label + "MountReleased");
+                e.B(0x48, 0x83, 0xe9, 12, 0x31, 0xd2); Call(profile.ReleaseString);
+                e.Label(label + "MountReleased");
+                e.B(0x4c, 0x8b, 0x83); I(256);
+                e.B(0x49, 0xc7, 0x80); I(3344); I(0);
+                e.B(0x41, 0x80, 0xb8); I(3360); e.B(0);
+                e.J(0x85, "projectInvalid");
+            }
             e.B(0x48, 0x81, 0x83); I(256); I(ProjectRowSize);
             e.B(0xff, 0x83); I(264); e.J(0x84, label + "Loop", true);
             e.Label(label + "End");
@@ -87,3 +132,6 @@ internal static partial class NativeWorkbench
         e.Label("projectInvalid"); e.B(0xc7, 0x43, 72, 28, 0, 0, 0); e.J(0x84, "return", true);
     }
 }
+
+
+

@@ -84,6 +84,7 @@ public sealed class Workbench(Configuration configuration) : IDisposable
                 };
                 start.ArgumentList.Add("-gproj");
                 start.ArgumentList.Add(projectPath);
+                start.ArgumentList.Add("-scriptAuthorizeAll");
                 if (config.AddonDirectories.Length > 0)
                 {
                     start.ArgumentList.Add("-addonsDir");

@@ -16,6 +16,9 @@ New-Item -ItemType Directory -Path (Join-Path $destination 'docs') | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'docs/workbench-runtime.md') -Destination (Join-Path $destination 'docs')
 Copy-Item -LiteralPath (Join-Path $root 'docs/project-context.md') -Destination (Join-Path $destination 'docs')
 Copy-Item -LiteralPath (Join-Path $root 'docs/shared-server.md') -Destination (Join-Path $destination 'docs')
+Copy-Item -LiteralPath (Join-Path $root 'docs/native-hook-updates.md') -Destination (Join-Path $destination 'docs')
+Copy-Item -LiteralPath (Join-Path $root 'docs/mcp-acceptance.md') -Destination (Join-Path $destination 'docs')
+Copy-Item -LiteralPath (Join-Path $root 'docs/workbench-maintenance-profile.md') -Destination (Join-Path $destination 'docs')
 Copy-Item -LiteralPath (Join-Path $root 'docs/workbench-targeting.md') -Destination (Join-Path $destination 'docs')
 $adapterDirectory = Join-Path $destination 'adapters/workbench/Scripts/WorkbenchGame'
 New-Item -ItemType Directory -Path $adapterDirectory -Force | Out-Null

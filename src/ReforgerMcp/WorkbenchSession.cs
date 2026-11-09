@@ -64,6 +64,7 @@ public sealed partial class WorkbenchSession(Configuration configuration, Workbe
             backend = "Windows UI Automation observations",
             nativeReload = NativeWorkbench.Status(process),
             automaticResourceLeakSuppression = AutomaticResourceLeakSuppression,
+            automaticFocusPolicy = AutomaticFocusPolicy,
             windows = windows.Select(w => new
             {
                 title = w.Current.Name,

@@ -14,7 +14,7 @@
     "workbench": "D:/SteamLibrary/steamapps/common/Arma Reforger Tools/Workbench/ArmaReforgerWorkbenchSteamDiag.exe",
     "server": "E:/DedicatedServers/Reforger/ArmaReforgerServer.exe"
   },
-  "analysisTimeoutSeconds": 1800,
+  "analysisTimeoutSeconds": 3600,
   "queryTimeoutSeconds": 120,
   "analysisCpuCount": 2,
   "javaHeapMegabytes": 4096,

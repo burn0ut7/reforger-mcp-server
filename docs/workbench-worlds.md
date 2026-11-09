@@ -119,7 +119,7 @@ Call `workbench_script_status` for the current `processId`, then:
 
 The PID above is illustrative. Use the observed PID. A relative resource path such as `worlds/MP/MpTest/MpTest_Basic.ent` or an absolute path accessible to the loaded project also works. The loaded project must include the resource's addon/dependencies. World Editor is created if needed; otherwise the clean current world is replaced. Opening can run the project's normal engine/script initialization. The tool does not start play mode.
 
-Use `capture_windows` and `capture_screenshot` to inspect the resulting World Editor window. Those tools capture directly without activating it. World opening does not explicitly raise an existing editor, but Workbench's creation, progress or error UI may activate. Foreground samples are observations, not a universal guarantee against activation.
+Use `capture_windows` and `capture_screenshot` to inspect the resulting World Editor window. Those tools capture directly without activating it. The automatic [background focus policy](workbench-focus.md) suppresses supported Qt activation during creation, progress and error UI. Foreground samples are observations, not a universal guarantee against activation; see the policy's coverage limits.
 
 ## Preconditions and results
 

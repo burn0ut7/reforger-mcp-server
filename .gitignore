@@ -55,3 +55,10 @@ configuration*.json
 !adapters/workbench/Scripts/WorkbenchGame/RST_Runtime.c
 
 !adapters/workbench/Scripts/WorkbenchGame/RST_EditorChoices.c
+/tests
+!/tests/
+/tests/*
+!/tests/McpAcceptance/
+!/tests/NativeHookUpdate/
+!/tests/WorkbenchMaintenance/
+!/tests/WorkbenchFocus/

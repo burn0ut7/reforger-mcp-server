@@ -16,6 +16,16 @@ public sealed class WorkbenchScriptTools(WorkbenchSession scripts)
     [Description("Observe Workbench processes, windows and the existing compiler buffer; does not compile scripts.")]
     public Task<object> Status(CancellationToken cancellationToken = default) => Report(() => scripts.Status(cancellationToken));
 
+    [McpServerTool(Name = "workbench_focus_policy", ReadOnly = false, Destructive = false, OpenWorld = false)]
+    [Description("action=status|enable|disable: process-local Qt background activation/raising and taskbar-flash suppression. Enabled automatically; manual switching and foreground use remain available. disable permits focus-dependent exceptions until enable or Workbench exit. Returns per-API suppression counters; excludes startup before attachment and separate game clients.")]
+    public Task<object> FocusPolicy(string action, int processId, CancellationToken cancellationToken = default)
+        => Report(() => scripts.FocusPolicy(action, processId, cancellationToken));
+
+    [McpServerTool(Name = "workbench_script_authorization", ReadOnly = false, Destructive = false, OpenWorld = false)]
+    [Description("action=status|allow for Workbench's process-local Yes to All script permissions. Automatically allowed at native dispatch/startup; MCP launches add -scriptAuthorizeAll. Covers all protected script methods, including container/file access and process operations. Existing open dialogs must be resolved once. Returns live decision readback.")]
+    public Task<object> ScriptAuthorization(string action, int processId, CancellationToken cancellationToken = default)
+        => Report(() => scripts.ScriptAuthorization(action, processId, cancellationToken));
+
     [McpServerTool(Name = "workbench_resource_leak_assertion", ReadOnly = false, Destructive = false, OpenWorld = false)]
     [Description("action=status|suppress for the process-local Resources are leaking assertion. Automatic monitor also suppresses it; logging and existing dialogs remain unchanged.")]
     public Task<object> ResourceLeakAssertion(string action, int processId, CancellationToken cancellationToken = default)
