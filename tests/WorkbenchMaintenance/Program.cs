@@ -3,6 +3,9 @@ using System.Text;
 using ReforgerMcp;
 
 if (args.Length > 0) { Environment.ExitCode = await LiveMaintenance.Run(args); return; }
+PlayCallbackChecks.Run();
+RuntimeSetupChecks.Run();
+WorldCallbackChecks.Run();
 
 var allocations = new List<nint>();
 nint Alloc(int size) { var p = Marshal.AllocHGlobal(size); Marshal.Copy(new byte[size],0,p,size); allocations.Add(p); return p; }
@@ -53,6 +56,9 @@ try {
     Check(!NativeWorkbench.MaintenanceProfile.FromHash(NativeWorkbench.MaintenanceProfile.Legacy.Hash).Limited,"legacy profile retained");
     var rejected=false;try{NativeWorkbench.MaintenanceProfile.FromHash(new string('0',64));}catch(InvalidOperationException){rejected=true;}
     Check(rejected,"unknown binary rejected");
+    Check(NativeWorkbench.MaintenanceProfile.Current.SupportsUi("close") && NativeWorkbench.MaintenanceProfile.Current.SupportsUi("invoke"),"1.9 pinned Qt lifecycle actions admitted");
+    Check(!NativeWorkbench.MaintenanceProfile.Current.SupportsUi("add_item") && !NativeWorkbench.MaintenanceProfile.Current.SupportsUi("unknown"),"1.9 engine-dependent and unknown UI actions rejected");
+    Check(NativeWorkbench.MaintenanceProfile.Current.Reload == 0x22ca80 && NativeWorkbench.MaintenanceProfile.Current.ReloadBlockedOffset == 0x1656,"1.9 owning reload and moved state offset");
     Run();
     Check(Marshal.ReadInt32(output,72)==2,"project callback completes");
     Check(Marshal.ReadInt32(output,104)==1 && Marshal.ReadInt32(output,108)==1,"loaded and available counts");

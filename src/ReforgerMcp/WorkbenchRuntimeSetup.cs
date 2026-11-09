@@ -115,6 +115,14 @@ public sealed partial class WorkbenchSession
                     new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.TabItem))
                     .Cast<System.Windows.Automation.AutomationElement>().Any(t => t.Current.Name.Contains('*')))))
                 throw Blocked(process, "Close unsupported editors and save script tabs before installing the profile bridge. World Editor may remain open; setup uses the normal reload operation.");
+            if (action == "install")
+            {
+                var play = JsonSerializer.SerializeToElement(NativeWorkbench.Execute(process, token, play: "status"), Configuration.Json);
+                var playState = play.GetProperty("state").GetString();
+                if (playState != "world_unavailable" && (playState != "observed" ||
+                    !play.TryGetProperty("isPlaying", out var playing) || playing.ValueKind != JsonValueKind.False))
+                    throw Blocked(process, "Confirm embedded Play is stopped before installing the profile bridge. No adapter files or settings changed.");
+            }
             var native = (NativeRuntimeSetup)NativeWorkbench.Execute(process, token, runtimeSetup: false);
             var target = RuntimeAdapter.PathIn(native.ProfileDirectory);
             RuntimeAdapter.CheckPath(target);

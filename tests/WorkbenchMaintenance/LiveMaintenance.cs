@@ -39,7 +39,7 @@ internal static class LiveMaintenance
                 Endpoint = new Uri($"http://127.0.0.1:{http.Port}/mcp"),
                 AdditionalHeaders = new Dictionary<string,string> { ["Authorization"] = "Bearer " + token }
             }), cancellationToken:deadline.Token);
-            async Task<JsonElement> Call(string tool,object arguments,bool expectedRejection=false,CancellationToken? cleanupToken=null)
+            async Task<JsonElement> Call(string tool,object arguments,CancellationToken? cleanupToken=null)
             {
                 var argsMap=JsonSerializer.Deserialize<Dictionary<string,object?>>(JsonSerializer.Serialize(arguments))!;
                 var original = tool;
@@ -48,12 +48,6 @@ internal static class LiveMaintenance
                     var result=await client.CallToolAsync(tool,argsMap,cancellationToken:cleanupToken ?? deadline.Token);
                     var text=string.Join("\n",result.Content.OfType<TextContentBlock>().Select(b=>b.Text));
                     Save($"{++sequence:000}-{tool}.json",new { arguments=argsMap,result.IsError,text });
-                    if(expectedRejection)
-                    {
-                        Check(result.IsError==true && text.Contains("not yet validated",StringComparison.Ordinal),
-                            "Unported 1.9 operation rejected explicitly before dispatch");
-                        return default;
-                    }
                     if(result.IsError==true)throw new Exception(original+": "+text);
                     var value=JsonDocument.Parse(text).RootElement.Clone();
                     if(value.TryGetProperty("poll",out var poll) &&
@@ -116,7 +110,9 @@ internal static class LiveMaintenance
             ThreadResult(leak);
             leak=await Call("workbench_resource_leak_assertion",new {processId=pid,action="status"});
             Check(State(leak)=="observed" && leak.GetProperty("suppressed").GetBoolean(),"Suppression persists on independent status");
-            await Call("workbench_play_status",new {processId=pid},expectedRejection:true);
+            var play = await Call("workbench_play_status",new {processId=pid});
+            Check(State(play) is "observed" or "world_unavailable", "Play observation reports present or absent World Editor");
+            ThreadResult(play);
             var after=await Call("workbench_project_context",new {processId=pid,scope="all",limit=100});
             string Identity(JsonElement e)=>JsonSerializer.Serialize(e.GetProperty("addons").EnumerateArray()
                 .Select(a=>new {guid=a.GetProperty("guid").GetString(),path=a.GetProperty("projectFile").GetString(),loaded=a.GetProperty("loaded").GetBoolean(),current=a.GetProperty("current").GetBoolean()}));
@@ -128,10 +124,10 @@ internal static class LiveMaintenance
             passed=true;
         }
         catch(Exception ex) { failure=token.Length>0?ex.Message.Replace(token,"[redacted]"):ex.Message; }
-        Save("report.json",new { started,finished=DateTimeOffset.UtcNow,scope="Four Workbench maintenance features on 1.9; not full MCP certification",
+        Save("report.json",new { started,finished=DateTimeOffset.UtcNow,scope="Workbench maintenance features and read-only Play observation on 1.9; not full MCP certification",
             passed,failure,checks,
-            limits="No real focus-steal event or resource-leak condition induced. Native policy/readback plus separate machine-code fixtures tested. No compile, save, Play or project switch." });
-        Console.WriteLine(passed?"Four-feature maintenance acceptance PASSED":"Maintenance acceptance FAILED: "+failure);
+            limits="No real focus-steal event or resource-leak condition induced. Native policy/readback plus separate machine-code fixtures tested. No compile, save, Play transition or project switch." });
+        Console.WriteLine(passed?"Maintenance and Play-observation acceptance PASSED":"Maintenance acceptance FAILED: "+failure);
         return passed?0:1;
     }
 }

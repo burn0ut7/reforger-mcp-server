@@ -10,7 +10,7 @@ $allowed = @(
     '^docs/[A-Za-z0-9-]+\.md$',
     '^scripts/[A-Za-z0-9-]+\.(ps1|mjs)$',
     '^tests/ToolActivity/(Program\.cs|ToolActivity\.csproj)$',
-    '^tests/WorkbenchMaintenance/(Program\.cs|LiveMaintenance\.cs|WorkbenchMaintenance\.csproj)$',
+    '^tests/WorkbenchMaintenance/(Program\.cs|LiveMaintenance\.cs|PlayCallbackChecks\.cs|RuntimeSetupChecks\.cs|WorldCallbackChecks\.cs|WorkbenchMaintenance\.csproj)$',
     '^tests/WorkbenchFocus/(Program\.cs|WorkbenchFocus\.csproj)$',
     '^tests/McpAcceptance/(Program\.cs|McpAcceptance\.csproj)$',
     '^tests/NativeHookUpdate/(Program\.cs|NativeHookUpdate\.csproj)$',
