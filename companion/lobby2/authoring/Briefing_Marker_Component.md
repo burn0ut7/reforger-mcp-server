@@ -6,9 +6,25 @@ replicated runtime updates; the entity's world origin and yaw become the marker
 position and rotation. Entity names used by markers must be non-empty and
 unique. There is no separate marker-name property on the component.
 
-Workbench renders a direction arrow in the authored marker color. The arrow is
-created once in local space and follows the entity transform; entity yaw also
-controls the in-game marker.
+Place `Prefabs/Logic/Mission/MapMarker.et` and give the entity a unique name.
+It starts with a white circle icon at 48 screen pixels. Configure its
+`GC_BriefingMarkerComponent` to choose the image, label, color and audience.
+
+Workbench renders a direction arrow in the authored marker color. It follows
+position and yaw; pitch, roll and entity scale do not affect map markers.
+Moving a marker in Workbench snaps its authored Y position to terrain height at
+the new X/Z position, as part of the editor transform operation.
+Selecting a marker also shows its actual icon on a flat horizontal plane, fifteen
+centimetres above the entity. The preview follows the terrain-snapped entity;
+it does not sample terrain or rebuild geometry every frame. It uses the editor
+icon material's overall overlay pass so terrain does not hide the preview.
+The preview uses the map's yaw-minus-90 rotation and
+preserves the icon's aspect ratio. World-scaled icons use the authored width in
+metres; screen-scaled icons use a five-metre preview width. Minimum pixel size,
+labels, hover highlights and faction/phase visibility are map-only presentation.
+The preview disappears on deselection and is not saved or replicated. All preview
+code is compiled only for Workbench, runs only in edit mode, and is cleared for
+embedded Play; no 3D marker is created in an actual game session.
 
 ## Authored properties
 
@@ -50,17 +66,14 @@ rendered pixel size remains independent of map scale. Missing, hidden, or
 unavailable markers produce a
 `GC | Briefing marker focus failed: ...` warning in the console.
 
-## Image-set quad picker finding
+## Image-set quad names
 
-Workbench's public scripted attribute system provides resource pickers and
-static combo boxes, but it does not expose an API that enumerates quad names
-from an arbitrary `.imageset`. The base-game `SCR_MarkerSimpleConfig` follows
-the same supported pattern used here: a thumbnail image-set resource picker and
-a separate string for the quad name.
-
-A true resource-dependent quad dropdown would therefore require a dedicated
-custom Workbench property editor rather than a component `Attribute`. That is a
-separate editor-tooling slice and is not required by the runtime marker system.
+Enter an exact image-set quad name, for example `circle-2` or `arrow-large` in
+`icons_mapMarkersUI.imageset`. The selected 3D preview updates when the image or
+quad changes. Invalid resources or quads leave the direction arrow visible and
+emit a preview warning instead of displaying a substitute icon. Scripts can
+enumerate names with `WidgetManager.GetImageSetImages`; this component currently
+uses a thumbnail resource picker and a separate text field.
 
 ## Multiplayer ownership
 
