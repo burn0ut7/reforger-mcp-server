@@ -62,3 +62,6 @@ configuration*.json
 !/tests/NativeHookUpdate/
 !/tests/WorkbenchMaintenance/
 !/tests/WorkbenchFocus/
+
+!companion/lobby2/integrations/MapDrawing/addon.gproj
+resourceDatabase.rdb

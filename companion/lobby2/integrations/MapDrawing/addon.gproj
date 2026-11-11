@@ -1,0 +1,9 @@
+GameProject {
+ ID "Lobby2MapDrawing"
+ GUID "6A115D5DFF7ED8B1"
+ TITLE "Lobby2 Map Drawing Plans"
+ Dependencies {
+  "6A115D5DFF7ED870"
+  "656AC01634459D8D"
+ }
+}
