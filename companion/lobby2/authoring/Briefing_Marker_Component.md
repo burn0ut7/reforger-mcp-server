@@ -16,8 +16,10 @@ Moving a marker in Workbench snaps its authored Y position to terrain height at
 the new X/Z position, as part of the editor transform operation.
 Selecting a marker also shows its actual icon on a flat horizontal plane, fifteen
 centimetres above the entity. The preview follows the terrain-snapped entity;
-it does not sample terrain or rebuild geometry every frame. It uses the editor
-icon material's overall overlay pass so terrain does not hide the preview.
+it does not sample terrain or rebuild geometry every frame. Depth testing is
+disabled, matching the game's editor direction indicator, so terrain and other
+world geometry do not hide the selected preview. Sorting alone does not disable
+depth testing.
 The preview uses the map's yaw-minus-90 rotation and
 preserves the icon's aspect ratio. World-scaled icons use the authored width in
 metres; screen-scaled icons use a five-metre preview width. Minimum pixel size,
