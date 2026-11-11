@@ -5,7 +5,7 @@ description, details, world and player-count fields remain owned by the game.
 `m_GC_Catalog` adds author-confirmed information for the GC website. This schema
 does not change player slots, factions, mission logic or game-mode behavior.
 
-`Configs/Missions/ArlandLobby.conf` is a minimal unlisted authoring example used
+`Configs/Missions/Gray/ArlandLobby.conf` is a minimal unlisted authoring example used
 by the website's local Arland test entry. It deliberately leaves capacity,
 objectives and equipment unspecified. Register a scenario through Workbench
 when publishing a launchable mission, preserving its generated `.conf.meta`.
@@ -37,11 +37,14 @@ possible instead of maintaining duplicate metadata. Publish the saved `.conf`
 and `.conf.meta` to the configured mission repository. The website worker checks
 on startup and every ten minutes when enabled; no manual website import is needed.
 
-The existing Workbench scanner writes **generated content evidence** beside the
-world as `<world>.ent.metadata.json`. The website now discovers that file through
-the scenario's world path in the same repository. Save/export and commit it with
-the mission if desired. It is a partial editor snapshot, not a complete dependency
-or player-equipment inventory. Use **GC > Create Mission Data > Refresh metadata only** to refresh it. **Submit Mission** also refreshes the snapshot before review.
+The Workbench collector stores **generated content evidence** inside the scenario
+header's native `m_GC_GeneratedMetadata` object. The website reads that object
+from the same `.conf`; no separate world JSON is produced or consumed. Refresh
+existing missions once before removing their old `.ent.metadata.json` exports.
+It is a partial editor snapshot, not a complete dependency or player-equipment
+inventory. Save header edits in Resource Manager, then use **GC > Create Mission
+Data > Refresh metadata only**. **Submit Mission** also refreshes the snapshot
+before review. Both preserve authored header settings.
 The picker labels the authored local starting hour as Morning (06–11), Midday (12–16), Evening (17–20), or Night (21–05). Starts spanning periods show Variable. A missing or ambiguous source leaves the label empty.
 Ordinary saves and property edits do not trigger scans. Save the header separately
 in Resource Manager. No production game/server scans are added.

@@ -27,7 +27,7 @@ function Get-SubmissionMission($root, $world) {
     $header = $headers[0]
     $layers = $relative.Substring(0,$relative.Length-4) + '_Layers'
     $required = @($relative, "$relative.meta", $header.File, ($header.File+'.meta'))
-    @{Title=$header.Title; Required=$required; Scope=($required + @($layers,"$relative.metadata.json"))}
+    @{Title=$header.Title; Required=$required; Scope=($required + @($layers))}
 }
 
 # Prepare exactly the saved mission files in a temporary index. Unrelated staged
