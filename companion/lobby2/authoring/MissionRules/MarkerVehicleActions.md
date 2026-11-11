@@ -12,7 +12,7 @@ The existing marker's phase requirement and global visible state still apply. Hi
 
 Example: for `Objective_A`, add `US` with Visible checked and `USSR` unchecked. Leave Visible Without Faction unchecked. Other factions retain their previous visibility.
 
-This corresponds to TilW's per-faction and empty-faction marker visibility. It targets Lobby2 catalog markers, not legacy PS/COA markers, separate PS_MissionDescription entities, player-drawn markers or map shapes. The existing TilW compatibility adapter is unchanged; automatic legacy mission conversion is outside this action. Marker color, position, text, phase and size remain intact.
+This supports per-faction and empty-faction marker visibility. It targets Lobby2 catalog markers, not legacy PS/COA markers, separate PS_MissionDescription entities, player-drawn markers or map shapes. Lobby2 does not integrate with TilW Mission Framework; automatic legacy mission conversion is outside this action. Marker color, position, text, phase and size remain intact.
 
 Implementation: detached catalog snapshots are validated before upsert. Existing catalog revision, reliable update and joining-player snapshot paths carry the audience. Three audience booleans were added consistently to marker copying, stream serialization and snapshot serialization/comparison. Server and clients must use the same updated Lobby2 build. The existing SetBriefingMarkerVisible method now copies the full marker before toggling visibility, preserving the audience. SetBriefingMarker continues to replace the complete definition and its audience.
 

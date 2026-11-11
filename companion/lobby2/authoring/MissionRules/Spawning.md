@@ -27,7 +27,9 @@ Example: select Crewed Vehicle, choose a transport prefab, and set Location to `
 
 ## Execution and limits
 
-The existing manager gate requires the active Lobby2 server and its running framework instance. This adds no RPC, shared engine override, registry, spawn hook, frame callback or world scan. Names are resolved directly when the action executes. Native groups own membership after spawning. Crew creation is synchronous through native compartment methods; there is no repeating timer or pending job after mode exit.
+The existing manager gate requires the active Lobby2 server and its running framework instance. Names are resolved directly when the action executes. Native groups own membership after spawning. Crew creation is synchronous through native compartment methods; there is no repeating timer or pending job after mode exit.
+
+Keep Gunners Seated uses a Lobby2-owned combat-component override, independent of TilW Mission Framework. Only explicitly configured spawned gunners in their originating Lobby2 game-mode instance suppress voluntary combat dismounting. Other characters and modes retain the inherited decision; old mode ownership is cleared when it no longer matches. This adds no RPC, registry, spawn hook, frame callback or world scan.
 
 Resource and waypoint checks happen before spawning. A failed setup removes the newly created root, crew and crew groups tracked by this attempt. Existing named entities/groups are never replaced or merged. This is cleanup, not a transactional undo of arbitrary third-party prefab component side effects. Successful spawns remain ordinary world entities; resetting an event does not delete them.
 
