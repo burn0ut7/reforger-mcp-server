@@ -8,7 +8,7 @@ modded class GC_LobbyManager
 	protected int m_iGC_WavePlayer;
 	protected string m_sGC_WaveFaction;
 
-	string GC_PrepareLocationWaveTest()
+	string GC_PrepareLocationWaveTest(bool briefingOnly = false)
 	{
 		GC_LobbyGameMode mode = GC_LobbyGameMode.GetGameMode();
 		PlayerController player = GetGame().GetPlayerController();
@@ -28,7 +28,9 @@ modded class GC_LobbyManager
 		if (!chosen || !TryAssignPlayerToSlot(m_iGC_WavePlayer, chosen.GetID()))
 			return "BLOCKED: no selectable slot";
 		mode.GC_SetLobbyState(SCR_EGameModeState.BRIEFING);
-		if (!StartLobbyGame())
+		if (briefingOnly)
+			ForceSpawnClaimedSlots();
+		else if (!StartLobbyGame())
 			return "BLOCKED: could not start match";
 		m_sGC_WaveFaction = ResolveSlotGroup(chosen).GetFaction().GetFactionKey();
 		m_vGC_OriginalWavePosition = chosen.GetEntity().GetOrigin();
@@ -41,6 +43,36 @@ modded class GC_LobbyManager
 		GC_LobbyManager.Cast(this).GC_SetRespawnLocation({m_sGC_WaveFaction}, named);
 		GC_LobbyManager.Cast(this).GC_SetFactionRespawnTickets(m_sGC_WaveFaction, 2);
 		return "ready; kill then run cases 0, 1, 2 separately";
+	}
+
+	string GC_DeleteBriefingTestBody(bool removeAnchor)
+	{
+		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (GetLobbyPhase() != SCR_EGameModeState.BRIEFING || !slot || !slot.GetEntity())
+			return "BLOCKED: briefing test body required";
+		if (removeAnchor && m_GC_WaveAnchor)
+		{
+			SCR_EntityHelper.DeleteEntityAndChildren(m_GC_WaveAnchor);
+			m_GC_WaveAnchor = null;
+		}
+		SCR_EntityHelper.DeleteEntityAndChildren(slot.GetEntity());
+		return "deletion requested";
+	}
+
+	string GC_CheckBriefingLocation(bool expectMissing)
+	{
+		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (!slot || GetLobbyPhase() != SCR_EGameModeState.BRIEFING)
+			return "BLOCKED: briefing test slot required";
+		ForceSpawnClaimedSlots();
+		if (expectMissing)
+			return string.Format("missing passed=%1", slot.IsKIA() && !slot.GetEntity());
+		if (!m_GC_WaveAnchor || !slot.GetEntity())
+			return "FAIL: replacement missing";
+		vector expected = m_GC_WaveAnchor.GetOrigin();
+		expected[1] = GetGame().GetWorld().GetSurfaceY(expected[0], expected[2]);
+		return string.Format("briefing passed=%1 distance=%2", !slot.IsKIA() && vector.Distance(slot.GetEntity().GetOrigin(), expected) < 1,
+			vector.Distance(slot.GetEntity().GetOrigin(), expected));
 	}
 
 	string GC_KillLocationWavePlayer()
@@ -105,6 +137,47 @@ modded class GC_LobbyManager
 		if (!passed)
 			m_iGC_LocationFailures++;
 		PrintFormat("GC_RESPAWN_LOCATION_CHECK passed=%1 %2", passed, label);
+	}
+
+	string GC_RunIndividualLocationCase(int testCase)
+	{
+		GC_LobbyManager manager = GC_LobbyManager.Cast(this);
+		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (!slot || !slot.IsKIA() || !slot.GetEntity() || !m_GC_WaveAnchor)
+			return "BLOCKED: wait for KIA test slot";
+		IEntity previous = slot.GetEntity();
+		int tickets = manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction);
+		string denied = ExecuteAdminSlotAction(0, slot.GetID(), slot.GetUUID(), GC_EAdminSlotAction.HEAL_OR_RESPAWN);
+		if (denied != "rejected-not-logged-in" || slot.GetEntity() != previous || !slot.IsKIA())
+			return "FAIL: unauthenticated recovery mutated slot";
+		if (!SCR_Global.IsAdmin(m_iGC_WavePlayer))
+			return "BLOCKED: local test player is not logged in as admin";
+		vector expected = m_vGC_OriginalWavePosition + "40 0 40";
+		m_GC_WaveAnchor.SetOrigin(expected);
+		GC_EAdminSlotAction action = GC_EAdminSlotAction.HEAL_OR_RESPAWN;
+		if (testCase == 2)
+		{
+			action = GC_EAdminSlotAction.RESPAWN_CURRENT;
+			expected = previous.GetOrigin();
+		}
+		else if (testCase == 3)
+		{
+			action = GC_EAdminSlotAction.RESPAWN_ORIGINAL;
+			expected = m_vGC_OriginalWavePosition;
+		}
+		else
+			expected[1] = GetGame().GetWorld().GetSurfaceY(expected[0], expected[2]);
+		string outcome;
+		if (testCase == 1)
+			outcome = manager.GC_ExecuteAdminHeal(m_iGC_WavePlayer, GC_EAdminHealScope.SELECTED, {m_iGC_WavePlayer}, {GetPlayerVoiceIdentity(m_iGC_WavePlayer)}, 1, 10);
+		else
+			outcome = ExecuteAdminSlotAction(m_iGC_WavePlayer, slot.GetID(), slot.GetUUID(), action);
+		IEntity body = slot.GetEntity();
+		bool passed = body && body != previous && !slot.IsKIA()
+			&& GetGame().GetPlayerManager().GetPlayerControlledEntity(m_iGC_WavePlayer) == body
+			&& vector.Distance(body.GetOrigin(), expected) < 1
+			&& manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) == tickets;
+		return string.Format("individual=%1 passed=%2 outcome=%3", testCase, passed, outcome);
 	}
 
 	string GC_TestRespawnLocations()
@@ -183,9 +256,20 @@ modded class GC_LobbyManager
 			fixed.m_vOffset = "0 0 0";
 			fixed.m_vPosition = ResolveSlotGroup(candidate).GetOrigin();
 			fixed.Resolve(world, candidate, 0, result);
-			string spawned = RespawnAdminSlot(candidate, false, result);
+			string spawned = RespawnAdminSlot(candidate, false, fixed);
 			IEntity body = candidate.GetEntity();
 			GC_CheckLocation(spawned == "applied" && body && vector.Distance(body.GetOrigin(), result.Transform[3]) < 0.1, "production respawn owner spawns character at override");
+			GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction}, fixed);
+			fixed.m_vPosition = fixed.m_vPosition + "10 0 10";
+			fixed.Resolve(world, candidate, 0, result);
+			spawned = RespawnAdminSlot(candidate, true);
+			body = candidate.GetEntity();
+			GC_CheckLocation(spawned == "applied" && body && vector.Distance(body.GetOrigin(), result.Transform[3]) < 0.1, "individual respawn uses default ahead of current fallback");
+			GC_EntityRespawnLocation missing = new GC_EntityRespawnLocation();
+			missing.m_aEntities = {"GC_MissingIndividualRespawn"};
+			GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction}, missing);
+			GC_CheckLocation(RespawnAdminSlot(candidate, false) == "rejected-respawn-location" && candidate.GetEntity() == body, "missing individual destination retains previous body");
+			GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction}, prior);
 			if (body)
 				SCR_EntityHelper.DeleteEntityAndChildren(body);
 			candidate.SetEntity(null);

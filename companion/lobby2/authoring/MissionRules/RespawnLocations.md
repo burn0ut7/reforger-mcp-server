@@ -1,10 +1,13 @@
 # Respawn locations
 
-**Respawn Wave Action > Location** selects where this wave puts its eligible players. Leave Location empty to use the faction's current default. Without a configured default, existing missions retain their original slot positions.
+**Set Respawn Location Action** defines the faction's default for all replacement-character respawns, including individual heal-and-respawn, admin group/player recovery, briefing body replacement and automatic/scripted waves. The shared respawn transaction resolves it immediately before creating a replacement. Initial deployment and reconnecting to an existing living character are not respawns.
+
+**Respawn Wave Action > Location** optionally overrides that default for one action. Explicit original/current-position admin commands also remain deliberate overrides. Without a configured default or override, existing callers retain their normal original/current fallback.
 
 | Location | Behavior |
 | --- | --- |
 | Original slot position | Explicitly use the slot's saved start, ignoring any faction default. |
+| Current character position | Explicitly use the existing slot character/corpse's position and rotation. Reject if the body no longer exists. |
 | Named entities | Select one or more uniquely named world entities. Every spawn reads the selected entity's current position and heading. Players cycle through the list, then fill successive rows at each destination. |
 | World position | Use fixed world coordinates and a heading. |
 
@@ -14,9 +17,11 @@ Placement numbering restarts for each wave and is shared by players using the sa
 
 ## Changing destinations during a mission
 
-Use **Set Respawn Location Action**, select explicit **Factions**, and add a **Location**. This changes their default for subsequent automatic parameter waves and Respawn Wave Actions that leave Location empty. It does not move or respawn living players. Run another Set action to replace the default; an empty Location resets those factions to their original starts. All faction names and configuration are validated before any default changes. Defaults belong to the running mission and disappear when that game mode is destroyed.
+Use **Set Respawn Location Action**, select explicit **Factions**, and add a **Location**. This changes their default for all subsequent respawns without an explicit location override. It does not move or respawn living players. Run another Set action to replace the default; an empty Location restores the callers' normal original/current fallback. Choose Original Slot Position explicitly if every ordinary recovery must return to the starting point. All faction names and configuration are validated before any default changes. Defaults belong to the running mission and disappear when that game mode is destroyed.
 
 Named anchors are resolved at spawn time, not cached at mission start. An anchor can be authored in the world, spawned later, moved or rotated using normal mission scripts, or be a moving vehicle. Use a local offset to place players beside that vehicle. Deleting an anchor makes it unavailable until another entity with that exact name exists. An unavailable selected destination skips that player without consuming a ticket or falling back elsewhere. Duplicate names in the world are unsupported; give anchors unique names.
+
+Briefing death/deletion recovery also uses the shared destination. If recovery cannot resolve the location, the claimed slot remains KIA rather than being silently recreated by initial-spawn catch-up. Restore a valid destination and use an explicit recovery command, or a later Match respawn. Current Character Position requires a retained slot body; briefing cleanup/deletion clears that reference, so that policy cannot recover it without an explicit different destination.
 
 Examples:
 
@@ -24,9 +29,9 @@ Examples:
 - **Mobile rally point:** use the name of a support vehicle, offset behind it, and terrain snapping. Every later wave follows its current location and heading.
 - **One reinforcement insertion:** give a single Respawn Wave Action its own Location; later waves still use the faction default.
 - **Multiple landing points:** list named markers in their desired order; players distribute across them, then into rows. The existing Random Order option randomizes players, not destination order.
-- **Restore the original deployment:** clear the faction default, or explicitly select Original Slot Position for a single wave.
+- **Restore the original deployment:** set the faction default to Original Slot Position, or choose it explicitly for a single action. Clearing the default restores each caller's previous original/current fallback.
 
-Existing faction filters, maximum-player limits, ticket refunds, connected/KIA eligibility and variant policies still apply. Admin commands explicitly requesting original/current positions retain those meanings and ignore mission defaults. A failed spawn or possession retains the old slot/body and refunds any reserved ticket.
+Existing faction filters, maximum-player limits, ticket refunds, connected/KIA eligibility and variant policies still apply. Admin commands explicitly requesting original/current positions retain those meanings and ignore mission defaults; ordinary Heal/Respawn commands use the default when replacing a dead player. Individual recovery uses placement index zero; wave batches allocate indices per location. A failed location resolution, spawn or possession retains the old slot/body and refunds any ticket reserved by a wave. Admin recovery still uses its existing permissions and ticket-free behavior.
 
 ## Mission-script extension
 
