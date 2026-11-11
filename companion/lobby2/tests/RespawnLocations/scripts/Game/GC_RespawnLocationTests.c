@@ -7,6 +7,11 @@ modded class GC_LobbyManager
 	protected vector m_vGC_OriginalWavePosition;
 	protected int m_iGC_WavePlayer;
 	protected string m_sGC_WaveFaction;
+	protected bool m_bGC_WaveBriefingOnly;
+	protected vector m_vGC_WaveExpected;
+	protected int m_iGC_WaveExpectedTickets;
+	protected int m_iGC_WaveCase;
+	protected IEntity m_GC_WavePrevious;
 
 	string GC_PrepareLocationWaveTest(bool briefingOnly = false)
 	{
@@ -29,10 +34,21 @@ modded class GC_LobbyManager
 			return "BLOCKED: no selectable slot";
 		mode.GC_SetLobbyState(SCR_EGameModeState.BRIEFING);
 		if (briefingOnly)
-			ForceSpawnClaimedSlots();
+			QueueBriefingSlotSpawns();
 		else if (!StartLobbyGame())
 			return "BLOCKED: could not start match";
 		m_sGC_WaveFaction = ResolveSlotGroup(chosen).GetFaction().GetFactionKey();
+		m_bGC_WaveBriefingOnly = briefingOnly;
+		return "queued; call GC_FinishLocationWavePreparation after staging completes";
+	}
+
+	string GC_FinishLocationWavePreparation()
+	{
+		GC_Slot chosen = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (!chosen || !chosen.GetEntity() || m_bStartGamePending || m_bBriefingSpawnQueued)
+			return "PENDING";
+		if (!m_bGC_WaveBriefingOnly && GetLobbyPhase() != SCR_EGameModeState.GAME)
+			return "FAIL: match did not start";
 		m_vGC_OriginalWavePosition = chosen.GetEntity().GetOrigin();
 		m_GC_WaveAnchor = GetGame().SpawnEntity(GenericEntity, GetGame().GetWorld());
 		m_GC_WaveAnchor.SetName("GC_RespawnWaveAnchor");
@@ -64,7 +80,7 @@ modded class GC_LobbyManager
 		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
 		if (!slot || GetLobbyPhase() != SCR_EGameModeState.BRIEFING)
 			return "BLOCKED: briefing test slot required";
-		ForceSpawnClaimedSlots();
+		QueueBriefingSlotSpawns();
 		if (expectMissing)
 			return string.Format("missing passed=%1", slot.IsKIA() && !slot.GetEntity());
 		if (!m_GC_WaveAnchor || !slot.GetEntity())
@@ -88,21 +104,19 @@ modded class GC_LobbyManager
 	{
 		GC_LobbyManager manager = GC_LobbyManager.Cast(this);
 		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
-		if (!slot || !slot.IsKIA() || !m_GC_WaveAnchor)
-			return "BLOCKED: wait for KIA state";
+		if (!slot || !slot.IsKIA() || !m_GC_WaveAnchor || manager.GC_IsRespawnWavePending())
+			return "BLOCKED: wait for KIA state and prior wave completion";
 		int before = manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction);
 		GC_RespawnLocation destination;
-		vector expected;
-		if (testCase == 0)
+		vector expected = m_vGC_OriginalWavePosition;
+		if (testCase == -1)
 		{
 			GC_EntityRespawnLocation missing = new GC_EntityRespawnLocation();
 			missing.m_aEntities = {"GC_MissingRespawnAnchor"};
-			int skipped = manager.GC_RespawnWave({m_sGC_WaveFaction}, 1, true, false, missing);
-			if (skipped != 0 || !slot.IsKIA() || manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) != before)
-				return "FAIL: missing destination changed tickets or player";
-			m_GC_WaveAnchor.SetOrigin(m_vGC_OriginalWavePosition + "20 0 20");
-			expected = m_GC_WaveAnchor.GetOrigin();
+			destination = missing;
 		}
+		else if (testCase == 0)
+			expected = m_vGC_OriginalWavePosition + "20 0 20";
 		else if (testCase == 1)
 		{
 			GC_PositionRespawnLocation position = new GC_PositionRespawnLocation();
@@ -112,23 +126,58 @@ modded class GC_LobbyManager
 			expected = position.m_vPosition;
 		}
 		else
-		{
 			destination = new GC_RespawnLocation();
-			expected = m_vGC_OriginalWavePosition;
-		}
 		expected[1] = GetGame().GetWorld().GetSurfaceY(expected[0], expected[2]);
 		bool tickets = testCase != 2;
-		int count = manager.GC_RespawnWave({m_sGC_WaveFaction}, 1, tickets, false, destination);
-		int expectedTickets = before;
-		if (tickets)
-			expectedTickets--;
+		m_GC_WavePrevious = slot.GetEntity();
+		if (!manager.GC_QueueRespawnWave({m_sGC_WaveFaction}, 1, tickets, false, destination))
+			return "FAIL: wave rejected";
+		if (!slot.IsKIA() || slot.GetEntity() != m_GC_WavePrevious || manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) != before)
+			return "FAIL: queue call spawned or spent tickets synchronously";
+		if (testCase == 0)
+			m_GC_WaveAnchor.SetOrigin(expected);
+		m_iGC_WaveCase = testCase;
+		m_vGC_WaveExpected = expected;
+		m_iGC_WaveExpectedTickets = before;
+		if (tickets && testCase != -1)
+			m_iGC_WaveExpectedTickets--;
+		return "queued; call GC_CheckLocationWaveCase after completion";
+	}
+
+	string GC_CheckLocationWaveCase()
+	{
+		GC_LobbyManager manager = GC_LobbyManager.Cast(this);
+		if (manager.GC_IsRespawnWavePending())
+			return "PENDING";
+		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (!slot)
+			return "FAIL: test slot missing";
 		IEntity character = slot.GetEntity();
-		bool passed = count == 1 && !slot.IsKIA() && character
-			&& GetGame().GetPlayerManager().GetPlayerControlledEntity(m_iGC_WavePlayer) == character
-			&& vector.Distance(character.GetOrigin(), expected) < 1
-			&& manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) == expectedTickets;
-		return string.Format("case=%1 passed=%2 spawned=%3 tickets=%4 distance=%5", testCase, passed, count,
-			manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction), vector.Distance(character.GetOrigin(), expected));
+		bool passed = manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) == m_iGC_WaveExpectedTickets;
+		if (m_iGC_WaveCase == -1)
+			passed = passed && slot.IsKIA() && character == m_GC_WavePrevious;
+		else
+			passed = passed && !slot.IsKIA() && character
+				&& GetGame().GetPlayerManager().GetPlayerControlledEntity(m_iGC_WavePlayer) == character
+				&& vector.Distance(character.GetOrigin(), m_vGC_WaveExpected) < 1;
+		return string.Format("case=%1 passed=%2 tickets=%3", m_iGC_WaveCase, passed, manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction));
+	}
+
+	string GC_TestWaveCancellation()
+	{
+		GC_LobbyManager manager = GC_LobbyManager.Cast(this);
+		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (GetLobbyPhase() != SCR_EGameModeState.GAME || !slot || !slot.IsKIA())
+			return "BLOCKED: KIA test player in match required";
+		IEntity previous = slot.GetEntity();
+		int tickets = manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction);
+		if (!manager.GC_QueueRespawnWave({m_sGC_WaveFaction}, 1, false))
+			return "FAIL: wave rejected";
+		if (!GC_LobbyGameMode.GetGameMode().GetBoundaryAdmin().ForceMissionEnd())
+			return "FAIL: mission end rejected";
+		bool passed = !manager.GC_IsRespawnWavePending() && slot.GetEntity() == previous
+			&& manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) == tickets;
+		return string.Format("cancellation passed=%1 phase=%2", passed, GetLobbyPhase());
 	}
 
 	protected void GC_CheckLocation(bool passed, string label)

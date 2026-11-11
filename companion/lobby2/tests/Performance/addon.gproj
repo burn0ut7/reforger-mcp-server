@@ -1,0 +1,8 @@
+GameProject {
+ ID "Lobby2PerformanceTests"
+ GUID "8E9D6826A37C4B01"
+ TITLE "Lobby2 Performance Tests"
+ Dependencies {
+  "6A115D5DFF7ED870"
+ }
+}

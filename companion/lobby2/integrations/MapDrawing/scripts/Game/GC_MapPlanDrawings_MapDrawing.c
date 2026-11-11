@@ -15,6 +15,12 @@ modded class GC_MapPlanDrawings
 			sync.GC_CapturePlan(drawings);
 	}
 
+	override bool CaptureRow(int index, out array<int> row)
+	{
+		TILW_DrawingSyncComponent sync = TILW_DrawingSyncComponent.FindInstance();
+		return sync && sync.GC_CapturePlanRow(index, row);
+	}
+
 	//------------------------------------------------------------------------------------------------
 	override bool Validate(array<ref array<int>> drawings)
 	{
@@ -45,14 +51,27 @@ modded class TILW_DrawingSyncComponent
 	//------------------------------------------------------------------------------------------------
 	void GC_CapturePlan(array<ref array<int>> drawings)
 	{
-		foreach (array<int> cached : m_aDrawingsCache)
+		array<int> row;
+		for (int index; GC_CapturePlanRow(index, row); index++)
 		{
-			int count = cached.Count();
-			array<int> row = {cached[count - 2]};
-			for (int index; index < count - 2; index++)
-				row.Insert(cached[index]);
 			drawings.Insert(row);
 		}
+	}
+
+	bool GC_CapturePlanRow(int index, out array<int> row)
+	{
+		if (index < 0 || index >= m_aDrawingsCache.Count())
+			return false;
+		array<int> cached = m_aDrawingsCache[index];
+		row = {};
+		// Native JIP permits at most 255 points plus properties and ID. Return
+		// an invalid row for corrupt data; never perform an unbounded copy.
+		if (!cached || cached.Count() < 4 || cached.Count() > 257)
+			return true;
+		row.Insert(cached[cached.Count() - 2]);
+		for (int point; point < cached.Count() - 2; point++)
+			row.Insert(cached[point]);
+		return true;
 	}
 
 	//------------------------------------------------------------------------------------------------
