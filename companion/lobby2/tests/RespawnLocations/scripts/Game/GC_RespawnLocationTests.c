@@ -1,0 +1,209 @@
+//! Explicit runtime checks; no automatic execution and no production test dependencies.
+modded class GC_LobbyManager
+{
+	protected int m_iGC_LocationChecks;
+	protected int m_iGC_LocationFailures;
+	protected IEntity m_GC_WaveAnchor;
+	protected vector m_vGC_OriginalWavePosition;
+	protected int m_iGC_WavePlayer;
+	protected string m_sGC_WaveFaction;
+
+	string GC_PrepareLocationWaveTest()
+	{
+		GC_LobbyGameMode mode = GC_LobbyGameMode.GetGameMode();
+		PlayerController player = GetGame().GetPlayerController();
+		if (!Replication.IsServer() || !mode || !player || GetLobbyPhase() == SCR_EGameModeState.GAME)
+			return "BLOCKED: start from a fresh pre-match local Play session";
+		mode.GC_SetLobbyState(SCR_EGameModeState.SLOTTING);
+		m_iGC_WavePlayer = player.GetPlayerId();
+		GC_Slot chosen;
+		foreach (GC_Slot slot : GetSlots())
+		{
+			if (!slot.HasClaim() && CanPlayerRequestSlot(m_iGC_WavePlayer, slot))
+			{
+				chosen = slot;
+				break;
+			}
+		}
+		if (!chosen || !TryAssignPlayerToSlot(m_iGC_WavePlayer, chosen.GetID()))
+			return "BLOCKED: no selectable slot";
+		mode.GC_SetLobbyState(SCR_EGameModeState.BRIEFING);
+		if (!StartLobbyGame())
+			return "BLOCKED: could not start match";
+		m_sGC_WaveFaction = ResolveSlotGroup(chosen).GetFaction().GetFactionKey();
+		m_vGC_OriginalWavePosition = chosen.GetEntity().GetOrigin();
+		m_GC_WaveAnchor = GetGame().SpawnEntity(GenericEntity, GetGame().GetWorld());
+		m_GC_WaveAnchor.SetName("GC_RespawnWaveAnchor");
+		m_GC_WaveAnchor.SetOrigin(m_vGC_OriginalWavePosition + "10 0 10");
+		GC_EntityRespawnLocation named = new GC_EntityRespawnLocation();
+		named.m_aEntities = {"GC_RespawnWaveAnchor"};
+		named.m_bSnapToTerrain = true;
+		GC_LobbyManager.Cast(this).GC_SetRespawnLocation({m_sGC_WaveFaction}, named);
+		GC_LobbyManager.Cast(this).GC_SetFactionRespawnTickets(m_sGC_WaveFaction, 2);
+		return "ready; kill then run cases 0, 1, 2 separately";
+	}
+
+	string GC_KillLocationWavePlayer()
+	{
+		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (!slot || !slot.GetEntity() || slot.IsKIA())
+			return "BLOCKED: living test slot required";
+		ChimeraCharacter.Cast(slot.GetEntity()).GetCharacterController().ForceDeath();
+		return "death requested";
+	}
+
+	string GC_RunLocationWaveCase(int testCase)
+	{
+		GC_LobbyManager manager = GC_LobbyManager.Cast(this);
+		GC_Slot slot = GetSlotByPlayerId(m_iGC_WavePlayer);
+		if (!slot || !slot.IsKIA() || !m_GC_WaveAnchor)
+			return "BLOCKED: wait for KIA state";
+		int before = manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction);
+		GC_RespawnLocation destination;
+		vector expected;
+		if (testCase == 0)
+		{
+			GC_EntityRespawnLocation missing = new GC_EntityRespawnLocation();
+			missing.m_aEntities = {"GC_MissingRespawnAnchor"};
+			int skipped = manager.GC_RespawnWave({m_sGC_WaveFaction}, 1, true, false, missing);
+			if (skipped != 0 || !slot.IsKIA() || manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) != before)
+				return "FAIL: missing destination changed tickets or player";
+			m_GC_WaveAnchor.SetOrigin(m_vGC_OriginalWavePosition + "20 0 20");
+			expected = m_GC_WaveAnchor.GetOrigin();
+		}
+		else if (testCase == 1)
+		{
+			GC_PositionRespawnLocation position = new GC_PositionRespawnLocation();
+			position.m_vPosition = m_vGC_OriginalWavePosition + "30 0 30";
+			position.m_bSnapToTerrain = true;
+			destination = position;
+			expected = position.m_vPosition;
+		}
+		else
+		{
+			destination = new GC_RespawnLocation();
+			expected = m_vGC_OriginalWavePosition;
+		}
+		expected[1] = GetGame().GetWorld().GetSurfaceY(expected[0], expected[2]);
+		bool tickets = testCase != 2;
+		int count = manager.GC_RespawnWave({m_sGC_WaveFaction}, 1, tickets, false, destination);
+		int expectedTickets = before;
+		if (tickets)
+			expectedTickets--;
+		IEntity character = slot.GetEntity();
+		bool passed = count == 1 && !slot.IsKIA() && character
+			&& GetGame().GetPlayerManager().GetPlayerControlledEntity(m_iGC_WavePlayer) == character
+			&& vector.Distance(character.GetOrigin(), expected) < 1
+			&& manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction) == expectedTickets;
+		return string.Format("case=%1 passed=%2 spawned=%3 tickets=%4 distance=%5", testCase, passed, count,
+			manager.GC_GetFactionRespawnTickets(m_sGC_WaveFaction), vector.Distance(character.GetOrigin(), expected));
+	}
+
+	protected void GC_CheckLocation(bool passed, string label)
+	{
+		m_iGC_LocationChecks++;
+		if (!passed)
+			m_iGC_LocationFailures++;
+		PrintFormat("GC_RESPAWN_LOCATION_CHECK passed=%1 %2", passed, label);
+	}
+
+	string GC_TestRespawnLocations()
+	{
+		if (!Replication.IsServer() || GetManager() != this || GetLobbyPhase() == SCR_EGameModeState.POSTGAME)
+			return "BLOCKED: active server mission required";
+		m_iGC_LocationChecks = 0;
+		m_iGC_LocationFailures = 0;
+		BaseWorld world = GetGame().GetWorld();
+		EntitySpawnParams result;
+		GC_RespawnLocation original = new GC_RespawnLocation();
+		GC_CheckLocation(original.Resolve(world, null, 0, result) && !result, "original requests unchanged spawn path");
+		GC_PositionRespawnLocation fixed = new GC_PositionRespawnLocation();
+		fixed.m_vPosition = "100 200 300";
+		fixed.m_vOffset = "1 3 4";
+		GC_CheckLocation(fixed.Resolve(world, null, 0, result) && vector.Distance(result.Transform[3], "101 203 304") < 0.01, "fixed position and offset");
+		GC_CheckLocation(fixed.Resolve(world, null, 5, result) && vector.Distance(result.Transform[3], "103 203 302") < 0.01, "grid separates later players");
+		fixed.m_fHeading = 90;
+		GC_CheckLocation(fixed.Resolve(world, null, 0, result) && vector.Distance(result.Transform[3], "104 203 299") < 0.01, "heading rotates local offset");
+		fixed.m_bSnapToTerrain = true;
+		GC_CheckLocation(fixed.Resolve(world, null, 0, result) && Math.AbsFloat(result.Transform[3][1] - world.GetSurfaceY(104, 299) - 3) < 0.01, "terrain snap retains height offset");
+		fixed.m_iColumns = 0;
+		GC_CheckLocation(!fixed.Resolve(world, null, 0, result) && !result, "invalid placement rejects without stale result");
+		fixed.m_iColumns = 4;
+		GC_EntityRespawnLocation named = new GC_EntityRespawnLocation();
+		named.m_aEntities = {"GC_RespawnCheckAnchor_A", "GC_RespawnCheckAnchor_B"};
+		if (world.FindEntityByName(named.m_aEntities[0]) || world.FindEntityByName(named.m_aEntities[1]))
+			return "BLOCKED: test entity names already exist";
+		IEntity anchorA = GetGame().SpawnEntity(GenericEntity, world);
+		IEntity anchorB = GetGame().SpawnEntity(GenericEntity, world);
+		if (!anchorA || !anchorB)
+		{
+			if (anchorA)
+				SCR_EntityHelper.DeleteEntityAndChildren(anchorA);
+			if (anchorB)
+				SCR_EntityHelper.DeleteEntityAndChildren(anchorB);
+			return "BLOCKED: could not create test anchors";
+		}
+		anchorA.SetName(named.m_aEntities[0]);
+		anchorB.SetName(named.m_aEntities[1]);
+		anchorA.SetOrigin("100 200 300");
+		anchorB.SetOrigin("200 300 400");
+		GC_CheckLocation(named.Resolve(world, null, 1, result) && vector.Distance(result.Transform[3], anchorB.GetOrigin()) < 0.01, "list distributes players to second anchor");
+		GC_CheckLocation(named.Resolve(world, null, 2, result) && vector.Distance(result.Transform[3], "102 200 300") < 0.01, "list wraps with spacing");
+		anchorA.SetOrigin("300 400 500");
+		anchorA.SetYawPitchRoll("90 0 0");
+		named.m_vOffset = "0 0 5";
+		GC_CheckLocation(named.Resolve(world, null, 0, result) && vector.Distance(result.Transform[3], "305 400 500") < 0.01, "moving and rotating anchor changes next resolution");
+		SCR_EntityHelper.DeleteEntityAndChildren(anchorB);
+		GC_CheckLocation(!named.Resolve(world, null, 1, result) && !result, "deleted selected anchor rejects rather than falls back");
+		named.m_aEntities = {"GC_RespawnCheckAnchor_A", "GC_RespawnCheckAnchor_A"};
+		GC_CheckLocation(!named.IsValid(), "duplicate anchor entries rejected");
+		named.m_aEntities = {"GC_RespawnCheckAnchor_A"};
+
+		GC_Slot candidate;
+		foreach (GC_Slot slot : GetSlots())
+		{
+			if (!slot.HasClaim() && !slot.GetEntity() && ResolveSlotGroup(slot) && ResolveSlotGroup(slot).GetFaction())
+			{
+				candidate = slot;
+				break;
+			}
+		}
+		if (candidate)
+		{
+			string faction = ResolveSlotGroup(candidate).GetFaction().GetFactionKey();
+			GC_RespawnLocation prior = GC_LobbyManager.Cast(this).GC_GetRespawnLocation(faction);
+			GC_CheckLocation(GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction}, named) && GC_LobbyManager.Cast(this).GC_GetRespawnLocation(faction) == named, "set faction default");
+			GC_CheckLocation(!GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction, "GC_INVALID_FACTION"}, fixed) && GC_LobbyManager.Cast(this).GC_GetRespawnLocation(faction) == named, "invalid scope leaves existing default unchanged");
+			GC_CheckLocation(GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction}, fixed) && GC_LobbyManager.Cast(this).GC_GetRespawnLocation(faction) == fixed, "replace default");
+			GC_CheckLocation(GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction}, null) && !GC_LobbyManager.Cast(this).GC_GetRespawnLocation(faction), "clear default");
+			GC_LobbyManager.Cast(this).GC_SetRespawnLocation({faction}, prior);
+			GC_SlotState oldState = candidate.GetState();
+			ResourceName oldPrefab = candidate.GetResolvedPrefab();
+			fixed.m_bSnapToTerrain = true;
+			fixed.m_vOffset = "0 0 0";
+			fixed.m_vPosition = ResolveSlotGroup(candidate).GetOrigin();
+			fixed.Resolve(world, candidate, 0, result);
+			string spawned = RespawnAdminSlot(candidate, false, result);
+			IEntity body = candidate.GetEntity();
+			GC_CheckLocation(spawned == "applied" && body && vector.Distance(body.GetOrigin(), result.Transform[3]) < 0.1, "production respawn owner spawns character at override");
+			if (body)
+				SCR_EntityHelper.DeleteEntityAndChildren(body);
+			candidate.SetEntity(null);
+			candidate.SetState(oldState);
+			candidate.SetResolvedPrefab(oldPrefab);
+			UpdateSlot(candidate);
+		}
+		else
+			GC_CheckLocation(false, "no empty slot for production spawn/default checks");
+		GC_WaveRespawnAction wave = new GC_WaveRespawnAction();
+		wave.m_Location = named;
+		GC_CheckLocation(wave.BuildAction().IsValid() && wave.BuildAction().m_RespawnLocation == named, "wave compiles destination");
+		GC_SetRespawnLocationAction setting = new GC_SetRespawnLocationAction();
+		GC_CheckLocation(!setting.BuildAction().IsValid(), "set action requires explicit factions");
+		setting.m_aFactions = {"US"};
+		GC_CheckLocation(setting.BuildAction().IsValid(), "set action supports reset to original");
+		GC_CheckLocation(!GC_LobbyManager.Cast(this).GC_ExecuteFrameworkAction(new GC_MissionRuleEngine(), setting.BuildAction()), "unowned framework engine rejected");
+		SCR_EntityHelper.DeleteEntityAndChildren(anchorA);
+		return string.Format("checks=%1 failures=%2", m_iGC_LocationChecks, m_iGC_LocationFailures);
+	}
+}
