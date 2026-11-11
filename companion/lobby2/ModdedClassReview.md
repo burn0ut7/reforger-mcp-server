@@ -1,5 +1,17 @@
 # Strict modded-class review
 
+## Implemented follow-up (2026-11-11)
+
+Production commit: Lobby2 `384d6bd` (`Reduce global inventory overrides`). Independent source review approved the final changes. Final production-only Reload `ebdcd38aed574f84910448e7c3385fd5` reported no script errors; three pre-existing Arland world resource GUID errors remain.
+
+Removed four shared overrides without removing features: native inventory invokers now feed admin auditing through the Lobby controller's possession/shutdown lifecycle, and the two cached clothing override switches no longer bypass native validation. Clothing permissions still apply after native checks. JIP input and queued presentation work now detach at explicit presentation shutdown as well as destruction. Shared declarations decrease from 39 to 38; the inventory type still has a separate Workbench hook.
+
+Embedded Play passed 27 checks with zero failures, including locked native remove/replace rejection, unlocked permissions, invalid-slot rejection, unavailable-manager fallback, repeated subscription changes and repeated shutdown. Audit logs show exactly one initial jacket add and two removals, with no add while detached. Independent review also exposed that manager shutdown reached only the local controller; it now traverses the native player registry on authority to clean up remote controllers before destruction. That remote branch is compile/source-verified, not live multiplayer-tested. See [fixture, native provenance and coverage limits](tests/ModdedIsolation/README.md). This is not addon-free, full world-transition or multiplayer certification.
+
+Retained AI muzzle hooks: optimized events omit the projectile, while replacing the ordinary hook would require new weapon/muzzle lifecycle tracking absent from the aggregate statistics owner, including swaps and turrets. Retained recovery invalidation because its narrowly scoped cross-mission cleanup prevents stale recovery. Arbitrary external player prefabs prevent a local clothing-storage subclass migration from covering every supported body.
+
+## Historical audit
+
 Reviewed 2026-11-11 against Lobby2 `6a1673a`, including its current working tree. This is a source and installed-engine-contract review, not multiplayer or cross-mode certification. No gameplay code was changed in this review.
 
 ## Result
