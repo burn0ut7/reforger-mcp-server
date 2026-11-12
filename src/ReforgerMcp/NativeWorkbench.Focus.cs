@@ -74,9 +74,15 @@ internal static partial class NativeWorkbench
                 {
                     var shim = process.Modules.Cast<ProcessModule>().SingleOrDefault(m =>
                         string.Equals(m.FileName, Path.Combine(Environment.SystemDirectory, "apphelp.dll"), StringComparison.OrdinalIgnoreCase));
-                    if (shim != null && original == shim.BaseAddress + 0x2c2a0)
+                    string? shimHash = shim == null ? null : (original - shim.BaseAddress) switch
                     {
-                        verification.Verify(shim.FileName, "b838911cb7279ba34a5092d35037223188c452cf282d03a2e70b7242c9516bb2");
+                        0x2c2a0 => "b838911cb7279ba34a5092d35037223188c452cf282d03a2e70b7242c9516bb2",
+                        0x2deb0 => "055a5f86aae369ab44d0deebac7cc2104b4ab328718f3c028625bd63984cba32",
+                        _ => null
+                    };
+                    if (shimHash != null)
+                    {
+                        verification.Verify(shim!.FileName, shimHash);
                         originals[i] = original;
                         if (!installed) continue;
                     }
