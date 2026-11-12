@@ -5,6 +5,12 @@ or closed polygon. Add its optional **Capture** object to turn the immediate
 area answer into a timed captured/not-captured answer. Leaving Capture unset
 preserves existing area behavior.
 
+When the named area is an AO limit, conditions sample its authoritative runtime
+polygon, including accepted `SetPolygon` changes. Ordinary polygons refresh when
+their points or transform change. Polygon areas require 3–128 points without
+crossed or overlapping edges and with nonzero horizontal area. Invalid or open
+polygons make the condition unavailable; fixing the outline restores sampling.
+
 ## Players, objects and vehicles
 
 Capture timing works with either target selection:

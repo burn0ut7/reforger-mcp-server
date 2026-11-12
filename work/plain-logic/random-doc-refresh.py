@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path(r'C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/addons/Lobby2/docs/MissionRules/README.md');s=p.read_text().replace('Area, faction, prefab and timer conditions remain future slices; timing and randomness have not moved into conditions yet.', 'Area, faction, prefab and general timer conditions remain future slices. Scheduled Random Chance is now available as a condition; Advanced chance remains a separate action gate.');p.write_text(s)

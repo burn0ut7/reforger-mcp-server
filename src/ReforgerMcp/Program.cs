@@ -13,6 +13,16 @@ using ReforgerMcp;
 
 try
 {
+    if (args.Length == 4 && args[0] == "--config" && args[2] == "--start-authoring")
+    {
+        await WorkbenchAuthoringStartup.Run(args[1], args[3], CancellationToken.None);
+        return 0;
+    }
+    if (args.Length == 4 && args[0] == "--config" && args[2] == "--enable-authoring")
+    {
+        await WorkbenchAuthoringSetup.Run(Configuration.Load(args[1]), args[1], args[3], CancellationToken.None);
+        return 0;
+    }
     if (args.Length == 2 && args[0] == "--check-config")
     {
         var check = Configuration.Check(args[1]);
@@ -27,7 +37,7 @@ try
     }
     var serveHttp = args.Length == 3 && args[2] == "--serve-http";
     if (args.Length < 2 || args[0] != "--config" || (args.Length != 2 && !serveHttp && !(args.Length == 4 && args[2] is "--prepare" or "--setup-runtime")))
-        throw new ArgumentException("Usage: ReforgerMcp --config <json-path> [--serve-http | --setup-runtime <status|install|enable> | --prepare <target|all> | --hook-update <request.json>] | --check-config <json-path>");
+        throw new ArgumentException("Usage: ReforgerMcp --config <json-path> [--serve-http | --enable-authoring <dll-path> | --start-authoring <dll-path> | --setup-runtime <status|install|enable> | --prepare <target|all> | --hook-update <request.json>] | --check-config <json-path>");
     var config = Configuration.Load(args[1]);
     using var activityLifetime = new ActivityLifetime();
     WebApplicationBuilder? webBuilder = null;
@@ -64,7 +74,7 @@ try
     if (args.Length == 2 || serveHttp)
     {
         var mcp = builder.Services.AddMcpServer()
-            .WithTools<EngineTools>().WithTools<PakTools>().WithTools<WorkbenchTools>().WithTools<CaptureTools>().WithTools<WorkbenchScriptTools>().WithTools<WorkbenchEntityTools>().WithTools<WorkbenchTargetTools>().WithTools<WorkbenchPrefabTools>().WithTools<WorkbenchRuntimeTools>().WithTools<WorkbenchRuntimeSetupTools>().WithTools<WorkbenchHistoryTools>().WithTools<WorkbenchMultiplayerTools>().WithTools<WorkbenchWindowTools>().WithTools<LogTools>().WithTools<ProjectTools>().WithTools<WorkbenchChoicesTools>();
+            .WithTools<EngineTools>().WithTools<PakTools>().WithTools<WorkbenchTools>().WithTools<CaptureTools>().WithTools<WorkbenchScriptTools>().WithTools<WorkbenchEntityTools>().WithTools<WorkbenchTargetTools>().WithTools<WorkbenchPrefabTools>().WithTools<WorkbenchRuntimeTools>().WithTools<WorkbenchRuntimeSetupTools>().WithTools<WorkbenchHistoryTools>().WithTools<WorkbenchMultiplayerTools>().WithTools<WorkbenchWindowTools>().WithTools<LogTools>().WithTools<ProjectTools>().WithTools<WorkbenchChoicesTools>().WithTools<WorkbenchExtensionTools>();
         if (serveHttp) mcp.WithHttpTransport(options => options.SessionMode = HttpServerSessionMode.Stateless);
         else mcp.WithStdioServerTransport();
         mcp.WithRequestFilters(filters => filters.AddCallToolFilter(next =>
@@ -155,6 +165,3 @@ file sealed class ActivityLifetime : IDisposable
     public ToolActivityLog? Log { get; set; }
     public void Dispose() => Log?.Dispose();
 }
-
-
-

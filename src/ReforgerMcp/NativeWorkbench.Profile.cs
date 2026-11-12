@@ -14,11 +14,11 @@ internal static partial class NativeWorkbench
         int[] SettingsAccessors, int OpenEditor, int OpenResource, int DirtyMask, int ResourceNameConstructor, int ResourceNameDestroy, int ResourceNamePool, int FileSystemOwner)
     {
         internal int ReloadBlockedOffset => Limited ? 0x1656 : 0x164e;
-        // These actions call only the independently pinned Qt modules. Array add
-        // additionally calls engine reflection helpers and remains legacy-only.
+        internal ArrayAddProfile Arrays => Limited ? ArrayAddProfile.Current : ArrayAddProfile.Legacy;
+        // Array add additionally uses this exact binary's validated RTTI/owner profile.
         internal bool SupportsUi(string action) => !Limited || action is
-            "close" or "invoke" or "menu" or "toggle" or "set_text" or
-            "select" or "expand" or "collapse" or "open_choices" or "choose";
+            "close" or "invoke" or "menu" or "toggle" or "set_text" or "finish_edit" or
+            "select" or "activate" or "expand" or "collapse" or "open_choices" or "choose" or "add_item";
         internal static readonly MaintenanceProfile Legacy = new(false,
             "7dd36ca1f662b0c13669a4f2f7f10e3c461c2906b021e742272d64b3ab7e9798",
             0x3db6598, 0x2b922c8, 0x3db65e5, 0x298d00, 0x2980f0, 0x2bac1c8,

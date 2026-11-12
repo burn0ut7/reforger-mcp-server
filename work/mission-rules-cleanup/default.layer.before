@@ -1,0 +1,96 @@
+SCR_AIWorld : "{E0A05C76552E7F58}Prefabs/AI/SCR_AIWorld.et" {
+ coords 125.908 1 128.795
+}
+SCR_FactionManager FactionManager_USxUSSR1 : "{589540B35EBA8CDC}Prefabs/MP/Managers/Factions/FactionManager_USxUSSR.et" {
+ coords 131.957 1 135.807
+}
+GC_LobbyGameMode GameMode_Lobby3 : "{7B115D5DFF7ED995}Prefabs/MP/Modes/GameMode_Lobby_RulesExample.et" {
+ components {
+  GC_LobbyManager "{6A137A39106A4973}" {
+   m_aMissionRules {
+    GC_SimpleMissionRule "{7B115D5DFF7EDA01}" {
+     m_Advanced GC_RuleOptions "{6AD2493CFDC2276E}" {
+     }
+    }
+    GC_RuleDefinition "{6AD2493B4C98D76C}" {
+    }
+    GC_SimpleMissionRule "{6AD2493B4D9BFC30}" {
+    }
+    GC_MissionRule "{6AD2493B0AD655F4}" {
+    }
+   }
+  }
+ }
+ coords 135.297 1 123.139
+}
+SCR_AIGroup : "{1A5F0D93609DA5DA}Prefabs/Groups/OPFOR/Group_USSR_ManeuverGroup.et" {
+ coords 132.636 1 123.2
+ m_bPlayable 1
+ m_bDeleteIfNoPlayer 0
+}
+SCR_AIGroup : "{43C7A28EEB660FF8}Prefabs/Groups/OPFOR/Group_USSR_Team_GL.et" {
+ coords 131.435 1 129.833
+ m_bPlayable 1
+ m_bDeleteIfNoPlayer 0
+}
+SCR_ChimeraCharacter : "{5B1996C05B1E51A4}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_AR.et" {
+ coords 98.837 1 114.464
+}
+SCR_ChimeraCharacter : "{8A578DE95771CC1D}Prefabs/Characters/Core/Character_Spectator.et" {
+ coords 119.751 1 129.574
+}
+TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramework.et" {
+ coords 123.504 1 133.061
+}
+SCR_AIGroup : "{96BAB56E6558788E}Prefabs/Groups/OPFOR/Group_USSR_Team_AT.et" {
+ coords 113.795 1 122.404
+ m_bPlayable 1
+ m_bDeleteIfNoPlayer 0
+}
+SCR_ChimeraCharacter : "{9C2A994C94376FFE}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo_random.et" {
+ components {
+  SCR_EditableCharacterComponent "{520EA1D2F659C85C}" {
+   m_VariantData SCR_EditableEntityVariantData "{6A142E92A3D63BEF}" {
+    m_aVariants {
+     SCR_EditableEntityVariant "{6A142E929847B846}" {
+     }
+    }
+   }
+  }
+ }
+ coords 117.317 1 129.225
+}
+$grp SCR_AIGroup : "{DDF3799FA1387848}Prefabs/Groups/BLUFOR/Group_US_RifleSquad.et" {
+ {
+  coords 123.896 1.303 119.864
+  m_bPlayable 1
+  m_bDeleteIfNoPlayer 0
+ }
+ {
+  coords 126.802 1 120.895
+  m_bPlayable 1
+  m_bDeleteIfNoPlayer 0
+ }
+ {
+  coords 127.27 1 115.331
+  m_bPlayable 1
+  m_bDeleteIfNoPlayer 0
+ }
+}
+SCR_ChimeraCharacter : "{E398E44759DA1A43}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_TL.et" {
+ coords 98.543 1 117.099
+}
+SCR_AIGroup : "{F72EF3429D8C8DF5}Prefabs/Groups/BLUFOR/Group_US_AmmoTeam.et" {
+ components {
+  AIFormationComponent "{507E9DC12F541FE6}" {
+   DefaultFormation "Test"
+  }
+ }
+ coords 127.157 1 132.377
+ angles 0 -179.265 0
+ m_aUnitPrefabSlots +{
+  "{9C2A994C94376FFE}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo_random.et"
+ }
+ m_bPlayable 1
+ m_bDeleteIfNoPlayer 0
+}

@@ -1,0 +1,18 @@
+Vehicle discovery research — 2026-11-09
+
+No vehicle hooks or world scans implemented. Current delivered Lobby2 commit: 7edca58.
+
+Installed source revision: 95a1918a7fed40bf884083293ae050d6
+Source: game/data/data007.pak/scripts/GameCode/Vehicle/Vehicle.c
+SHA256: 48a5791db2d6789f48c6c13b9b03686863025202edcb6932670bfa9f0c2683c5
+Lines 190–202: constructor sets PHYSICSACTIVE event mask; EOnInit initializes component references. This proves an individual initialization callback exists, not when the active game mode is available or complete coverage of subclasses.
+
+Lobby2 scripts/Game/GC_LobbyManager.c lines 257–277: manager EOnInit does not start mission rules. OnWorldPostProcess starts them after world load. GetManager lines 5258 onward resolves through active GC_LobbyGameMode and rejects shutdown.
+
+Implication: registration gated on a running mission engine can miss initial map vehicles. Registration gated on mode presence still needs proof that mode resolution is available during every initial vehicle callback. No such lifecycle ordering proof has been established.
+
+Previously inspected native public sources expose AI agents and AI-group-local vehicle lists; no complete public vehicle registry was identified. Absence from these searches is not proof of absence in the engine.
+
+Remaining requirements before implementation: establish initial-load ordering and subclass callback coverage; define mode-owned storage lifetime before framework startup; preserve inherited callbacks; cover creation/deletion and mode exit without scanning or retained cross-mode state. Shared-hook mode isolation requires verification under project instructions. User currently requests compilation/source checks only, not in-game tests, and has not approved the proposed relaxation of the no-hooks constraint.
+
+Decision: keep arbitrary vehicle/prefab discovery deferred. Do not introduce a hook, global pre-mode collection, scan fallback, or claim reliable discovery based on this evidence.

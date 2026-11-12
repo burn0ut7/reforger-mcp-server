@@ -1,0 +1,5 @@
+from pathlib import Path
+r=Path(r'C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/addons/Lobby2/tests/McpTestAddon/scripts/Game')
+p=r/'GC_GameModeConditionTests.c';s=p.read_text(encoding='utf-8');a=s.index('\t//------------------------------------------------------------------------------------------------');b=s.index('\t//------------------------------------------------------------------------------------------------',a+10);method=s[a:b];s=s[:a]+s[b:];p.write_text(s,encoding='utf-8')
+p=r/'GC_MissionRuleTests.c';s=p.read_text(encoding='utf-8');a=s.index('\t//------------------------------------------------------------------------------------------------',s.index('class GC_MissionRuleTests'));s=s[:a]+method+s[a:];p.write_text(s,encoding='utf-8')
+p=r/'GC_EventGroupTests.c';s=p.read_text(encoding='utf-8-sig').replace('b.m_aConditions = {StateRule("unused", SCR_EGameModeState.BRIEFING).m_aConditions[0]};','GC_GameModeStateCondition briefing = new GC_GameModeStateCondition();\n\t\tbriefing.m_eGameModeState = SCR_EGameModeState.BRIEFING;\n\t\tb.m_aConditions = {briefing};');p.write_text(s,encoding='utf-8')

@@ -1,0 +1,4 @@
+from pathlib import Path
+p=Path(r'C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/addons/Lobby2/docs/Lobby2_Architecture_and_Best_Practices.md')
+with p.open('ab') as f:
+ f.write(b'\n## Mission framework state conditions\n\nGC_LobbyManager starts its server-local mission engine from OnWorldPostProcess, observing the active Lobby2 phase. Its existing OnGameStateChanged callback supplies subsequent distinct states; there is no additional global listener or phase authority. Authored Game Mode State leaves compose through Condition Group/Count. Conditions are checked on initial observation and phase changes, with delayed actions revalidated. The framework remains alive through POSTGAME for explicit After action events and stops on shutdown or loss of mode ownership. Engine state is an observation used for evaluation, not a replicated phase store. Historical interpreter triggers remain internal; the editor has no separate Event selector.\n')

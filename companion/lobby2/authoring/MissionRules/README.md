@@ -535,7 +535,7 @@ Delete Entities and Assign Waypoints are separate actions. See [settings, exampl
 
 ## Weather action
 
-Time and Weather Action changes the clock, a named weather preset, or both. Independent Change Time and Change Weather checkboxes select the changes. World Editor > Plugins > GC > List weather presets shows every preset in the loaded map. See [settings and engine behavior](WeatherAction.md).
+Time and Weather Action changes the clock, a named weather preset, or both. Independent Change Time and Change Weather checkboxes select the changes. Choose a preset in the action field using the Workbench integration, or enter its exact name from the loaded map's Time and Weather Manager. See [settings and engine behavior](WeatherAction.md).
 
 ## Timer condition
 

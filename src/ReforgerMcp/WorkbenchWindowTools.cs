@@ -28,6 +28,6 @@ public sealed class WorkbenchWindowTools(WorkbenchWindows windows)
 
     [McpServerTool(Name = "workbench_window_action", ReadOnly = false, Destructive = true, OpenWorld = false)]
     [Description("Run advertised native action on observed selectionId; may save/delete/open dialogs. Selections expire after 2 minutes, a listing/action or restart. Pending operationId belongs to workbench_window_action_status.")]
-    public Task<object> Act(string selectionId, [Description("invoke|menu|toggle|set_text|select|expand|collapse|open_choices|choose|add_item|close; only advertised capabilities.")] string action, [Description("set_text: at most 1024 UTF-16 units, no NUL. choose: exact advertised label. add_item: array row.")] string? value = null, CancellationToken cancellationToken = default)
+    public Task<object> Act(string selectionId, [Description("invoke|menu|toggle|set_text|finish_edit|select|activate|expand|collapse|open_choices|choose|add_item|close; only advertised capabilities. finish_edit emits the editable property combo's normal editingFinished signal after input validation; may commit a property change. activate accepts a native type-picker row.")] string action, [Description("set_text: at most 1024 UTF-16 units, no NUL; changes editor text without finishing the edit. finish_edit takes no value. choose: exact advertised label. add_item: array row.")] string? value = null, CancellationToken cancellationToken = default)
         => Report(() => windows.Act(selectionId, action, cancellationToken, value));
 }

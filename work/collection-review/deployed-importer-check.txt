@@ -1,0 +1,1 @@
+RETAINED 01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-103.l2t: InvalidDataException

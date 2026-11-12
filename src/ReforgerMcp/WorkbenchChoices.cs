@@ -9,6 +9,21 @@ namespace ReforgerMcp;
 
 public sealed partial class WorkbenchSession
 {
+    internal Task<object> ReadReferenceChoices(int processId, string provider, string kind, CancellationToken ct) => Run(token =>
+    {
+        if (!Regex.IsMatch(provider, "^[A-Za-z_][A-Za-z0-9_]{0,95}$") || kind is not ("values" or "entities"))
+            throw new ArgumentException("Use a provider class identifier and kind=values|entities.");
+        using var process = SelectProcess();
+        if (process.Id != processId) throw new InvalidOperationException("Workbench process changed.");
+        var port = configuration.Workbench?.RuntimePort ?? throw new InvalidOperationException("Configure the Workbench runtime port and install the editor adapter.");
+        RuntimeNet.VerifyListener(port, process.Id);
+        var receipt = Guid.NewGuid().ToString("N");
+        var response = RuntimeNet.Call(port, new { APIFunc = "RST_EditorChoices", provider, kind = kind == "entities" ? kind : "", token = receipt });
+        if (response.GetProperty("adapterBuild").GetString() != RuntimeAdapter.Build || response.GetProperty("token").GetString() != receipt)
+            throw new InvalidOperationException("Editor choices adapter identity mismatch; install this server's adapter.");
+        return (object)response;
+    }, ct);
+
     internal Task<object> RefreshChoices(int processId, NativeWorkbench.VerificationScope verification, CancellationToken ct) => Run(token =>
     {
         var elapsed = Stopwatch.StartNew();
@@ -126,8 +141,13 @@ public sealed class WorkbenchChoices(WorkbenchSession session, ILogger<Workbench
 }
 
 [McpServerToolType]
-public sealed class WorkbenchChoicesTools(WorkbenchChoices choices)
+public sealed class WorkbenchChoicesTools(WorkbenchChoices choices, WorkbenchSession session)
 {
+    [McpServerTool(Name = "workbench_reference_choices", ReadOnly = true, Destructive = false, OpenWorld = false)]
+    [Description("Read an installed editor reference provider through the production adapter. kind=values returns names; entities returns parallel entityIds/entityNames/entityLabels, including unnamed sources. Editor only, unavailable in Play. Discovery does not select, rename or edit entities. IDs and names require revalidation before a later edit; labels are not serialized references.")]
+    public Task<object> Read(int processId, string provider, CancellationToken cancellationToken, string kind = "values") =>
+        session.ReadReferenceChoices(processId, provider, kind, cancellationToken);
+
     [McpServerTool(Name = "workbench_dynamic_choices", ReadOnly = false, Destructive = false, OpenWorld = false)]
     [Description("action=status|enable|disable: automatic inline choices for marked string combos; requires installed editor adapter. Refreshes live providers every second, changes no saved properties; stops on error.")]
     public object Configure(string action = "status", int processId = 0) => choices.Configure(action, processId);

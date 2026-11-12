@@ -11,7 +11,7 @@ pak_prepare pak_search pak_search_text pak_read pak_extract log_sessions log_rea
 workbench_status workbench_script_status workbench_project_context workbench_windows workbench_controls
 workbench_window_action workbench_window_action_status workbench_open_project workbench_terminate workbench_open_world
 workbench_reload_scripts workbench_operation workbench_focus_policy workbench_resource_leak_assertion workbench_script_authorization
-workbench_dynamic_choices workbench_create_entity workbench_entity workbench_query_entities workbench_inspect_entity workbench_edit_entity
+workbench_dynamic_choices workbench_load_extension workbench_create_entity workbench_entity workbench_query_entities workbench_inspect_entity workbench_edit_entity
 workbench_open_prefab workbench_inspect_prefab workbench_save_prefab_definition workbench_create_child_prefab workbench_save_prefab
 workbench_save_world workbench_history workbench_history_status workbench_play workbench_play_status workbench_multiplayer
 workbench_multiplayer_status workbench_multiplayer_setting workbench_runtime_setup workbench_runtime_status workbench_runtime_inspect
@@ -29,7 +29,7 @@ if (args is ["--self-test"])
     Check(!Verdict.SemanticOk(JsonSerializer.SerializeToElement(new { state = "failed" })));
     Check(!Verdict.SemanticOk(JsonSerializer.SerializeToElement(new { data = new { ok = false } })));
     Check(!Verdict.SemanticOk(JsonSerializer.SerializeToElement(new { state = "pending" })));
-    Check(names.Length == 58 && names.Distinct().Count() == 58);
+    Check(names.Length == 59 && names.Distinct().Count() == 59);
     Console.WriteLine("10 acceptance-gate regression checks passed."); return 0;
 }
 if (args.Length != 2) throw new ArgumentException("Usage: McpAcceptance <configuration.json> <new evidence directory> OR --self-test");

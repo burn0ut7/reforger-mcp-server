@@ -65,9 +65,14 @@ internal static partial class NativeWorkbench
         }
         public void Dispose() { foreach (var file in files.Values) file.Dispose(); files.Clear(); }
     }
-    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null, ChoicesCommand? choices = null, int? runtimePort = null, bool? scriptAuthorization = null)
+    public static object Execute(Process process, CancellationToken ct, string? world = null, UiCommand? ui = null, string? play = null, PluginCommand? plugin = null, VerificationScope? verification = null, EntityCommand? entity = null, ChildPrefabCommand? childPrefab = null, bool projectContext = false, bool? runtimeSetup = null, bool? resourceLeakAssertion = null, ChoicesCommand? choices = null, int? runtimePort = null, bool? scriptAuthorization = null, ExtensionCommand? extension = null)
     {
         ct.ThrowIfCancellationRequested();
+        var extensionInput = extension is null ? null : ExtensionInput(extension);
+        if (extension is not null && (world is not null || ui is not null || play is not null || plugin is not null || entity is not null ||
+            childPrefab is not null || projectContext || runtimeSetup is not null || resourceLeakAssertion is not null || choices is not null ||
+            runtimePort is not null || scriptAuthorization is not null))
+            throw new ArgumentException("Extension loading cannot be combined with another native operation.");
 
         using var dispatchLease = ui is null ? new DispatchLease(process) : null;
         if (runtimePort is not null && (runtimeSetup != true || runtimePort is < 1 or > 65535)) throw new ArgumentException("Runtime port requires explicit setup and a port from 1 to 65535.");
@@ -83,14 +88,16 @@ internal static partial class NativeWorkbench
             if (field.Kind == "bool" && plugin.Value is not ("true" or "false")) throw new ArgumentException("Setting requires true or false.");
             if (field.Kind is "array" or "process") throw new ArgumentException("Peer count and process observations are read-only.");
         }
-        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null && resourceLeakAssertion is null && choices is null && scriptAuthorization is null;
+        var runReload = world is null && ui is null && play is null && plugin is null && entity is null && childPrefab is null && !projectContext && runtimeSetup is null && resourceLeakAssertion is null && choices is null && scriptAuthorization is null && extension is null;
         var suppressResourceLeakAssertion = resourceLeakAssertion == true || runReload || world is not null || ui is not null || play is "start" or "stop";
         using var ownVerification = verification is null ? new VerificationScope() : null;
         void CheckHash(string path, string hash) => (verification ?? ownVerification!).Verify(path, hash);
         var exe = process.MainModule!;
         var profile = Profile(exe.FileName, verification ?? ownVerification!);
         var supportedWorld = world?.EndsWith(".ent", StringComparison.OrdinalIgnoreCase) == true;
-        if (profile.Limited && !(projectContext || resourceLeakAssertion is not null || scriptAuthorization is not null || runtimeSetup is not null || runReload || play is not null || supportedWorld || ui is not null && profile.SupportsUi(ui.Action)))
+        if (ui?.Action == "activate" && (!profile.Limited || ui.WindowHandle == 0))
+            throw new InvalidOperationException("Native picker activation requires the validated 1.9 profile and an observed window.");
+        if (profile.Limited && !(projectContext || resourceLeakAssertion is not null || scriptAuthorization is not null || runtimeSetup is not null || extension is not null || runReload || play is not null || supportedWorld || ui is not null && profile.SupportsUi(ui.Action)))
             throw new InvalidOperationException("Workbench 1.9 native profile does not support this editor operation yet. No call dispatched.");
         if (profile.Limited && (world is not null && !supportedWorld || ui is not null && !profile.SupportsUi(ui.Action) || plugin is not null ||
             entity is not null || childPrefab is not null || choices is not null))
@@ -117,7 +124,7 @@ internal static partial class NativeWorkbench
                 // but must not prevent Play observation or its normal stop lifecycle.
                 // Preserve setup's idle-application guard before its initial read.
                 // The session separately verifies the actual Play flag for installation.
-                var requiresIdleApplication = runReload || world is not null || runtimeSetup is not null ||
+                var requiresIdleApplication = runReload || world is not null || runtimeSetup is not null || extension is not null ||
                     (!profile.Limited && play is null && plugin is null && resourceLeakAssertion is null && scriptAuthorization is null);
                 if (ui is null && (Read(exe.BaseAddress + profile.Busy, 1)[0] != 0 ||
                     requiresIdleApplication && Read(app + profile.ReloadBlockedOffset, 1)[0] != 0)) throw new WorkbenchBusyException("Application busy");
@@ -208,6 +215,7 @@ internal static partial class NativeWorkbench
                 BitConverter.GetBytes(uiThread).CopyTo(bytes, 56); Q(64, runReload ? 1 : 0);
                 Write(data, bytes);
                 if (choices is not null) Write(data + ChoicesInputOffset, ChoicesInput(choices));
+                if (extensionInput is not null) Write(data + 512, extensionInput);
                 if (runtimeSetup is not null)
                 {
                     Write(data + 512, System.Text.Encoding.UTF8.GetBytes("$profile:\0"));
@@ -275,14 +283,32 @@ internal static partial class NativeWorkbench
                     foreach (var rva in new[] { 0x408c70, 0x409930, 0x40b480, 0x40bd20 }) CheckCode(gui, rva);
                     CheckCode(widgets, 0x577a0); CheckCode(widgets, 0x52d70);
                     if (ui.Action is "set_text" or "choose") { CheckCode(qt, 0x16bff0); CheckCode(qt, 0x1fd0); }
+                    if (ui.Action == "finish_edit")
+                    {
+                        CheckCode(qt, 0x38f0);
+                        foreach (var rva in new[] { 0x185c40, 0x185490, 0x5c820, 0x184d90 }) CheckCode(widgets, rva);
+                    }
                     if (ui.Action is "select" or "expand" or "collapse") { CheckCode(widgets, 0x2ade00); CheckCode(widgets, 0x2c6f40); CheckCode(widgets, 0x33de90); }
                     if (ui.Action is "open_choices" or "choose") { CheckCode(widgets, 0x2bee90); CheckCode(widgets, 0x143ef0); CheckCode(qt, 0x228d0); }
                     if (ui.Action == "add_item")
                     {
-                        foreach (var rva in new[] { 0x2a68079, 0x48e210, 0x479130, 0x4e46c0 }) CheckCode(exe, rva);
+                        foreach (var rva in profile.Arrays.Code) CheckCode(exe, rva);
                         CheckCode(widgets, 0x34c240); CheckCode(widgets, 0x5c820);
                     }
-                    EmitUi(cb, ui, gui.BaseAddress, widgets.BaseAddress, qt.BaseAddress, exe.BaseAddress);
+                    if (ui.Action == "activate")
+                    {
+                        CheckCode(widgets, 0x34c240);
+                        CheckCode(exe, 0x51e5e0);
+                    }
+                    EmitUi(cb, ui, gui.BaseAddress, widgets.BaseAddress, qt.BaseAddress, exe.BaseAddress, profile.Arrays);
+                }
+                else if (extension is not null)
+                {
+                    var gui = process.Modules.Cast<ProcessModule>().Single(m => m.ModuleName == "Qt6Gui.dll");
+                    var widgets = process.Modules.Cast<ProcessModule>().Single(m => m.ModuleName == "Qt6Widgets.dll");
+                    CheckHash(gui.FileName, "ca9f20d9b59d5bc321a87005b926b853ebcd6a2394823e14d3c8b5fc5702fa8c");
+                    CheckHash(widgets.FileName, "d34ef78b3d3b5506ee8279ce6efbfc263d773b74860af76e66b0715346897a3a");
+                    EmitExtension(cb, Export("LoadLibraryExW"), Export("GetProcAddress"), Export("GetLastError"));
                 }
                 else if (choices is not null)
                 {
@@ -392,6 +418,12 @@ internal static partial class NativeWorkbench
                 var completed = BitConverter.ToUInt32(result, 72);
                 var succeeded = BitConverter.ToUInt32(result, 68) == 1;
                 var resourceAcknowledged = BitConverter.ToInt32(result, 116) == 1;
+                if (extension is not null)
+                    return new ExtensionResult(completed != 2 ? "outcome_unknown" : succeeded ? "entry_returned" :
+                            BitConverter.ToInt32(result, 104) == 1 ? "entry_missing_module_retained" : "module_load_failed",
+                        process.Id, BitConverter.ToInt64(result, 112) != 0,
+                        completed == 2 ? BitConverter.ToInt32(result, 108) : null,
+                        uiThread, BitConverter.ToUInt32(result, 60), true);
                 if (scriptAuthorization is not null)
                     return new { state = completed == 2 ? "observed" : "outcome_unknown", processId = process.Id,
                         allowAll = completed == 2 ? BitConverter.ToInt32(result, 68) == 0x8000 : (bool?)null,
@@ -517,7 +549,7 @@ internal static partial class NativeWorkbench
             throw new InvalidOperationException("Native operation dispatch was attempted; operation outcome or cleanup may be unknown. Inspect Workbench logs/state and do not blindly retry. " + ex.Message, ex);
         }
     }
-    private static void EmitUi(E e, UiCommand command, nint gui, nint widgets, nint core, nint image)
+    private static void EmitUi(E e, UiCommand command, nint gui, nint widgets, nint core, nint image, ArrayAddProfile arrays)
     {
         void Call(nint address) { e.B(0x48, 0xb8); e.Q(address); e.B(0xff, 0xd0); }
         if (command.Action == "close")
@@ -533,7 +565,7 @@ internal static partial class NativeWorkbench
             e.B(0x48, 0x85, 0xc0); e.J(0x84, "uiDone");
             e.B(0x48, 0x89, 0x43, 96, 0x48, 0x89, 0xc1, 0x48, 0x8b, 0x00, 0xff, 0x50, 8, 0x84, 0xc0); // isValid()
             e.J(0x84, "uiDone");
-            if (command.Action is "select" or "expand" or "collapse" or "open_choices" or "choose" or "add_item")
+            if (command.Action is "select" or "activate" or "expand" or "collapse" or "open_choices" or "choose" or "add_item")
             {
                 // Exact Qt 6.8.3 QAccessibleTableCell layout, checked by RTTI-derived
                 // primary vtable. QPointer view.value +0x20; persistent index +0x28.
@@ -547,7 +579,8 @@ internal static partial class NativeWorkbench
                     0x48, 0x8b, 0x42, 8, 0x48, 0x89, 0x83, 0x28, 1, 0, 0,
                     0x48, 0x8b, 0x42, 16, 0x48, 0x89, 0x83, 0x30, 1, 0, 0,
                     0x48, 0x8d, 0x93, 0x20, 1, 0, 0);
-                if (command.Action == "add_item") EmitArrayAdd(e, image, widgets);
+                if (command.Action == "add_item") EmitArrayAdd(e, image, widgets, arrays);
+                else if (command.Action == "activate") EmitPickerActivate(e, image, widgets, command.WindowHandle);
                 else if (command.Action is "open_choices" or "choose")
                 {
                     Call(widgets + 0x2bee90); // Row's native editor widget
@@ -576,6 +609,7 @@ internal static partial class NativeWorkbench
                 else if (command.Action == "select") Call(widgets + 0x2c6f40); // QAbstractItemView::setCurrentIndex
                 else { e.B(0x41, 0xb8); e.B(BitConverter.GetBytes(command.Action == "expand" ? 1 : 0)); Call(widgets + 0x33de90); }
             }
+            else if (command.Action == "finish_edit") EmitFinishEdit(e, widgets, core);
             else if (command.Action == "set_text")
             {
                 // Construct a real QString from bounded UTF-16 in this allocation.

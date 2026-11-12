@@ -1,0 +1,7 @@
+from pathlib import Path
+r=Path(r'C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/addons/Lobby2')
+p=r/'scripts/Game/MissionFramework/GC_Event.c';s=p.read_text().replace('float m_fWaitSeconds;', 'float m_fDelay;').replace('advanced.m_fWaitSeconds', 'advanced.m_fDelay').replace('Wait this many seconds before running. Zero means now. Conditions must still pass when the wait ends.', 'Delay in seconds before running. For example, 5 means wait 5 seconds. Zero means no delay. Conditions must still pass when the delay ends.');p.write_text(s)
+for name in ['GC_EventGroupTests.c','GC_FlagMemoryTests.c','GC_MissionRuleTests.c']:
+ p=r/'tests/McpTestAddon/scripts/Game'/name;s=p.read_text().replace('m_Advanced.m_fWaitSeconds','m_Advanced.m_fDelay');p.write_text(s)
+p=r/'Prefabs/MP/Modes/GameMode_Lobby_NoFlagsExample.et';s=p.read_text().replace('m_fWaitSeconds','m_fDelay');p.write_text(s)
+p=r/'docs/MissionRules/README.md';s=p.read_text().replace('**Wait Seconds** adds a delay','**Delay** adds a wait measured in seconds').replace('Advanced > Wait Seconds','Advanced > Delay');s+='\nThe Advanced field formerly named Wait Seconds is now Delay, still measured in seconds. Saved GC_RuleOptions objects use m_fDelay instead of m_fWaitSeconds; the shipped example was migrated with the same numeric value. External saved Advanced settings need the same field rename. Internal compiled/legacy fixtures retain their original field name.\n';p.write_text(s)

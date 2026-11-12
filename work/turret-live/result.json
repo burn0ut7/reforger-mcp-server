@@ -1,0 +1,40 @@
+{
+  "recording": "01a1c5c0-aabc-8f00-8400-00000007b002",
+  "batches": 13,
+  "records": 959,
+  "dropped": 0,
+  "fixtures": [
+    {
+      "entity": "entity-18",
+      "turrets": 2,
+      "snapshots": 9,
+      "changedWithHullStill": true,
+      "hullRotation": true,
+      "despawn": true
+    },
+    {
+      "entity": "entity-19",
+      "turrets": 2,
+      "snapshots": 9,
+      "changedWithHullStill": true,
+      "hullRotation": true,
+      "despawn": true
+    },
+    {
+      "entity": "entity-20",
+      "turrets": 1,
+      "snapshots": 9,
+      "changedWithHullStill": true,
+      "hullRotation": true,
+      "despawn": true
+    },
+    {
+      "entity": "entity-21",
+      "turrets": 0,
+      "snapshots": 9,
+      "changedWithHullStill": false,
+      "hullRotation": false,
+      "despawn": true
+    }
+  ]
+}

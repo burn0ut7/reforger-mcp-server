@@ -1,0 +1,5 @@
+from pathlib import Path
+p=Path(r'C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/addons/Lobby2/tests/McpTestAddon/scripts/Game/GC_RandomConditionTests.c')
+import re
+p.write_text(re.sub(r'\bevent\b','authoredEvent',p.read_text()))
+p=Path('work/mission-rules-cleanup/package.py');s=p.read_text().replace("'tests/McpTestAddon/scripts/Game/GC_MissionRandomTests.c'", "'tests/McpTestAddon/scripts/Game/GC_MissionRandomTests.c','tests/McpTestAddon/scripts/Game/GC_RandomConditionTests.c'");s=s.replace('timer/named-event conditions and moving randomness into conditions remain future slices.', 'Scheduled Random Chance conditions provide a configurable interval, 0..1 chance, and Keep rolling or Roll once behavior. Nested logical groups combine their cached answers normally. General timer conditions remain a future slice.');s=s.replace('Dedicated/remote-client behavior was not newly tested.', 'Scheduled random conditions received production script compilation and source-level review only; their new optional regression scenarios were not run in-game. Dedicated/remote-client behavior was not newly tested.');p.write_text(s)

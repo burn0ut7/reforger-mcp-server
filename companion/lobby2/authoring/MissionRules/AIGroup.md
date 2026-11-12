@@ -2,7 +2,7 @@
 
 Add **AI Group Condition** (`GC_AIGroupCondition`) to an event or mission flag's Conditions list. It uses the existing mission framework: the event still owns actions, delay and repeatability.
 
-- **Group**: choose an existing named AI group from the world dropdown, or enter the exact name of a group that will spawn later. Select the group entity, not a soldier or vehicle. The picker reuses `GC_AIGroupChoices`, also used by Assign Waypoints. Unnamed entities need **Plugins > GC > Name unnamed entities** before string references can find them.
+- **Group**: choose an existing named AI group from the world dropdown, or enter the exact name of a group that will spawn later. Select the group entity, not a soldier or vehicle. The picker reuses `GC_AIGroupChoices`, also used by Assign Waypoints.
 - **Mode**: None (initializing), Idle, Autonomous (combat movement), or Following waypoint. Default: Autonomous.
 - **Continuous**: unchecked stays true after the first observed matching mode; checked follows the group's current mode and becomes false when it leaves that mode. Default: unchecked.
 

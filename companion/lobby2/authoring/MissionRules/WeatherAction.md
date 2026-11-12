@@ -3,7 +3,7 @@
 Add **Time and Weather Action** to an event's Actions list. Use **Change Weather** and **Change Time** independently, or check both. At least one must be checked.
 
 - **Change Weather:** checked by default, preserving existing weather actions.
-- **Weather Preset:** exact preset name, default `Clear`. Open the mission world and choose **Plugins > GC > List weather presets** to see every name from its Time and Weather Manager. Names are also printed to the editor log. Copy a name into this field. Nested action fields do not have a verified live dropdown; no external helper is required.
+- **Weather Preset:** exact preset name, default `Clear`. Choose a preset in the field using the Workbench integration, or type its exact name from the map's Time and Weather Manager.
 - **Transition Seconds:** weather transition duration on the game's weather timeline, from 0 to 86400. Zero changes immediately. Time acceleration can affect real elapsed duration. This does not delay the clock change.
 - **Allow Natural Changes:** unchecked keeps the requested weather until another system changes it. Checked allows normal weather progression afterward. The engine's default state duration is retained (0.001 hours); this does not guarantee a long hold at that preset.
 - **Change Time:** unchecked by default. Check to set **Hours** (0–23), **Minutes** (0–59), and **Seconds** (0–59). For example, 18:30:00 means 6:30 PM. Date and normal time progression stay unchanged.

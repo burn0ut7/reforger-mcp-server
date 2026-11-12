@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "categories": [
+    {
+      "category": "GC",
+      "commands": ["Create Mission Data", "Spawn Mission Template", "Submit Mission", "Update Mods"],
+      "iconCommand": "Spawn Mission Template"
+    }
+  ]
+}

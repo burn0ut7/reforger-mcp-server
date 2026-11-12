@@ -1,0 +1,3962 @@
+[
+  {
+    "schemaVersion": 2,
+    "recordingId": "01a1c5d0-d7ed-81af-8400-00000010e90b",
+    "missionId": "01a1c5cf-e068-805b-8400-0000000d9686",
+    "seconds": 109.415699219,
+    "batches": 143,
+    "rawBytes": 18091613,
+    "gzipBytesPerBatch": 814611,
+    "bytesPerSecond": 165347.50615438554,
+    "closed": true,
+    "stopReason": "disabled",
+    "droppedRecords": 0,
+    "contiguousRevisions": true,
+    "contiguousSequences": true,
+    "monotonicTimes": true,
+    "recordCounts": {
+      "map-state": 3,
+      "spawn": 128,
+      "state": 50817,
+      "equipment": 127,
+      "seat": 124,
+      "appearance": 124,
+      "vehicle-state": 92,
+      "turret-state": 91,
+      "damage": 18,
+      "death": 3,
+      "despawn": 104
+    },
+    "coverage": {
+      "actors": "players-and-ai",
+      "map": "server-faction-snapshots-1s",
+      "pose": "inferred",
+      "voice": "client-capture-500ms-timeout",
+      "shots": true,
+      "impacts": true,
+      "impactScope": "projectiles-inheriting-stock-bullet-base",
+      "damage": true,
+      "grenades": true,
+      "vehicles": true,
+      "gear": true
+    },
+    "spawns": [
+      {
+        "entity": "entity-1",
+        "kind": "ai",
+        "prefab": "{1CA3D30464EE4674}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Spotter.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Spotter",
+        "position": [
+          1236.021972,
+          39.0,
+          2739.58789
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-2",
+        "kind": "ai",
+        "prefab": "{37578B1666981FCE}Prefabs/Characters/Core/Character_Base.et",
+        "playerIdentity": "",
+        "faction": "",
+        "iconResource": "",
+        "iconName": "",
+        "position": [
+          1197.621948,
+          38.855136,
+          2682.34497
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-3",
+        "kind": "ai",
+        "prefab": "{DCB41B3746FDD1BE}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_Rifleman.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Rifleman",
+        "position": [
+          1202.526977,
+          39.0,
+          2707.673095
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-4",
+        "kind": "ai",
+        "prefab": "{1CA3D30464EE4674}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Spotter.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Spotter",
+        "position": [
+          1196.259033,
+          39.0,
+          2726.050048
+        ],
+        "anglesDegrees": [
+          0.0,
+          -79.040946,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-5",
+        "kind": "ai",
+        "prefab": "{6058AB54781A0C52}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_AMG.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1202.767944,
+          38.688571,
+          2775.924072
+        ],
+        "anglesDegrees": [
+          0.0,
+          -70.364562,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-6",
+        "kind": "ai",
+        "prefab": "{6058AB54781A0C52}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_AMG.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1174.875,
+          38.817577,
+          2766.862792
+        ],
+        "anglesDegrees": [
+          0.0,
+          -18.134267,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-7",
+        "kind": "ai",
+        "prefab": "{6058AB54781A0C52}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_AMG.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1145.004028,
+          38.0,
+          2778.241943
+        ],
+        "anglesDegrees": [
+          0.0,
+          33.274078,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-8",
+        "kind": "ai",
+        "prefab": "{0F6689B491641155}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Sniper.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Sharpshooter",
+        "position": [
+          1199.258666,
+          39.0,
+          2723.050537
+        ],
+        "anglesDegrees": [
+          0.0,
+          179.618103,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-9",
+        "kind": "ai",
+        "prefab": "{6058AB54781A0C52}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_AMG.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1205.769042,
+          38.735839,
+          2772.924072
+        ],
+        "anglesDegrees": [
+          -0.0,
+          -118.697296,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-10",
+        "kind": "ai",
+        "prefab": "{6058AB54781A0C52}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_AMG.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1136.671508,
+          38.999992,
+          2666.41748
+        ],
+        "anglesDegrees": [
+          0.0,
+          -156.911819,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-11",
+        "kind": "ai",
+        "prefab": "{6058AB54781A0C52}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_AMG.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1148.004028,
+          38.059741,
+          2775.241943
+        ],
+        "anglesDegrees": [
+          0.0,
+          88.58815,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-12",
+        "kind": "ai",
+        "prefab": "{CD28EE7C5690D3BB}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1199.769042,
+          38.751564,
+          2772.924072
+        ],
+        "anglesDegrees": [
+          0.0,
+          159.043106,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-13",
+        "kind": "ai",
+        "prefab": "{CD28EE7C5690D3BB}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1171.875,
+          38.911975,
+          2763.863037
+        ],
+        "anglesDegrees": [
+          0.0,
+          -25.373231,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-14",
+        "kind": "ai",
+        "prefab": "{CD28EE7C5690D3BB}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1142.003784,
+          38.173206,
+          2775.241943
+        ],
+        "anglesDegrees": [
+          0.0,
+          -56.503986,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-15",
+        "kind": "ai",
+        "prefab": "{CD28EE7C5690D3BB}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1207.212646,
+          38.903606,
+          2765.870117
+        ],
+        "anglesDegrees": [
+          0.0,
+          -156.412994,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-16",
+        "kind": "ai",
+        "prefab": "{CD28EE7C5690D3BB}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1180.875,
+          39.0,
+          2760.863037
+        ],
+        "anglesDegrees": [
+          0.0,
+          159.03807,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-17",
+        "kind": "ai",
+        "prefab": "{CD28EE7C5690D3BB}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_Ammo.et",
+        "playerIdentity": "",
+        "faction": "US",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Ammo_Bearer",
+        "position": [
+          1151.004028,
+          38.271636,
+          2772.241943
+        ],
+        "anglesDegrees": [
+          0.0,
+          -2.552918,
+          0.0
+        ]
+      },
+      {
+        "entity": "entity-18",
+        "kind": "vehicle",
+        "prefab": "{C012BB3488BEA0C2}Prefabs/Vehicles/Wheeled/BTR70/BTR70.et",
+        "playerIdentity": "",
+        "faction": "",
+        "iconResource": "{95F49CBE9FF7A0CB}UI/Textures/Editor/EditableEntities/Vehicles/EditableEntity_Vehicle_Apc.edds",
+        "iconName": "",
+        "position": [
+          1150.0,
+          40.0,
+          2730.0
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-19",
+        "kind": "vehicle",
+        "prefab": "{DDDD9B51F1234DF3}Prefabs/Vehicles/Helicopters/UH1H/UH1H_armed.et",
+        "playerIdentity": "",
+        "faction": "",
+        "iconResource": "{BFBA42C85CB25019}UI/Textures/Editor/EditableEntities/Vehicles/EditableEntity_Vehicle_Helicopter.edds",
+        "iconName": "",
+        "position": [
+          1170.0,
+          40.0,
+          2730.0
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-20",
+        "kind": "vehicle",
+        "prefab": "{73530808E4B455BA}Prefabs/Weapons/Tripods/Tripod_M3_M2HB.et",
+        "playerIdentity": "",
+        "faction": "",
+        "iconResource": "{C9E7C9C9DE28F3B7}UI/Textures/Editor/EditableEntities/Vehicles/EditableEntity_Vehicle_Turret_MachineGun.edds",
+        "iconName": "",
+        "position": [
+          1190.0,
+          40.0,
+          2730.0
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-21",
+        "kind": "vehicle",
+        "prefab": "{B55C6990A6A9411B}Prefabs/Vehicles/Wheeled/M998/M998_covered.et",
+        "playerIdentity": "",
+        "faction": "",
+        "iconResource": "{943873C801ED95B8}UI/Textures/Editor/EditableEntities/Vehicles/EditableEntity_Vehicle_Offroad.edds",
+        "iconName": "",
+        "position": [
+          1210.0,
+          40.0,
+          2730.0
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-22",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1198.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-23",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1200.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-24",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1202.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-25",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1204.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-26",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1206.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-27",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1208.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-28",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1210.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-29",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1212.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-30",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1214.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-31",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1216.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-32",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1218.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-33",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1220.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-34",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1222.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-35",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1224.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-36",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1226.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-37",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1228.458007,
+          42.080001,
+          2727.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-38",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1198.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-39",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1200.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-40",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1202.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-41",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1204.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-42",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1206.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-43",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1208.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-44",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1210.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-45",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1212.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-46",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1214.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-47",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1216.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-48",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1218.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-49",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1220.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-50",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1222.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-51",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1224.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-52",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1226.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-53",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1228.458007,
+          42.080001,
+          2729.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-54",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1198.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-55",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1200.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-56",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1202.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-57",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1204.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-58",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1206.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-59",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1208.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-60",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1210.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-61",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1212.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-62",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1214.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-63",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1216.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-64",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1218.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-65",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1220.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-66",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1222.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-67",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1224.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-68",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1226.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-69",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1228.458007,
+          42.080001,
+          2731.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-70",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1198.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-71",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1200.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-72",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1202.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-73",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1204.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-74",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1206.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-75",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1208.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-76",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1210.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-77",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1212.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-78",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1214.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-79",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1216.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-80",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1218.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-81",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1220.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-82",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1222.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-83",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1224.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-84",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1226.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-85",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1228.458007,
+          42.080001,
+          2733.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-86",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1198.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-87",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1200.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-88",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1202.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-89",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1204.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-90",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1206.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-91",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1208.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-92",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1210.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-93",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1212.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-94",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1214.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-95",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1216.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-96",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1218.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-97",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1220.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-98",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1222.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-99",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1224.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-100",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1226.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-101",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1228.458007,
+          42.080001,
+          2735.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-102",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1198.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-103",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1200.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-104",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1202.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-105",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1204.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-106",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1206.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-107",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1208.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-108",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1210.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-109",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1212.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-110",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1214.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-111",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1216.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-112",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1218.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-113",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1220.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-114",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1222.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-115",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1224.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-116",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1226.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-117",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1228.458007,
+          42.080001,
+          2737.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-118",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1198.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-119",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1200.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-120",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1202.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-121",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1204.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-122",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1206.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-123",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1208.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-124",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1210.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-125",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1212.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-126",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1214.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-127",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1216.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      },
+      {
+        "entity": "entity-128",
+        "kind": "ai",
+        "prefab": "{BF643BE4ADBDFDD3}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_LAT.et",
+        "playerIdentity": "",
+        "faction": "USSR",
+        "iconResource": "{EE0B4CDEA86FC24A}UI/Textures/DeployMenu/LoadoutIcons/LoadoutIcons.imageset",
+        "iconName": "EditableEntity_Character_Anti_Tank",
+        "position": [
+          1218.458007,
+          42.080001,
+          2739.127929
+        ],
+        "anglesDegrees": [
+          0.0,
+          0.0,
+          -0.0
+        ]
+      }
+    ],
+    "stances": [
+      0
+    ],
+    "flags": [
+      0,
+      2
+    ],
+    "leanRange": [
+      0,
+      0
+    ],
+    "maxSpeedMps": 48.396,
+    "medianStateIntervalMs": 202.171875,
+    "maxStateIntervalMs": 5146.964844000002,
+    "maxObservationWindowMs": 403.546875,
+    "statesAfterDeath": 0,
+    "bonesPerSkeleton": [],
+    "seatChanges": [
+      {
+        "entity": "entity-1",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-2",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-3",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-4",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-5",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-6",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-7",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-8",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-9",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-10",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-11",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-12",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-13",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-14",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-15",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-16",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-17",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-22",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-23",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-24",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-25",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-26",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-27",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-28",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-29",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-30",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-31",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-32",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-33",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-34",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-35",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-36",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-37",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-38",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-39",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-40",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-41",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-42",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-43",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-44",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-45",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-46",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-47",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-48",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-49",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-50",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-51",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-52",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-53",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-54",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-55",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-56",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-57",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-58",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-59",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-60",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-61",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-62",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-63",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-64",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-65",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-66",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-67",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-68",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-69",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-70",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-71",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-72",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-73",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-74",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-75",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-76",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-77",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-78",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-79",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-80",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-81",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-82",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-83",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-84",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-85",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-86",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-87",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-88",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-89",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-90",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-91",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-92",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-93",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-94",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-95",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-96",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-97",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-98",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-99",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-100",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-101",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-102",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-103",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-104",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-105",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-106",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-107",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-108",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-109",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-110",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-111",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-112",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-113",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-114",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-115",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-116",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-117",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-118",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-119",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-120",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-121",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-122",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-123",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-124",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-125",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-126",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-127",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      },
+      {
+        "entity": "entity-128",
+        "vehicle": "",
+        "seatIndex": -1,
+        "compartmentType": -1
+      }
+    ],
+    "linkedProjectileDamageCount": 0,
+    "linkedDamageDeathCount": 0,
+    "firstLaunch": null,
+    "grenades": [],
+    "files": [
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-0.json",
+        "bytes": 71113,
+        "sha256": "fdd834edfbb359bb94cf41c292ed1e297b52bc85231782e2d6b428d336b275a4"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-1.json",
+        "bytes": 71479,
+        "sha256": "178c8d9d755a11b3f7ae8fddba51a7b6acef773f1d7acb3fc6a650c2b9d3f1af"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-2.json",
+        "bytes": 73812,
+        "sha256": "bf5220d4d4c88049b407fff3abdce843e4e656652621da32a91bf4654d0c90bf"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-3.json",
+        "bytes": 76396,
+        "sha256": "0591773f83c64ffd0f467db203167f6f2a0c204ca2087ba47bd2c8b1d12ec39d"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-4.json",
+        "bytes": 70989,
+        "sha256": "caa3ade692e7e37eea9166377e444de0718d47a84fdbc89ab59c780a29126729"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-5.json",
+        "bytes": 71020,
+        "sha256": "f1927f8e7fe53f374fe453490621055cb6804b3397ae50467fd919b12541b8fe"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-6.json",
+        "bytes": 71022,
+        "sha256": "9666814b6a1d0a9fc809926bd72bb6a14237392f0538124d12dbf846ceee39dd"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-7.json",
+        "bytes": 71015,
+        "sha256": "ae219cf228e541cea039e3109b140a3c53a871c00cf34c6e8766b31ad0b38e78"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-8.json",
+        "bytes": 71012,
+        "sha256": "96eabf877ec99ca34a101f77e25cb0670a8244e468a191bc93bdab01463cc323"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-9.json",
+        "bytes": 70985,
+        "sha256": "b62c56458ecb99ecac93efd81d0eef47331473ceb0bdda2ad1f057c0d1436764"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-10.json",
+        "bytes": 71073,
+        "sha256": "24bd9448b5cf6b47f971137c72990434346b357dd184b39da3056e110ec7437a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-11.json",
+        "bytes": 78574,
+        "sha256": "b177b7957240a97fe4851db40cbf6badb6f4bab0a813c73d8ab0716d214175dc"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-12.json",
+        "bytes": 131773,
+        "sha256": "a16ea534a96116072afbc613c73fa59c6852f89f61338925ff5873d6cd491ce6"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-13.json",
+        "bytes": 129585,
+        "sha256": "168dcb53ea46c614f0db1f73bc58cdf01d9556290143ffbc82d9a96b9d24ac26"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-14.json",
+        "bytes": 130097,
+        "sha256": "5a6aa4eca6d3dcb8e4ee8014018ede376e3af6fedc5d029d3433a7b6ee35693e"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-15.json",
+        "bytes": 132865,
+        "sha256": "66316f370a0d16f79cd7c6945d323c63b37b1e06d798f062108784a9731d6b52"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-16.json",
+        "bytes": 129011,
+        "sha256": "1ee7e77e9b83d46317714216d13aeeecc4def66d715e8a0b35447f4281f634c1"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-17.json",
+        "bytes": 161331,
+        "sha256": "b142c736f140e9f8a9108b90f3e893889213b0d19968a3f873398532fd4f36f5"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-18.json",
+        "bytes": 129195,
+        "sha256": "2fb3580c1803ec09f064821eb7e92b66888f2ff79da576bacdca4b82ea31214f"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-19.json",
+        "bytes": 137801,
+        "sha256": "1b40bd6b0c8b1c3f90e6add8e1b2088054cec38a373a4da6ef36459c79b4c94a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-20.json",
+        "bytes": 145645,
+        "sha256": "fd18aa808c2d56314d7d9095ed53b12c0fe12199913555b48bc87ad267b2b7e0"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-21.json",
+        "bytes": 148431,
+        "sha256": "7ea6c11fdf6d04b2bc38952b027d34bcc96c043041dbb8e228e467158e7e95c1"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-22.json",
+        "bytes": 147066,
+        "sha256": "0e69c7e0fb2c7249c099ff2ad905bbd0e75a13b4971697ed73729455fd36314b"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-23.json",
+        "bytes": 147792,
+        "sha256": "4ff966eb23158421f083c41793f3335139c9ccb522e85f71ff49197ae535cfdc"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-24.json",
+        "bytes": 130647,
+        "sha256": "ac18608fb81f74073d2caadd4e131a0f48fa46e2ff3633536e0857c12cfae341"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-25.json",
+        "bytes": 134333,
+        "sha256": "b97fd8f0f23350f1a26e4db8961b68446c93021833464a1ea2c6cd8a9a80469a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-26.json",
+        "bytes": 130311,
+        "sha256": "7ff3a7d81ab74928516ad91dcd60287df2e6d558a71700525a07994749752d98"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-27.json",
+        "bytes": 130676,
+        "sha256": "1037c129c49db40a34c9a00a4f17b31b0a27738d72af39b29a410af1c474afbb"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-28.json",
+        "bytes": 132843,
+        "sha256": "b9383f9e8aba3c355e89f9200690a8a4c197709524a4d6bcce34d38af6fa23af"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-29.json",
+        "bytes": 129220,
+        "sha256": "329dd9ab73260fa4c9448101e29b635a626d3c44b81d228bc8ddfa8cc2051ea0"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-30.json",
+        "bytes": 131297,
+        "sha256": "3167a4ec6259f5ecba641e2247ebc08a4c57fdd48242f565c089f321213a3c93"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-31.json",
+        "bytes": 137678,
+        "sha256": "94f02db58dc8eab0e313e8735c11e5a6345e651fa7bf19d730c5bfa7ae8b00b9"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-32.json",
+        "bytes": 130207,
+        "sha256": "a9b069c5a5951175089982b55e130eb78d228a3418e513127a036e3cad128aeb"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-33.json",
+        "bytes": 128683,
+        "sha256": "b39ccdea303fd3c499129ee89120e05f5277edfea24cd5cc9cfbf9baf1273d82"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-34.json",
+        "bytes": 131350,
+        "sha256": "d34f669e82280622001dfa3684697bbe403e0900283e85c86e6a1cbdaaf080b9"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-35.json",
+        "bytes": 130978,
+        "sha256": "0ce4de65e1c7a09cd52132e35432f82596f6e959ae41b1b086145d8579ff34a2"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-36.json",
+        "bytes": 130965,
+        "sha256": "3a2a1c5a5505e5a1a3c42f7b02e4d81079ec91d0abb7a9bde3c35c710ae9c467"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-37.json",
+        "bytes": 130157,
+        "sha256": "a686f62f26146d3fc80bdcc3e1b22481c5935f852c8e726188130feb7e634b4b"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-38.json",
+        "bytes": 129697,
+        "sha256": "88d498addb33d30dfb4fe3776b4cc4cdf521364b93ad794c1f6f90d51c853f12"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-39.json",
+        "bytes": 130145,
+        "sha256": "1dd5a788b00cd02e56f39204ed6ae71613c52604e10169e90830a32efdb76577"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-40.json",
+        "bytes": 130204,
+        "sha256": "c0a804d436b7a5de1556c13be0b45152805bc78092940e1d3b509ceb781c55de"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-41.json",
+        "bytes": 130094,
+        "sha256": "ea7b5e9975f5fc936e28d73afcd37d5f618e20cea8c05e0f92b1fb2f0e4abcbd"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-42.json",
+        "bytes": 131393,
+        "sha256": "71891891cb1b415291f17764803f5d80ebb9ddfa1041df8f3e22117a12adef98"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-43.json",
+        "bytes": 129746,
+        "sha256": "102a2ce46543487547903bb0c5697f18146d15f526c20eeef3bfd8466f99da61"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-44.json",
+        "bytes": 129591,
+        "sha256": "ace77473f45863d2b4e022a6dc45777344ae5abf5c5961a5563a9cea09719023"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-45.json",
+        "bytes": 128994,
+        "sha256": "69872c8409f6dc128521087b63ddded31cadd85587f2d2ef0d0e586a69d7ec90"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-46.json",
+        "bytes": 129096,
+        "sha256": "cfad99f066b0a58812ef67a80d0db5ff90c31208a4c6f3d8ba4580443374eefe"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-47.json",
+        "bytes": 130129,
+        "sha256": "3a767657ce0936bfa1e81a71b197fe0157f00a70f4d9860b6de5fc4e32f64f78"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-48.json",
+        "bytes": 130564,
+        "sha256": "1767683c1a997b6a10da87a4f7808a68121436eae97bb7aa58fb8772f97da2ce"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-49.json",
+        "bytes": 133150,
+        "sha256": "f216c14519509c3a78b74f8534fe9d4a90e84e9b62e92a884f8bea9bdbce7cc5"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-50.json",
+        "bytes": 130500,
+        "sha256": "755052dd0b6dd5ef311f55ef8646b1c6b5e215440bd34dc8b7eaa3df3152a3a8"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-51.json",
+        "bytes": 132694,
+        "sha256": "1ee77108ad19460d17a76b426823b8bf244ad0ce54eb7afab7429612e0e86c86"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-52.json",
+        "bytes": 130616,
+        "sha256": "177809a82604ab4027b0878d92595b233286d49804b576889d05ad9c632af9f9"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-53.json",
+        "bytes": 130130,
+        "sha256": "c0b8bdf822f358407493fdcac2a0f7960ce9c82aae6a259d7cdd32141e10d6cd"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-54.json",
+        "bytes": 130258,
+        "sha256": "b0f847de7597565f0bcb2f215fbcf7c51ef7b84f7c1a4d9a5f01714a914e53d8"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-55.json",
+        "bytes": 131139,
+        "sha256": "da200aaf459b9d062b1091d2e280dc4d712bda70d635bf1a72290863ca13bc9c"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-56.json",
+        "bytes": 130553,
+        "sha256": "ba266ba9e91690de1fa42c03ed8cf1e6d32a9354339dd628879f4009e21576ad"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-57.json",
+        "bytes": 130605,
+        "sha256": "dc6a25c11bce925e5390b770a95a37e48eba4ff03aa5e4719a3d81b00581e84a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-58.json",
+        "bytes": 131340,
+        "sha256": "5503149ddbe41a5456a6a6a7f845914e8d3e33b25930ecbeb0f014129650c368"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-59.json",
+        "bytes": 131333,
+        "sha256": "1edb0dbcdce6f8250f04af3a1340692bed47a6af3af5bc5df79355d1a653456a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-60.json",
+        "bytes": 130871,
+        "sha256": "22494363e5aabae4ef20c31552a2105d306a1b2b88197529866f98296b3a59b5"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-61.json",
+        "bytes": 130937,
+        "sha256": "099c303c41403c24177746531c6759b4ec0b05d2ef9db04e8285fc489bc33735"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-62.json",
+        "bytes": 132004,
+        "sha256": "c5f5f543f84f54c53435d7bd36c7912393987bb8bebf977206181ffb19552c05"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-63.json",
+        "bytes": 131857,
+        "sha256": "64903c2af373f4487af0f60c3f2ccf0dd934d71a4282a6052827056821f1f510"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-64.json",
+        "bytes": 131897,
+        "sha256": "96de35899b31ca0dd98a16159131b1e9988f8f47ccf4125c9898aea4dfb8d00a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-65.json",
+        "bytes": 130836,
+        "sha256": "83a3823e5f6db1164e3ef577039af68baddf04062ab4496781fb330e0337e736"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-66.json",
+        "bytes": 130807,
+        "sha256": "79739f051f2eb68361127c9bbb47d7f227412620fa8d48d08320601d37309b4f"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-67.json",
+        "bytes": 129945,
+        "sha256": "03ec06ef9bebd13c95e995b61baa1f1815a75951c4b6e1241ee8b3310a70355e"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-68.json",
+        "bytes": 131194,
+        "sha256": "eda7a607b75133f3449988b2aea13c10feba7998b4704c3f125b064d14c63f3e"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-69.json",
+        "bytes": 132645,
+        "sha256": "df8a5979bb6c226a796ed8732f4445b2ce187fd636bc4f141e51fa85465d8e87"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-70.json",
+        "bytes": 130330,
+        "sha256": "31036710e322eb27b037a220df03056b0d5f4185532be78c3a1f0661bb475b64"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-71.json",
+        "bytes": 131724,
+        "sha256": "ebb9cd5b2aff5a85a194fcf7e89bcafa1a5d493824aed355ee3dd2c0ecf2fdc1"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-72.json",
+        "bytes": 132047,
+        "sha256": "20fe77ab561f4862fe054710db9949b15d262d0235b82556151c188c66d171e7"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-73.json",
+        "bytes": 131679,
+        "sha256": "90af1474a72127180cb67038da2dbcacaf446b42ef63b5b12e0e7b2b8f892d4b"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-74.json",
+        "bytes": 130306,
+        "sha256": "9b2b485770c33c589bd821cc36e8af5f4ad68554bb3dd9763d62f81c0b8ff5bd"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-75.json",
+        "bytes": 130233,
+        "sha256": "04193024fefec17585acdaa76979dbf86109175bf96e07037a82b4860d971d03"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-76.json",
+        "bytes": 130909,
+        "sha256": "67e20672e22e2290bfbe4147a67f17554547ab0cd217d408257e359304a9ed33"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-77.json",
+        "bytes": 131066,
+        "sha256": "864fa75558e2c464ca845fdd00b4273b53842232f332ccf4766e9ca14cb7f823"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-78.json",
+        "bytes": 131758,
+        "sha256": "3f00bf6481fb04d37f1123dd379d1f3439c5b3a0b3d10f8ec639edd6b7713333"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-79.json",
+        "bytes": 131095,
+        "sha256": "e2821a283e8ddb5b6e49ab5ea41ba44c1d176703a6adc403c6985a77337cdd42"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-80.json",
+        "bytes": 132046,
+        "sha256": "68ef74173b5e401246b3f6d2a70fda5498ad7002f6aba2c518b4713fd48e701b"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-81.json",
+        "bytes": 132281,
+        "sha256": "577c1a86ccd3301e964348b95e53e89c9a89b3dde08dde2cd66918fc42d8cb7a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-82.json",
+        "bytes": 131875,
+        "sha256": "e8477aff3cb35708ec26a7f871063edbdf281c21c5eb837e8f08c2ccf8aa3598"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-83.json",
+        "bytes": 132230,
+        "sha256": "94f16cf8721b21d4532e28574999e6ef742af6d391425d01a0408f87a40d04de"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-84.json",
+        "bytes": 131896,
+        "sha256": "4929ba5dfb0560c109499fe5043af640e80db7465832c2dac0ff959eb0a950ce"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-85.json",
+        "bytes": 132612,
+        "sha256": "d8b04685c57edd314d1bf0806f55eb5a14a9d160e16a25b6fc697113218ad63b"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-86.json",
+        "bytes": 130748,
+        "sha256": "cd6b208b705a7f91a2dd84ae7bad69770c73778fe42dc7b9d6fc70ee28cf16e8"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-87.json",
+        "bytes": 131924,
+        "sha256": "cc74b5226ad666a49481871bbca177a2c29a70fecfe7a6732b010a87c2342d2c"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-88.json",
+        "bytes": 131722,
+        "sha256": "9f684ac12822fda1d562546a6ae7d62d850b09e920a6a3e1312277c662f69ddb"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-89.json",
+        "bytes": 132406,
+        "sha256": "8ab59f1c6d7b7df64e9c03d5c4fce7c7a2ef9dc2c077bd376695412f4815a817"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-90.json",
+        "bytes": 131123,
+        "sha256": "c984136ffb97d8f85d086f85b823bf4adfe0897f200315f3c9a0a4819de155f3"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-91.json",
+        "bytes": 130677,
+        "sha256": "c1b9f4c87decb6ed91608d99167be12b691bbe55dc6e6f770a15e35919588d2a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-92.json",
+        "bytes": 134050,
+        "sha256": "319862823483e1a68d87df9e517e0e602131f7153c98a5587a80bbedb4bef239"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-93.json",
+        "bytes": 132054,
+        "sha256": "7fb1789687df9f286fff2b3aa5eea40774ccb5b13a41eaa637dd60bc5d37ffeb"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-94.json",
+        "bytes": 134795,
+        "sha256": "d469c348939f9834c313c3f604fc69725070231570dbe696f856bab40dd12cc2"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-95.json",
+        "bytes": 130473,
+        "sha256": "b5a0bb21f1f75fee902dc2b7e153e5620f21c966585fab67af7e7811d7fce0f7"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-96.json",
+        "bytes": 131311,
+        "sha256": "55f5faf190c8ea222d8b8ec4f11d0d7f64ba773dcf8800d317c925c35c453b46"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-97.json",
+        "bytes": 132408,
+        "sha256": "2dee13594e5f3a2548613f904bbc99894db328195e12f3c5d012670e704065f4"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-98.json",
+        "bytes": 130592,
+        "sha256": "29d43f59aacb19ddd3cf707ba521ab57de24c23d52c2446ed78ccb2eb1640120"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-99.json",
+        "bytes": 132511,
+        "sha256": "f2cc3377e63d931c29543dd94c4e5c2cd279dae0bad084a8ca9a3a04c18369eb"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-100.json",
+        "bytes": 130579,
+        "sha256": "fd5b87bb721f5116ea5535c627a396b75399ce4df03ce301f59fe2c4c3165952"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-101.json",
+        "bytes": 131443,
+        "sha256": "df473de49249337b79deb4904153c1500b2435b6f6f8758bcb027996d11cee95"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-102.json",
+        "bytes": 131001,
+        "sha256": "fde45251906b6971267509264423927af6dec17d9fe34c5a81ff533d2f283b97"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-103.json",
+        "bytes": 132256,
+        "sha256": "18d8f8c2a4c6c9825d2318147bb0de5b5c3fabc93d4149bc35be9cc3c7d030a8"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-104.json",
+        "bytes": 131830,
+        "sha256": "7be7b00799143e7745f6fe7e9f05290c8ed53c3d36ead5c6e7947b664b0ac98c"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-105.json",
+        "bytes": 131140,
+        "sha256": "c2b3705aa57f6f6649ce31e192a9bc4efef239650d964e6ce8204cfac49b3bf0"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-106.json",
+        "bytes": 132981,
+        "sha256": "a1301975564831483536d9cb6ba1ba04bda140f68df33fc038f51878007365b7"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-107.json",
+        "bytes": 131128,
+        "sha256": "fe82d30d41e94388d0153133451111fc28d42e480f72b9824ad9ebd0a9c8686c"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-108.json",
+        "bytes": 133638,
+        "sha256": "fcbc57448ec59d310dd7a0ad227b626a7877b4e824bd0e7f902affe7b9b06399"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-109.json",
+        "bytes": 130045,
+        "sha256": "1fb6da4e0da1eb3c27ea67379b06340190b7617d3d8e2c5f7fb980020cdcb687"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-110.json",
+        "bytes": 130427,
+        "sha256": "62a627b2650331e0269dccc94590450ce8fdef9c49269822ab261e62e186ffa1"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-111.json",
+        "bytes": 131095,
+        "sha256": "48375a5a0e324790b0527d8afebeda12b57196d1bf6d1b59a8d10b998a3903b9"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-112.json",
+        "bytes": 131020,
+        "sha256": "f7ccdb3316e7d84567790bdc55fde12db149ae95f224178621e1fed6388a88d2"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-113.json",
+        "bytes": 131159,
+        "sha256": "5e8b6a29a1926c315317dbe9eb99d2057100bd5bf7c6ac0064c8e525ebfe8697"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-114.json",
+        "bytes": 130878,
+        "sha256": "c2657572ea07e0b0d7ccc70da8d3414d0834567a387096cb08ad78106dfe960e"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-115.json",
+        "bytes": 130902,
+        "sha256": "59ab1a358d19a2ab0086715b616515ed3b44c461fd189b64638ebddc36b57b7b"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-116.json",
+        "bytes": 131312,
+        "sha256": "affadd21c5f803d75c6ac50ae5cba1113052327c93eb7e7f50a33e1688cdaee1"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-117.json",
+        "bytes": 131116,
+        "sha256": "f825fae41f9df980b0a72554f59b1413abbaa1326be595aa1cf942fb7fd2373a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-118.json",
+        "bytes": 131748,
+        "sha256": "b7bfa942d942801629c7c9bc4ca90e543f82ca563cba998c3b80f7b304b7f609"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-119.json",
+        "bytes": 131210,
+        "sha256": "fecdfb09cae64097ee1844f2fff577684941e3148c3609d5206aa3f5ad3f513e"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-120.json",
+        "bytes": 130868,
+        "sha256": "9c5a61f247f6ba7acf30db5c0c8bd50743ccbdc18c2f44cfba5bbeb86daaa471"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-121.json",
+        "bytes": 130734,
+        "sha256": "9f1378c45d1b0d48292a486608f8a9b1af84870c1480e97290f69696718df35a"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-122.json",
+        "bytes": 130667,
+        "sha256": "ac3e79393409b847fe3a2b03545ae191e61fa4f0489f3fedba65855d0f5877c1"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-123.json",
+        "bytes": 132180,
+        "sha256": "e3defb646ac1eae5677b1bf303444125ed576e7799122aa72b92334376a8c457"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-124.json",
+        "bytes": 131759,
+        "sha256": "8a876eec488ab960d6af1efaa9546eb00587c86b9eee099579f21429a7957a06"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-125.json",
+        "bytes": 134244,
+        "sha256": "8babfe34ab85471f5bdeac38204b9afb7f221db3deadecc1402e5028d12bfb72"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-126.json",
+        "bytes": 132106,
+        "sha256": "365867081ef6678919bcfce389545a8d1f950136d016c38c6fd2e8673481b379"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-127.json",
+        "bytes": 131454,
+        "sha256": "94573d8d5d87ea61519edb0cde0287826105254f376c5a95581521837fd91cf0"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-128.json",
+        "bytes": 130786,
+        "sha256": "d3d64e736ffb74b63036ed28a57c29d2fb8c3702720eb8c3140c661d02804c4c"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-129.json",
+        "bytes": 132084,
+        "sha256": "0b108ae0fa6c26a2796e38abb8604dc5db29e5e2c5733d357757614a4c31958e"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-130.json",
+        "bytes": 131409,
+        "sha256": "8daab95a531e3a699cf67ce92e1b83bc3fe529d583590d6cc9d3fbcb32d34212"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-131.json",
+        "bytes": 131214,
+        "sha256": "9a1451f4a9748849666a24c697d5bde2281c65db6c6d42cf6b8b92ec335c1cc8"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-132.json",
+        "bytes": 131018,
+        "sha256": "f671c984a0637897f0b298a268a531db155d0fdea54d7b770c695e5d0faf9af2"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-133.json",
+        "bytes": 132605,
+        "sha256": "183ec933525b8c4ce80e4157565e32af0609d79a1a0edb453b5777671529a0b3"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-134.json",
+        "bytes": 131420,
+        "sha256": "54c6a45b8dcfff3e4e97bd360603016bedd7afb2cb0d323b73c0ad0ac1ab7b9b"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-135.json",
+        "bytes": 131879,
+        "sha256": "ea02a321812416f1718c909aa3459a0753ebe86ceac13081f6697fb94cd86a03"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-136.json",
+        "bytes": 131803,
+        "sha256": "47060682a34f890e7a96a1997c66512fd7bfbb4c8f805bc3f46ac2dcd7cf31ec"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-137.json",
+        "bytes": 131234,
+        "sha256": "6588fe17846cdf0ac17fc58cb9509acd62329b1e60f5eeb46161779cba7f58d6"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-138.json",
+        "bytes": 135709,
+        "sha256": "11cc60727fbc8f309ce226dacabf57a9f801499b606eaff34f5588866c62b662"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-139.json",
+        "bytes": 107990,
+        "sha256": "9e8f7700e60ca773f3439b93efe072cdc99dea55ce9fd9711ea673b2714c4960"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-140.json",
+        "bytes": 119868,
+        "sha256": "fdbde471428cd97558d374da4d70557184ff062b562f978a020d92ddcd873c5d"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-141.json",
+        "bytes": 112381,
+        "sha256": "3d00f87fb24c21cbac345261c1cd5485f2b0aef27b4c3fc61014c3217855e9e0"
+      },
+      {
+        "path": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\work\\collection-review\\native-audit\\decoded-json\\01a1c5d0-d7ed-81af-8400-00000010e90b-telemetry-142.json",
+        "bytes": 105021,
+        "sha256": "0fbb8f5738da3172e72333cf5842ea8e1f28ac9cc8865ceebe30a73bee156f6f"
+      }
+    ]
+  }
+]

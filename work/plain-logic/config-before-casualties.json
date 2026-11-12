@@ -1,0 +1,41 @@
+{
+  "ghidraHome": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\.temp\\local\\runtimes\\ghidra_12.1.4_PUBLIC",
+  "javaHome": "C:\\Users\\Gray\\Documents\\VS\\reforger-script-tools\\.temp\\local\\runtimes\\jdk-21.0.12.1+1",
+  "dataDirectory": "%LOCALAPPDATA%/ReforgerMcp",
+  "targets": {
+    "server": "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger Server/ArmaReforgerServer.exe",
+    "game": "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger/ArmaReforgerSteam.exe",
+    "diagnostic": "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger/ArmaReforgerSteamDiag.exe",
+    "workbench": "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger Tools/Workbench/ArmaReforgerWorkbenchSteamDiag.exe"
+  },
+  "pakDirectories": {
+    "game": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Arma Reforger\\addons",
+    "server": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Arma Reforger Server\\addons",
+    "addons": "C:\\Users\\Gray\\Documents\\My Games\\ArmaReforger\\addons"
+  },
+  "analysisTimeoutSeconds": 3600,
+  "queryTimeoutSeconds": 120,
+  "analysisCpuCount": 2,
+  "javaHeapMegabytes": 6144,
+  "workbench": {
+    "executable": "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger Tools/Workbench/ArmaReforgerWorkbenchSteamDiag.exe",
+    "addonDirectories": [
+      "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger/addons"
+    ],
+    "runtimePort": 5776
+  },
+  "captureExecutables": {
+    "game": "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger/ArmaReforgerSteam.exe",
+    "diagnostic": "C:/Program Files (x86)/Steam/steamapps/common/Arma Reforger/ArmaReforgerSteamDiag.exe"
+  },
+  "logDirectories": {
+    "workbench": "C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/logs",
+    "peer1": "C:/Users/Gray/Documents/My Games/PeerPlugin1/logs",
+    "peer2": "C:/Users/Gray/Documents/My Games/PeerPlugin2/logs"
+  },
+  "unpackedDirectories": {},
+  "localHttp": {
+    "port": 5780,
+    "tokenFile": "C:\\Users\\Gray\\AppData\\Local\\ReforgerMcp\\shared-server.key"
+  }
+}

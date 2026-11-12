@@ -1,0 +1,355 @@
+[
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "input-down"
+      },
+      {
+        "type": "string",
+        "value": ""
+      },
+      {
+        "type": "string",
+        "value": ""
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"7ce4841f52b7491e826cde678d438836\",\"receipt\":\"rbe4d1d2b844d4dcc9459c8de78000ce1\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=0 spectator=0 nativeGroup=1000 groupFrequency=38000 nativeFaction=USSR [0:Global available=0] [1:Faction available=0] [2:Group available=0] [3:Vehicle available=0] [4:Local available=0] [5:Admin available=1] [6:Spectator available=0] messages=2 {Global|1|Prototype preview Global} {Faction|1|Prototype faction}\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":1,\"compileMs\":1,\"invokeMs\":0,\"serverMs\":92.4037},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "input-up"
+      },
+      {
+        "type": "string",
+        "value": ""
+      },
+      {
+        "type": "string",
+        "value": ""
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"fc38d56a513c404c9df18985bc912554\",\"receipt\":\"r2e2a939b8fe64067a9219e21a18ac4e2\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=0 spectator=0 nativeGroup=1000 groupFrequency=38000 nativeFaction=USSR [0:Global available=0] [1:Faction available=0] [2:Group available=0] [3:Vehicle available=0] [4:Local available=0] [5:Admin available=1] [6:Spectator available=0] messages=2 {Global|1|Prototype preview Global} {Faction|1|Prototype faction}\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":0,\"compileMs\":0,\"invokeMs\":1,\"serverMs\":87.5422},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChatAuthority",
+    "args": [
+      {
+        "type": "int",
+        "value": 1
+      },
+      {
+        "type": "string",
+        "value": "Global"
+      },
+      {
+        "type": "string",
+        "value": "Denied gameplay Global"
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"420db898ee6a42b48a6ae44ec12d27fc\",\"receipt\":\"rf52f8c25d9314fc6ab529499f573d660\",\"returnType\":\"string\",\"returned\":\"player=1 channel=Global accepted=0\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":1,\"compileMs\":1,\"invokeMs\":0,\"serverMs\":91.8583},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChatAuthority\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "raw-send"
+      },
+      {
+        "type": "string",
+        "value": "Global"
+      },
+      {
+        "type": "string",
+        "value": "Denied gameplay Global"
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"71d105cd79e24c96a3a1fcb0c5d3b208\",\"receipt\":\"re3c8a1e54a8445ca9903f437a187eb69\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=0 spectator=0 nativeGroup=1000 groupFrequency=38000 nativeFaction=USSR [0:Global available=0] [1:Faction available=0] [2:Group available=0] [3:Vehicle available=0] [4:Local available=0] [5:Admin available=1] [6:Spectator available=0] messages=2 {Global|1|Prototype preview Global} {Faction|1|Prototype faction}\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":1,\"compileMs\":1,\"invokeMs\":0,\"serverMs\":92.6166},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "whisper"
+      },
+      {
+        "type": "string",
+        "value": "1"
+      },
+      {
+        "type": "string",
+        "value": "Denied whisper"
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"70cdca50c9dc4aa4b61b1bddd0a54670\",\"receipt\":\"r50a08b613eeb480392bba24af8be1ee4\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=0 spectator=0 nativeGroup=1000 groupFrequency=38000 nativeFaction=USSR [0:Global available=0] [1:Faction available=0] [2:Group available=0] [3:Vehicle available=0] [4:Local available=0] [5:Admin available=1] [6:Spectator available=0] messages=2 {Global|1|Prototype preview Global} {Faction|1|Prototype faction}\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":0,\"compileMs\":0,\"invokeMs\":1,\"serverMs\":92.587},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestPhaseClockSnapshot",
+    "args": [],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"f5a7a9cbc8c24170a1d21a9c08ff4730\",\"receipt\":\"r4fb91183f1b346fb80cdd8b8ecdc10ca\",\"returnType\":\"string\",\"returned\":\"phase=GAME elapsed=14 header=absent\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":0,\"compileMs\":0,\"invokeMs\":1,\"serverMs\":94.977},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestPhaseClockSnapshot\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "open"
+      },
+      {
+        "type": "string",
+        "value": ""
+      },
+      {
+        "type": "string",
+        "value": ""
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"0d03bc3a3937410c847abc865aed4f24\",\"receipt\":\"r66fa751d7993400da8ba0371537f7d39\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=1 spectator=1 nativeGroup=1000 groupFrequency=38000 nativeFaction=USSR menu=-668294016 visible=1 open=1 active=Global [0:Global available=1] [1:Faction available=0] [2:Group available=0] [3:Vehicle available=0] [4:Local available=0] [5:Admin available=1] [6:Spectator available=0] messages=4 {Global|1|Prototype preview Global} {Faction|1|Prototype faction} {Whisper|1|Denied whisper} receiver=1 {Whisper|1|Denied whisper} receiver=1\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":0,\"compileMs\":0,\"invokeMs\":1,\"serverMs\":93.2209},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "send"
+      },
+      {
+        "type": "string",
+        "value": "Global"
+      },
+      {
+        "type": "string",
+        "value": "Prototype spectator Global"
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"81b9b021953943eabddbfbfc61eff923\",\"receipt\":\"r4f3024f662fa4cc09c8a30bc3c6c3b41\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=1 spectator=1 nativeGroup=1000 groupFrequency=38000 nativeFaction=USSR menu=-668294016 visible=1 open=0 active=Global [0:Global available=1] [1:Faction available=0] [2:Group available=0] [3:Vehicle available=0] [4:Local available=0] [5:Admin available=1] [6:Spectator available=0] messages=4 {Global|1|Prototype preview Global} {Faction|1|Prototype faction} {Whisper|1|Denied whisper} receiver=1 {Whisper|1|Denied whisper} receiver=1\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":1,\"compileMs\":1,\"invokeMs\":1,\"serverMs\":98.1521},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChatAuthority",
+    "args": [
+      {
+        "type": "int",
+        "value": 1
+      },
+      {
+        "type": "string",
+        "value": "Faction"
+      },
+      {
+        "type": "string",
+        "value": "Denied spectator Faction"
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"0efc09e568ba477ea945f4d125e83193\",\"receipt\":\"r91ca908e41b2469cbf3f990f5a475cdc\",\"returnType\":\"string\",\"returned\":\"player=1 channel=Faction accepted=0\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":0,\"compileMs\":0,\"invokeMs\":1,\"serverMs\":91.5649},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChatAuthority\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "open"
+      },
+      {
+        "type": "string",
+        "value": ""
+      },
+      {
+        "type": "string",
+        "value": ""
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"f8085dd097c848c283826ccb18ee3f17\",\"receipt\":\"rfe14ba583f694acdbce6fd0498a327b1\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=1 spectator=1 phase=PREGAME whisperConfigured=0 nativeGroup=-1 nativeFaction=none menu=-1146266096 visible=1 open=1 active=Global [0:Global available=1] receivesSelf=true [1:Faction available=0] receivesSelf=false [2:Group available=0] receivesSelf=false [3:Vehicle available=0] receivesSelf=false [4:Local available=0] receivesSelf=false [5:Admin available=1] receivesSelf=true [6:Spectator available=0] receivesSelf=false messages=0\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":1,\"compileMs\":1,\"invokeMs\":0,\"serverMs\":96.292},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "whisper"
+      },
+      {
+        "type": "string",
+        "value": "1"
+      },
+      {
+        "type": "string",
+        "value": "Whisper must not deliver"
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"d1b2be853601435eb028b56b6966344f\",\"receipt\":\"r7051363d48f243998fa25e37491eae08\",\"returnType\":\"string\",\"returned\":\"player=1 admin=1 channels=7 panel=1 spectator=1 phase=PREGAME whisperConfigured=0 nativeGroup=-1 nativeFaction=none menu=-1146266096 visible=1 open=1 active=Global [0:Global available=1] receivesSelf=true [1:Faction available=0] receivesSelf=false [2:Group available=0] receivesSelf=false [3:Vehicle available=0] receivesSelf=false [4:Local available=0] receivesSelf=false [5:Admin available=1] receivesSelf=true [6:Spectator available=0] receivesSelf=false messages=0\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":1,\"compileMs\":1,\"invokeMs\":0,\"serverMs\":98.7573},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyManager\",\"method\":\"GC_TestNativeChat\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestFreezeAdvance",
+    "args": [],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"invoked\",\"processId\":45588,\"operationId\":\"ccbe4e7eae414668a893a74bc8d2fc41\",\"receipt\":\"r68111a539e86433cbdb499ce1777dd69\",\"returnType\":\"string\",\"returned\":\"DISPATCHED production phase request\",\"invocationAttempted\":true,\"timings\":{\"prepareMs\":1,\"compileMs\":1,\"invokeMs\":23,\"serverMs\":120.5394},\"target\":{\"world\":\"$Lobby2:worlds/examples/arland/Arland_Lobby.ent\",\"entityName\":\"GameMode_Lobby2\",\"componentType\":\"GC_LobbyFreezeComponent\",\"method\":\"GC_TestFreezeAdvance\"},\"completion\":\"synchronous_call_only\"}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestAdminAssignSelf",
+    "args": [
+      {
+        "type": "int",
+        "value": 1
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"blocked\",\"dispatched\":false,\"reason\":\"A native operation is pending. Poll it; this requested operation was not dispatched.\",\"poll\":{\"tool\":\"workbench_operation\",\"arguments\":{\"operationId\":\"202eb8aca33d452b849e73cb50117fbd\"}}}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "open"
+      },
+      {
+        "type": "string",
+        "value": ""
+      },
+      {
+        "type": "string",
+        "value": ""
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"blocked\",\"dispatched\":false,\"reason\":\"A native operation is pending. Poll it; this requested operation was not dispatched.\",\"poll\":{\"tool\":\"workbench_operation\",\"arguments\":{\"operationId\":\"202eb8aca33d452b849e73cb50117fbd\"}}}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestNativeChat",
+    "args": [
+      {
+        "type": "string",
+        "value": "send"
+      },
+      {
+        "type": "string",
+        "value": "Global"
+      },
+      {
+        "type": "string",
+        "value": "Global before the match"
+      }
+    ],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"blocked\",\"dispatched\":false,\"reason\":\"A native operation is pending. Poll it; this requested operation was not dispatched.\",\"poll\":{\"tool\":\"workbench_operation\",\"arguments\":{\"operationId\":\"202eb8aca33d452b849e73cb50117fbd\"}}}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GC_TestFreezeAdvance",
+    "args": [],
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"state\":\"blocked\",\"dispatched\":false,\"reason\":\"A native operation is pending. Poll it; this requested operation was not dispatched.\",\"poll\":{\"tool\":\"workbench_operation\",\"arguments\":{\"operationId\":\"202eb8aca33d452b849e73cb50117fbd\"}}}"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path('work/mission-rules-cleanup/package.py');s=p.read_text().replace('Source and the nested-condition inspector received independent review; object-class picker options are not independently verified.','Source received independent review. The updated comparison label was observed in the inspector; expansion of its new count field was deferred because the user was editing the scene. Serialized count and nested children passed live tests. Object-class picker options are not independently verified.');p.write_text(s)

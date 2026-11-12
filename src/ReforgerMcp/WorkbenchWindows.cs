@@ -135,11 +135,16 @@ public sealed class WorkbenchWindows(Configuration configuration)
         if (type == ControlType.TreeItem)
         {
             if (e.TryGetCurrentPattern(SelectionItemPattern.Pattern, out _)) actions.Add("select");
+            if (e.Current.AutomationId == "Arma4WorkbenchApp.SearchListWidget.QTreeWidget") actions.Add("activate");
             if (hasMenu) actions.AddRange(["expand", "collapse"]);
             actions.AddRange(["open_choices", "choose"]); // Native owner check refuses rows without a combo editor.
             actions.Add("add_item"); // Native owner/type/enabled checks refuse non-array rows.
         }
-        if (Editable(e)) actions.Add("set_text");
+        if (Editable(e))
+        {
+            actions.Add("set_text");
+            if (e.Current.AutomationId.EndsWith(".PropComboBox.QLineEdit", StringComparison.Ordinal)) actions.Add("finish_edit");
+        }
         return actions.ToArray();
     }
 
@@ -308,8 +313,8 @@ public sealed class WorkbenchWindows(Configuration configuration)
 
     public Task<object> Act(string selectionId, string action, CancellationToken ct, string? value = null) => Run(() =>
     {
-        if (action is not ("invoke" or "close" or "menu" or "toggle" or "set_text" or "select" or "expand" or "collapse" or "open_choices" or "choose" or "add_item"))
-            throw new ArgumentException("action must be invoke, close, menu, toggle, set_text, select, expand, collapse, open_choices, choose or add_item, as advertised by inspection.");
+        if (action is not ("invoke" or "close" or "menu" or "toggle" or "set_text" or "finish_edit" or "select" or "activate" or "expand" or "collapse" or "open_choices" or "choose" or "add_item"))
+            throw new ArgumentException("action must be invoke, close, menu, toggle, set_text, finish_edit, select, activate, expand, collapse, open_choices, choose or add_item, as advertised by inspection.");
         if (action is "set_text" or "choose" ? value is null || value.Length > 1024 || value.Contains('\0') : value is not null)
             throw new ArgumentException("set_text and choose accept value; it requires at most 1024 UTF-16 code units without NUL.");
         if (nativeWindows.TryGetValue(selectionId, out var header))
@@ -389,7 +394,8 @@ public sealed class WorkbenchWindows(Configuration configuration)
         ct.ThrowIfCancellationRequested();
         var accessibleId = AccessibleId(element);
         controls.Clear(); selections.Clear(); nativeWindows.Clear();
-        return Dispatch(selected.Owner.Pid, selected.Owner.Start, new(action, accessibleId, Text: value));
+        return Dispatch(selected.Owner.Pid, selected.Owner.Start, new(action, accessibleId,
+            WindowHandle: action == "activate" ? selected.Owner.Window.Current.NativeWindowHandle : 0, Text: value));
     }
 
     private async Task<object> Run(Func<object> action, CancellationToken ct, TimeSpan? inspectionTimeout = null)

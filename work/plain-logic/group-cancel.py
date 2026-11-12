@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path(r'C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/addons/Lobby2/scripts/Game/MissionFramework/GC_MissionRuleEngine.c');s=p.read_text(encoding='utf-8').replace('(state == SCR_EGameModeState.POSTGAME && rule.m_eWhen != GC_ERuleEvent.GAME_MODE_STATE)','(state == SCR_EGameModeState.POSTGAME && !pending.m_Parent && rule.m_eWhen != GC_ERuleEvent.GAME_MODE_STATE)');p.write_text(s,encoding='utf-8')

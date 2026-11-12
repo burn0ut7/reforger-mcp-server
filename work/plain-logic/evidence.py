@@ -1,0 +1,3 @@
+from pathlib import Path
+p=Path(r'C:/Users/Gray/Documents/My Games/ArmaReforgerWorkbench/addons/Lobby2/docs/MissionRules/README.md');s=p.read_text().replace('Workbench verification for this update is recorded after the live test pass.','Workbench 1.9.0.37: 439 checks passed with zero failures (251 standard logic, 148 interpreter, 30 authoring, six serialized nested-example and four flag-action example checks).');p.write_text(s)
+p=Path('work/mission-rules-cleanup/package.py');s=p.read_text().replace('numeric comparison condition objects','nested condition-count comparison objects').replace('passed 309 checks','passed 439 checks');p.write_text(s)

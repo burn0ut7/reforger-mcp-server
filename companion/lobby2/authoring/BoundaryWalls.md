@@ -1,5 +1,40 @@
 # Setup and AO boundary walls
 
+## Selected map-area previews in Workbench
+
+Selecting an entity with `GC_MapShapeComponent` (including `MapShape.et` and
+`AOLimit.et`) shows its configured map outline and translucent fill in the 3D
+viewport. Outline color, faction color, fill color/opacity and
+inverted fill use the map settings. Selection previews deliberately ignore the
+runtime Enabled and faction-audience filters so authors can edit hidden areas.
+Open polygons show their outline only until closed.
+Closed polygons require 3–128 points, nonzero horizontal area, and no crossed,
+touching or overlapping non-adjacent edges. Invalid shapes show an outline and
+log a warning instead of a misleading fill. Maps and AO limits use the same
+validation; a rejected runtime polygon replacement preserves the previous shape.
+
+Only selected entities receive these previews; multi-selection shows each
+selected area's style. Deselecting removes its preview. Radius Area's existing
+sphere helper is also selection-only. Workbench's own spline handles and native
+editing lines remain separate from these map previews.
+
+The 3D translation is a flat X/Z projection at the shape origin's height, drawn
+through terrain. Outline widths use 0.1 metres per authored map pixel (3 pixels
+becomes 0.3 metres); they are world-space ribbons rather than screen-space lines.
+Inverted fills extend to the world bounds instead of a 2D map
+viewport. Multiple translucent fills blend where they overlap. Geometry is
+cached until points, transforms or style change. Geometry rebuilds wait until
+points remain stationary for 250 ms, so dragging does not continually rebuild
+meshes. The previous preview remains visible until the new position settles.
+Geometry edits replace meshes while reusing entities and materials; spare
+batches are released when fewer are needed. Color changes replace the materials.
+The outside-fill canvas captures world bounds when selected, preventing temporary
+preview geometry from feeding back into those bounds. Nothing is saved
+into the world, and the previews run only in Workbench edit mode, never Play or
+the actual game. This does not change AO enforcement or runtime boundary walls.
+
+## Runtime boundary walls
+
 `SetupZone.et` includes an enabled `GC_BoundaryWallComponent`.
 `AOLimit.et` includes the same component with **Enabled** off by default.
 Change its **Boundary wall** settings on the placed prefab:

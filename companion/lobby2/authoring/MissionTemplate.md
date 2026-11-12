@@ -5,7 +5,7 @@ mission subscene, and choose **Plugins → GC → Spawn Mission Template**. Refo
 places native `WorkbenchPlugin` actions in Plugins; its Tools menu contains
 interactive editor tools such as Map / AO Polygon.
 
-The plugin places `GC_MissionTemplate_Coop.et` at the world origin and creates the
+The plugin places `Prefabs/Templates/GC_MissionTemplate_Coop.et` at the world origin and creates the
 terrain's AI-world prefab as its child. The root inherits `GameMode_Lobby.et` and
 contains the faction, radio, GC chat, and perception entities. Lobby2's mission
 framework has no TilW Mission Framework dependency or integration.

@@ -1,0 +1,1252 @@
+scripts/WorkbenchGame\GC_AOPolygonTool.c-3-class GC_AOPolygonTool : WorldEditorTool
+scripts/WorkbenchGame\GC_AOPolygonTool.c-4-{
+scripts/WorkbenchGame\GC_AOPolygonTool.c:5:	[Attribute("5", UIWidgets.EditBox, "Number of equally spaced vertices and sides.", params: "3 128 1", category: "Polygon")]
+scripts/WorkbenchGame\GC_AOPolygonTool.c-6-	protected int m_iSides;
+scripts/WorkbenchGame\GC_AOPolygonTool.c-7-
+scripts/WorkbenchGame\GC_AOPolygonTool.c:8:	[Attribute("100", UIWidgets.EditBox, "Metres from the shape entity's origin to each vertex (not side length or diameter).", params: "0.1 100000", category: "Polygon")]
+scripts/WorkbenchGame\GC_AOPolygonTool.c:9:	protected float m_fRadius;
+scripts/WorkbenchGame\GC_AOPolygonTool.c-10-
+scripts/WorkbenchGame\GC_AOPolygonTool.c:11:	[Attribute("0", UIWidgets.Slider, "Clockwise degrees around the shape's local Y axis. Zero places the first point along local +Z. Entity rotation applies in addition.", params: "0 360 1", category: "Polygon")]
+scripts/WorkbenchGame\GC_AOPolygonTool.c:12:	protected float m_fRotation;
+scripts/WorkbenchGame\GC_AOPolygonTool.c-13-
+scripts/WorkbenchGame\GC_AOPolygonTool.c-14-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\AO\GC_AOLimitEntity.c-43-	[Attribute("0", UIWidgets.CheckBox, "Off: stay INSIDE the polygon. On: stay OUTSIDE the polygon. Height is ignored.", category: "AO")]
+scripts/Game\AO\GC_AOLimitEntity.c-44-	protected bool m_bInverted;
+scripts/Game\AO\GC_AOLimitEntity.c:45:	[Attribute("0", UIWidgets.EditBox, "Higher numbers win among breached applicable limits. Equal priorities are allowed: hard wins, then earliest soft deadline; exact ties retain the first evaluated limit. Other limits keep their timers. Use distinct priorities to explicitly choose a winner.", category: "AO")]
+scripts/Game\AO\GC_AOLimitEntity.c-46-	protected int m_iPriority;
+scripts/Game\AO\GC_AOLimitEntity.c:47:	[Attribute("20", UIWidgets.EditBox, "Continuous seconds outside before death. Re-entry or exemption clears this limit's timer. Range 0.1-3600.", category: "AO")]
+scripts/Game\AO\GC_AOLimitEntity.c:48:	protected float m_fGraceSeconds;
+scripts/Game\AO\GC_AOLimitEntity.c:49:	[Attribute("RETURN TO AO", UIWidgets.EditBox, "Heading displayed above this AO warning countdown. Keep it short to fit the compact HUD.", category: "AO")]
+scripts/Game\AO\GC_AOLimitEntity.c-50-	protected string m_sWarningText;
+scripts/Game\AO\GC_AOLimitEntity.c:51:	[Attribute("", UIWidgets.EditBox, "Optional safe return transform for already enrolled characters without valid return history. Must satisfy ALL applicable hard limits. Units that have never entered the permitted area remain exempt.", category: "AO")]
+scripts/Game\AO\GC_AOLimitEntity.c-52-	protected string m_sReturnEntity;
+scripts/Game\AO\GC_AOLimitEntity.c-53-	[Attribute("", UIWidgets.Auto, "Native player faction keys. Empty applies to everyone; otherwise only the listed factions are affected.", category: "Eligibility")]
+--
+scripts/Game\Camera\GC_SpectatorManualCamera.c-20-{
+scripts/Game\Camera\GC_SpectatorManualCamera.c-21-	[Attribute("0.3", desc: "Helmet-camera lateral offset along the Camera bone's negative X axis.")]
+scripts/Game\Camera\GC_SpectatorManualCamera.c:22:	protected float m_fShoulderOffsetLateral;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-23-
+scripts/Game\Camera\GC_SpectatorManualCamera.c-24-	[Attribute("0.2", desc: "Helmet-camera distance behind the corrected Camera bone direction.")]
+scripts/Game\Camera\GC_SpectatorManualCamera.c:25:	protected float m_fShoulderOffsetBack;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-26-
+scripts/Game\Camera\GC_SpectatorManualCamera.c-27-	[Attribute("0.2", desc: "Helmet-camera vertical offset along the head's up axis.")]
+scripts/Game\Camera\GC_SpectatorManualCamera.c:28:	protected float m_fShoulderOffsetUp;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-29-
+scripts/Game\Camera\GC_SpectatorManualCamera.c-30-	protected GC_ESpectatorCameraMode m_eMode = GC_ESpectatorCameraMode.FREE;
+--
+scripts/Game\Camera\GC_SpectatorManualCamera.c-43-	protected CameraBase m_MirrorOverlayCamera;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-44-	protected bool m_bMirrorDiagnosticsLogged;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:45:	protected float m_fMirrorPreviousFOV;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:46:	protected float m_fMirrorPreviousNearPlane;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-47-	protected bool m_bMirrorFOVOverrideActive;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-48-	protected bool m_bMirrorPositionStabilized;
+--
+scripts/Game\Camera\GC_SpectatorManualCamera.c-52-	protected bool m_bMirrorHasPresentation;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-53-	protected bool m_bMirrorADSTransitionActive;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:54:	protected float m_fMirrorADSTransitionElapsed;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:55:	protected float m_fMirrorADSTransitionDuration;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-56-	protected vector m_vMirrorADSTransitionStartPosition;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:57:	protected float m_fMirrorADSTransitionStartFOV;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-58-	protected vector m_vMirrorLastWorldPosition;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:59:	protected float m_fMirrorLastFOV;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-60-	protected static AnimationTagID s_MirrorFPCameraTag = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-61-	protected static const float MIRROR_POSITION_STABILIZATION_SPEED = 6.0;
+--
+scripts/Game\Camera\GC_SpectatorManualCamera.c-67-	protected bool m_bSpectatorNightModeEnabled;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-68-	protected bool m_bSpectatorNightModeApplied;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:69:	protected float m_fSpectatorNightModeAlpha = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-70-	protected BaseWorld m_SpectatorNightModeWorld;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-71-	protected TimeAndWeatherManagerEntity m_SpectatorNightModeWeather;
+--
+scripts/Game\Camera\GC_SpectatorManualCamera.c-75-	protected ref GC_SpectatorSample m_NetworkSample;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-76-	protected ref GC_SpectatorPose m_NetworkPose;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:77:	protected float m_fNetworkFromLean;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-78-	protected vector m_vNetworkFromOpticScales;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:79:	protected float m_fNetworkStreamAge;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:80:	protected float m_fNetworkSightWaitAge;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:81:	protected float m_fNetworkInterpolationDuration = 0.033333;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-82-	protected int m_iNetworkLastSequence = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:83:	protected float m_fNetworkInterpolationElapsed;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:84:	protected float m_fNetworkSnapshotRate = 30.0;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-85-	protected bool m_bNetworkFOVOverrideActive;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:86:	protected float m_fNetworkPreviousFOV;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:87:	protected float m_fNetworkFromFOV;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:88:	protected float m_fNetworkToFOV;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-89-	protected bool m_bNetworkIsADS;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-90-	protected int m_iNetworkSightsIndex = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-91-	protected int m_iNetworkZoomIndex = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:92:	protected float m_fNetworkPIPFOV = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:93:	protected float m_fNetworkFromPIPFOV = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:94:	protected float m_fNetworkToPIPFOV = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:95:	protected float m_fNetworkSightFOV = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:96:	protected float m_fNetworkFromSightFOV = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c:97:	protected float m_fNetworkToSightFOV = -1;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-98-	protected BaseWeaponComponent m_NetworkSightsWeapon;
+scripts/Game\Camera\GC_SpectatorManualCamera.c-99-	protected int m_iNetworkPresentedSightsIndex = -1;
+--
+scripts/Game\AO\GC_AOWarning.c-7-	protected bool m_bSetupWarning;
+scripts/Game\AO\GC_AOWarning.c-8-	protected IEntity m_Character;
+scripts/Game\AO\GC_AOWarning.c:9:	protected float m_fDeadline;
+scripts/Game\AO\GC_AOWarning.c:10:	protected float m_fLastUpdate;
+scripts/Game\AO\GC_AOWarning.c:11:	protected float m_fTop = -1;
+scripts/Game\AO\GC_AOWarning.c-12-	protected static const ResourceName LAYOUT = "{8F470B543A20D941}UI/layouts/Mission/Lobby_AOWarning.layout";
+scripts/Game\AO\GC_AOWarning.c-13-
+--
+scripts/Game\AO\GC_AOWarning.c-125-	protected bool m_bGC_AOSent;
+scripts/Game\AO\GC_AOWarning.c-126-	protected IEntity m_GC_AOSentCharacter;
+scripts/Game\AO\GC_AOWarning.c:127:	protected float m_fGC_AOSentDeadline;
+scripts/Game\AO\GC_AOWarning.c-128-	protected string m_sGC_AOSentText;
+scripts/Game\AO\GC_AOWarning.c-129-
+--
+scripts/Game\GameMode\GC_JipGameMode.c-7-	protected ref array<string> m_aJipFactions;
+scripts/Game\GameMode\GC_JipGameMode.c-8-
+scripts/Game\GameMode\GC_JipGameMode.c:9:	[Attribute("0", UIWidgets.EditBox, "Seconds after mission start when JIP closes for everyone. Zero disables the cutoff.", category: "Join in progress", params: "0 inf 1")]
+scripts/Game\GameMode\GC_JipGameMode.c-10-	protected int m_iJipDenySeconds;
+scripts/Game\GameMode\GC_JipGameMode.c-11-
+--
+scripts/Game\AO\GC_AOLimitSystem.c-5-	ref map<GC_AOLimitEntity, float> m_mDeadlines = new map<GC_AOLimitEntity, float>();
+scripts/Game\AO\GC_AOLimitSystem.c-6-	GC_AOLimitEntity m_Selected;
+scripts/Game\AO\GC_AOLimitSystem.c:7:	float m_fDeadline;
+scripts/Game\AO\GC_AOLimitSystem.c-8-}
+scripts/Game\AO\GC_AOLimitSystem.c-9-
+--
+scripts/Game\GameMode\GC_LobbyGameMode.c-10-	protected bool m_bOwnsLobbySfxMute;
+scripts/Game\GameMode\GC_LobbyGameMode.c-11-	protected bool m_bPhaseAudioStopped;
+scripts/Game\GameMode\GC_LobbyGameMode.c:12:	protected float m_fPreviousSfxVolume;
+scripts/Game\GameMode\GC_LobbyGameMode.c-13-	protected ref GC_MapPlans m_MapPlans;
+scripts/Game\GameMode\GC_LobbyGameMode.c-14-	protected ref GC_AOLimitSystem m_AOLimits;
+--
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-189-class GC_MissionHeaderForm
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-190-{
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c:191:	[Attribute("", UIWidgets.EditBox)]
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-192-	string m_sName;
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c:193:	[Attribute("", UIWidgets.EditBox)]
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-194-	string m_sAuthor;
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c:195:	[Attribute("", UIWidgets.EditBox)]
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-196-	string m_sDescription;
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c:197:	[Attribute("1", UIWidgets.EditBox, "Maximum players for the mission.")]
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-198-	int m_iPlayerCount = 1;
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c:199:	[Attribute("1", UIWidgets.EditBox, "Fewest players needed to run the mission.")]
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-200-	int m_iMinimumPlayers = 1;
+scripts/WorkbenchGame\GC_CreateMissionHeaderPlugin.c-201-	[Attribute("Other", UIWidgets.ComboBox, "Choose the mission decade.", enums: GC_MissionCatalogChoices.Eras())]
+--
+scripts/Game\Briefing\GC_BriefingMarker.c-11-	protected string m_sQuadName;
+scripts/Game\Briefing\GC_BriefingMarker.c-12-	protected vector m_vWorldPosition;
+scripts/Game\Briefing\GC_BriefingMarker.c:13:	protected float m_fRotation;
+scripts/Game\Briefing\GC_BriefingMarker.c-14-	protected bool m_bWorldScale;
+scripts/Game\Briefing\GC_BriefingMarker.c:15:	protected float m_fSize;
+scripts/Game\Briefing\GC_BriefingMarker.c:16:	protected float m_fMinSize;
+scripts/Game\Briefing\GC_BriefingMarker.c-17-	protected int m_iColor = Color.WHITE;
+scripts/Game\Briefing\GC_BriefingMarker.c-18-	protected string m_sDescription;
+--
+scripts/Game\GameMode\GC_LobbyFreezeComponent.c-23-	protected ref array<string> m_aSelectedIdentities = {};
+scripts/Game\GameMode\GC_LobbyFreezeComponent.c-24-	ref ScriptInvoker m_OnChanged = new ScriptInvoker();
+scripts/Game\GameMode\GC_LobbyFreezeComponent.c:25:	protected float m_fSecondElapsed;
+scripts/Game\GameMode\GC_LobbyFreezeComponent.c:26:	protected float m_fBoundaryElapsed;
+scripts/Game\GameMode\GC_LobbyFreezeComponent.c-27-	protected bool m_bShutdown;
+scripts/Game\GameMode\GC_LobbyFreezeComponent.c-28-	protected ref map<IEntity, vector> m_mSafePositions = new map<IEntity, vector>();
+--
+scripts/Game\Briefing\GC_Briefing.c-7-	static const int MAX_FACTION_KEYS = 16;
+scripts/Game\Briefing\GC_Briefing.c-8-
+scripts/Game\Briefing\GC_Briefing.c:9:	[Attribute("0", UIWidgets.SpinBox, "One-based briefing index used for display, updates, and selection")]
+scripts/Game\Briefing\GC_Briefing.c-10-	protected int m_iOrder;
+scripts/Game\Briefing\GC_Briefing.c-11-
+scripts/Game\Briefing\GC_Briefing.c:12:	[Attribute("BRIEFING", UIWidgets.EditBox, "Player-facing briefing title")]
+scripts/Game\Briefing\GC_Briefing.c-13-	protected string m_sTitle;
+scripts/Game\Briefing\GC_Briefing.c-14-
+scripts/Game\Briefing\GC_Briefing.c:15:	[Attribute("", UIWidgets.EditBoxMultiline, "Plain or Reforger rich-text briefing body")]
+scripts/Game\Briefing\GC_Briefing.c-16-	protected string m_sContent;
+scripts/Game\Briefing\GC_Briefing.c-17-
+scripts/Game\Briefing\GC_Briefing.c:18:	[Attribute("", UIWidgets.EditBox, "Authoritative base-game faction keys. Empty shows the briefing to everyone")]
+scripts/Game\Briefing\GC_Briefing.c-19-	protected ref array<string> m_aFactionKeys;
+scripts/Game\Briefing\GC_Briefing.c-20-
+--
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-17-	protected ResourceName m_sHighlightImageSet;
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-18-
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c:19:	[Attribute("", UIWidgets.EditBox, "Quad name used only when Image is an .imageset resource. Workbench does not expose image-set quads to scripted dropdowns")]
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-20-	protected string m_sQuadName;
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-21-
+--
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-23-	protected bool m_bWorldScale;
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-24-
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c:25:	[Attribute("5", UIWidgets.SpinBox, "Legacy marker size: pixels when World Scale is off, or the projected X/Z world offset when on", params: "0.01 100000 0.01")]
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c:26:	protected float m_fSize;
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-27-
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c:28:	[Attribute("0", UIWidgets.SpinBox, "Minimum projected width and height in pixels. Zero disables the legacy minimum-size clamp", params: "0 10000 1")]
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c:29:	protected float m_fMinSize;
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-30-
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-31-	[Attribute("1 1 1 1", UIWidgets.ColorPicker, "Tint applied to the map marker and its Workbench direction arrow")]
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-32-	protected ref Color m_Color;
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-33-
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c:34:	[Attribute("", UIWidgets.EditBox, "Text displayed underneath the marker")]
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-35-	protected string m_sDescription;
+scripts/Game\Briefing\GC_BriefingMarkerComponent.c-36-
+--
+scripts/Game\GameMode\GC_LobbyStagingArea.c-4-class GC_LobbyStagingArea
+scripts/Game\GameMode\GC_LobbyStagingArea.c-5-{
+scripts/Game\GameMode\GC_LobbyStagingArea.c:6:	[Attribute("0 0 0", UIWidgets.EditBox, "Safe world-space return position inside this staging area")]
+scripts/Game\GameMode\GC_LobbyStagingArea.c-7-	vector m_vCenter;
+scripts/Game\GameMode\GC_LobbyStagingArea.c:8:	[Attribute("50", UIWidgets.EditBox, "Horizontal staging radius in metres (1-5000)")]
+scripts/Game\GameMode\GC_LobbyStagingArea.c:9:	float m_fRadius;
+scripts/Game\GameMode\GC_LobbyStagingArea.c:10:	[Attribute("", UIWidgets.EditBox, "Base-game faction key, or empty for every faction")]
+scripts/Game\GameMode\GC_LobbyStagingArea.c-11-	string m_sFactionKey;
+scripts/Game\GameMode\GC_LobbyStagingArea.c-12-
+--
+scripts/Game\MissionFramework\GC_AreaCondition.c-5-	ref GC_AreaTargetsBase m_Targets;
+scripts/Game\MissionFramework\GC_AreaCondition.c-6-
+scripts/Game\MissionFramework\GC_AreaCondition.c:7:	[Attribute("", UIWidgets.EditBox, "Exact unique name of a Radius Area or closed polygon in the world. Radius Area uses a 3D distance in metres. A polygon checks its horizontal outline and ignores height, like the AO limit. Configure the shape on that area, not here.")]
+scripts/Game\MissionFramework\GC_AreaCondition.c-8-	string m_sArea;
+scripts/Game\MissionFramework\GC_AreaCondition.c-9-
+--
+scripts/Game\GC_GroupSlotVariantConfigComponent.c-2-class GC_UnitSlotVariantConfig
+scripts/Game\GC_GroupSlotVariantConfigComponent.c-3-{
+scripts/Game\GC_GroupSlotVariantConfigComponent.c:4:	[Attribute("0", UIWidgets.EditBox, "Index of the corresponding entry in the group's unit prefab slots")]
+scripts/Game\GC_GroupSlotVariantConfigComponent.c-5-	protected int m_iUnitPrefabSlotIndex;
+scripts/Game\GC_GroupSlotVariantConfigComponent.c-6-
+--
+scripts/Game\GC_LobbyManager.c-17-	protected ref GC_LobbyParameterCatalog m_ParameterCatalog;
+scripts/Game\GC_LobbyManager.c-18-
+scripts/Game\GC_LobbyManager.c:19:	[Attribute("180", UIWidgets.EditBox, "Seconds after briefing begins before CO parameters lock; mission start locks earlier", params: "30 3600 1")]
+scripts/Game\GC_LobbyManager.c-20-	protected int m_iParameterLockSeconds;
+scripts/Game\GC_LobbyManager.c-21-
+--
+scripts/Game\GC_LobbyManager.c-46-
+scripts/Game\GC_LobbyManager.c-47-	//! Server-side grace period for reconnecting to a claimed slot.
+scripts/Game\GC_LobbyManager.c:48:	[Attribute("120", UIWidgets.EditBox, "Reconnect grace period in seconds (0 releases immediately)")]
+scripts/Game\GC_LobbyManager.c-49-	protected int m_iSlotReservationTimeoutSeconds;
+scripts/Game\GC_LobbyManager.c-50-
+--
+scripts/Game\GC_LobbyManager.c-55-	protected ResourceName m_sFormationSource;
+scripts/Game\GC_LobbyManager.c-56-
+scripts/Game\GC_LobbyManager.c:57:	[Attribute("File", UIWidgets.EditBox, "Formation name used when a group formation is unavailable")]
+scripts/Game\GC_LobbyManager.c-58-	protected string m_sDefaultFormation;
+scripts/Game\GC_LobbyManager.c-59-
+scripts/Game\GC_LobbyManager.c-60-	protected ref GC_MissionRuleEngine m_MissionRuleEngine;
+scripts/Game\GC_LobbyManager.c-61-	protected ref GC_MissionCasualtyTracker m_MissionCasualties;
+scripts/Game\GC_LobbyManager.c:62:	protected float m_fMissionRulesStartedAt;
+scripts/Game\GC_LobbyManager.c-63-	protected bool m_bMissionRulesStarted;
+scripts/Game\GC_LobbyManager.c-64-
+--
+scripts/Game\Map\GC_MapShapeComponent.c-14-	[Attribute("0.2 0.5 1 1", UIWidgets.ColorPicker, "Outline color and opacity. Set opacity to zero to hide the outline.", category: "Outline")]
+scripts/Game\Map\GC_MapShapeComponent.c-15-	protected ref Color m_LineColor;
+scripts/Game\Map\GC_MapShapeComponent.c:16:	[Attribute("3", UIWidgets.EditBox, "Line width in UI pixels, independent of map zoom.", params: "1 20", category: "Outline")]
+scripts/Game\Map\GC_MapShapeComponent.c:17:	protected float m_fLineWidth;
+scripts/Game\Map\GC_MapShapeComponent.c-18-	[Attribute("0", UIWidgets.CheckBox, "Use the first listed faction's color for the outline. No matching faction uses Outline Color.", category: "Outline")]
+scripts/Game\Map\GC_MapShapeComponent.c-19-	protected bool m_bFactionColor;
+--
+scripts/Game\Map\GC_MapShapeOverlay.c-10-	protected ref array<vector> m_aPoints = {};
+scripts/Game\Map\GC_MapShapeOverlay.c-11-	protected ref array<vector> m_aFrameBounds = {};
+scripts/Game\Map\GC_MapShapeOverlay.c:12:	protected float m_fCanvasWidth;
+scripts/Game\Map\GC_MapShapeOverlay.c:13:	protected float m_fCanvasHeight;
+scripts/Game\Map\GC_MapShapeOverlay.c-14-	protected ref array<ref CanvasWidgetCommand> m_aCommands = {};
+scripts/Game\Map\GC_MapShapeOverlay.c-15-	protected ref array<int> m_aColors = {}, m_aFills = {};
+--
+scripts/Game\Map\GC_MapShapeOverlay.c-18-	protected bool m_bProjectionDirty;
+scripts/Game\Map\GC_MapShapeOverlay.c-19-	protected bool m_bGeometryDirty;
+scripts/Game\Map\GC_MapShapeOverlay.c:20:	protected float m_fProjectedX;
+scripts/Game\Map\GC_MapShapeOverlay.c:21:	protected float m_fProjectedZ;
+scripts/Game\Map\GC_MapShapeOverlay.c:22:	protected float m_fProjectedZoom;
+scripts/Game\Map\GC_MapShapeOverlay.c-23-	protected int m_iGeneration;
+scripts/Game\Map\GC_MapShapeOverlay.c-24-	protected bool m_bListening;
+--
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-3-class GC_CasualtiesCondition : GC_ConditionBase
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-4-{
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c:5:	[Attribute("", UIWidgets.EditBox, "Spectator bodies never count, with any faction or Count setting. Faction keys to include, such as US or USSR. Leave the list empty to include every faction. Selected factions are counted together, not checked separately.")]
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-6-	ref array<string> m_aFactions;
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-7-
+--
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-9-	int m_iCount;
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-10-
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c:11:	[Attribute("1", UIWidgets.EditBox, "Share of the starting group that must have died: 0.7 = 70%, 1 = everyone, and 0 = no deaths required. Passes when deaths reach or exceed this ratio. The group is the living characters at Match start, with their starting factions and Players/AI classification. Each death counts once; respawning does not undo it. Disconnecting or deleting a living character is not a death. An empty starting group never passes.")]
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c:12:	float m_fCasualtyRatio;
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-13-
+scripts/Game\MissionFramework\GC_CasualtiesCondition.c-14-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_AreaTargets.c-12-class GC_NamedAreaTargets : GC_AreaTargetsBase
+scripts/Game\MissionFramework\GC_AreaTargets.c-13-{
+scripts/Game\MissionFramework\GC_AreaTargets.c:14:	[Attribute("", UIWidgets.EditBox, "Exact unique world names, not prefab paths or account names. One entry per target. Duplicate names count once. Every listed name must resolve; a missing object is not treated as Outside. Spawned replacements with the same name are resolved on a later check. Dead or destroyed named objects still count while they exist.")]
+scripts/Game\MissionFramework\GC_AreaTargets.c-15-	ref array<string> m_aNames;
+scripts/Game\MissionFramework\GC_AreaTargets.c-16-
+--
+scripts/Game\MissionFramework\GC_AreaTargets.c-38-	int m_iWho;
+scripts/Game\MissionFramework\GC_AreaTargets.c-39-
+scripts/Game\MissionFramework\GC_AreaTargets.c:40:	[Attribute("", UIWidgets.EditBox, "Optional faction keys, for example US or USSR. Empty means all factions. Selected factions are counted together. Uses the character's current faction; no separate faction condition is required.")]
+scripts/Game\MissionFramework\GC_AreaTargets.c-41-	ref array<string> m_aFactions;
+scripts/Game\MissionFramework\GC_AreaTargets.c-42-
+--
+scripts/Game\MissionFramework\GC_AreaTargets.c-54-	int m_iComparison;
+scripts/Game\MissionFramework\GC_AreaTargets.c-55-
+scripts/Game\MissionFramework\GC_AreaTargets.c:56:	[Attribute("0", UIWidgets.SpinBox, "Number of targets to compare against. Living Characters counts anywhere. Area Condition counts targets on its selected side; Outside does not mean all targets are outside.", "0 4096 1")]
+scripts/Game\MissionFramework\GC_AreaTargets.c-57-	int m_iRequiredCount;
+scripts/Game\MissionFramework\GC_AreaTargets.c-58-
+--
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-2-class GC_EntityDamageOptions
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-3-{
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c:4:	[Attribute("", UIWidgets.EditBox, "Optional damage area name, such as an engine or wheel. Leave blank to check the entity's main damage area. Use the exact area name from its damage component; this does not search child entities.")]
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-5-	string m_sDamageArea;
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-6-}
+--
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-10-class GC_EntityDamageCondition : GC_ConditionBase
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-11-{
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c:12:	[Attribute("", UIWidgets.EditBox, "Exact, unique name of an entity in the world, not a prefab file path or player name. Works with characters, vehicles and destructible objects that have a supported damage component. Missing or unsupported targets cannot pass, including inside a None group.")]
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-13-	string m_sEntityName;
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-14-
+--
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-16-	int m_iCheck;
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-17-
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c:18:	[Attribute("1", UIWidgets.SpinBox, "Only used by Damage amount. Minimum damage from 0 to 1: 0.5 means at least 50% damage, 1 means all health is gone, and 0 includes an undamaged target. Use Destroyed to check the engine's actual destroyed state.", "0 1 0.01")]
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c:19:	float m_fDamageNeeded;
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-20-
+scripts/Game\MissionFramework\GC_EntityDamageCondition.c-21-	[Attribute("", UIWidgets.Object, "Optional specific damage area. Leave unset to check the main area using the same damage system for characters, vehicles and buildings.")]
+--
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-27-class GC_RuleAction
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-28-{
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c:29:	[Attribute("Test action", UIWidgets.EditBox, "A short name to help you find this action.")]
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-30-	string m_sName;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-31-	[Attribute("0", UIWidgets.ComboBox, "Choose a small test action. These do not spawn units, end the game, or change player settings.", enums: {ParamEnum("Write a test message to the log", "0"), ParamEnum("Set a flag to yes or no", "1"), ParamEnum("Send a named test event", "2")})]
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-32-	GC_ERuleAction m_eDo;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c:33:	[Attribute("Test passed", UIWidgets.EditBox, "For a log message: the text to write. For a flag or test event: its exact name.")]
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-34-	string m_sTextOrName;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-35-	[Attribute("1", UIWidgets.CheckBox, "For Set a flag: checked means yes; unchecked means no.")]
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-36-	bool m_bFlagAnswer;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c:37:	float m_fChancePercent;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-38-	ref array<string> m_aFlagNames;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-39-	int m_iSelectionCount;
+--
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-65-{
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-66-	ref GC_RuleRandom m_Random;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c:67:	float m_fChance = 1;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-68-	bool m_bObserveFlags;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-69-	bool m_bObserveEvents;
+--
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-74-	GC_ERuleEvent m_eWhen;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-75-	string m_sTestEventName;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c:76:	float m_fEverySeconds;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-77-	ref GC_RuleCondition m_If;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-78-	ref array<ref GC_RuleAction> m_aThen;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-79-	bool m_bRunOnlyOnce;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c:80:	float m_fWaitSeconds;
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-81-
+scripts/Game\MissionFramework\GC_CompiledMissionRule.c-82-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_FlagConditions.c-2-class GC_MissionFlagCondition : GC_ConditionBase
+scripts/Game\MissionFramework\GC_FlagConditions.c-3-{
+scripts/Game\MissionFramework\GC_FlagConditions.c:4:	[Attribute("", UIWidgets.EditBox, "The flag to check. Use its exact name from Mission Flags.")]
+scripts/Game\MissionFramework\GC_FlagConditions.c-5-	string m_sFlagName;
+scripts/Game\MissionFramework\GC_FlagConditions.c-6-	[Attribute("0", UIWidgets.ComboBox, "Check the flag's remembered result. True means it is active. Its own conditions control activation. A repeatable flag is true during its check cycle, then resets to false.", enums: {ParamEnum("Is true", "0"), ParamEnum("Is false", "1")})]
+--
+scripts/Game\MissionFramework\GC_Event.c-5-	[Attribute("0", UIWidgets.ComboBox, "Once is enough for most events. Every time allows later matching state changes, flag calls or scheduled random checks. It does not run continuously while conditions remain true.", enums: {ParamEnum("Once", "0"), ParamEnum("Every time", "1")})]
+scripts/Game\MissionFramework\GC_Event.c-6-	int m_iRun;
+scripts/Game\MissionFramework\GC_Event.c:7:	[Attribute("0", UIWidgets.SpinBox, "Delay in seconds before running. For example, 5 means wait 5 seconds. Zero means no delay. Conditions must still pass when the delay ends.", "0 86400 0.1")]
+scripts/Game\MissionFramework\GC_Event.c:8:	float m_fDelay;
+scripts/Game\MissionFramework\GC_Event.c:9:	[Attribute("1", UIWidgets.SpinBox, "Chance to run this event's actions, from 0 to 1. For example, 0.8 is 80%, 1 is 100%, and 0 never runs. The default is 1; leaving this setting or Advanced unset means 100%. This does not spawn anything unless the actions do so.", "0 1 0.01")]
+scripts/Game\MissionFramework\GC_Event.c:10:	float m_fRandomChance;
+scripts/Game\MissionFramework\GC_Event.c-11-	[Attribute("0", UIWidgets.CheckBox, "Keep this event in the list without running it.")]
+scripts/Game\MissionFramework\GC_Event.c-12-	bool m_bDisabled;
+--
+scripts/Game\MissionFramework\GC_Event.c-64-class GC_Event : GC_EventDefinition
+scripts/Game\MissionFramework\GC_Event.c-65-{
+scripts/Game\MissionFramework\GC_Event.c:66:	[Attribute("Event", UIWidgets.EditBox, "A short name for this event.")]
+scripts/Game\MissionFramework\GC_Event.c-67-	string m_sName;
+scripts/Game\MissionFramework\GC_Event.c-68-	[Attribute("", UIWidgets.Object, "No conditions means always true: there are no requirements to meet. Otherwise, every listed condition must pass. A top-level event with no conditions runs at match start. Inside a random group, it is eligible whenever the group selects events.")]
+--
+scripts/Game\MissionFramework\GC_Event.c-104-class GC_RandomEventGroup : GC_EventDefinition
+scripts/Game\MissionFramework\GC_Event.c-105-{
+scripts/Game\MissionFramework\GC_Event.c:106:	[Attribute("Random event group", UIWidgets.EditBox, "A short name for this random selection.")]
+scripts/Game\MissionFramework\GC_Event.c-107-	string m_sName;
+scripts/Game\MissionFramework\GC_Event.c-108-	[Attribute("", UIWidgets.Object, "No conditions means always true: there are no requirements to meet, and the group selects at match start. Otherwise, every listed condition must pass. Child conditions filter the selection; they do not trigger the group themselves.")]
+scripts/Game\MissionFramework\GC_Event.c-109-	ref array<ref GC_ConditionBase> m_aConditions;
+scripts/Game\MissionFramework\GC_Event.c:110:	[Attribute("1", UIWidgets.SpinBox, "How many different events to pick from those whose conditions pass. No repeats in one selection. If fewer qualify, pick those available. Each selected event's own chance and delay still apply.", "1 255 1")]
+scripts/Game\MissionFramework\GC_Event.c-111-	int m_iPickCount;
+scripts/Game\MissionFramework\GC_Event.c-112-	[Attribute("", UIWidgets.Object, "Regular events to choose from. Disabled, already-completed once-only events, waiting events and events with failing conditions are excluded. Groups cannot be nested here; conditions can still nest normally.")]
+--
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-14-	[Attribute("", UIWidgets.ComboBox, "Press + and choose an objective. Add more if needed.", enums: GC_MissionCatalogChoices.Objectives())]
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-15-	ref array<string> m_aObjectives;
+scripts/Game\Mission\GC_CatalogMissionMetadata.c:16:	[Attribute("0", UIWidgets.EditBox, "Minimum players needed; zero means unspecified.")]
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-17-	int m_iMinPlayers;
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-18-	[Attribute("0", UIWidgets.Hidden)]
+--
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-33-	string m_sGroupId;
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-34-	[Attribute("-1", UIWidgets.Hidden)]
+scripts/Game\Mission\GC_CatalogMissionMetadata.c:35:	float m_fGroupSimilarity;
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-36-}
+scripts/Game\Mission\GC_CatalogMissionMetadata.c-37-
+--
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-27-{
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-28-	protected ref GC_InventoryCataloguePanel m_GCCataloguePanel;
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c:29:	protected float m_fGCPreviewRefresh;
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-30-	protected GC_ItemCatalogueEntry m_GCGestureItem;
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-31-	protected SCR_InventorySlotUI m_GCExistingGestureSlot;
+--
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-35-	protected BaseInventoryStorageComponent m_GCShownGearCrate;
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-36-	protected bool m_bGCOpenedGearCrate;
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c:37:	protected float m_fGCCrateResolveTime;
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-38-
+scripts/Game\Loadout\GC_InventoryCatalogueHooks.c-39-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_EntityDamageObservation.c-8-	protected bool m_bAvailable;
+scripts/Game\MissionFramework\GC_EntityDamageObservation.c-9-	protected bool m_bDestroyed;
+scripts/Game\MissionFramework\GC_EntityDamageObservation.c:10:	protected float m_fDamage;
+scripts/Game\MissionFramework\GC_EntityDamageObservation.c-11-	protected bool m_bChanged;
+scripts/Game\MissionFramework\GC_EntityDamageObservation.c-12-	protected bool m_bReportedMissing;
+--
+scripts/Game\MissionFramework\GC_MissionAction.c-12-class GC_LogMessageAction : GC_MissionAction
+scripts/Game\MissionFramework\GC_MissionAction.c-13-{
+scripts/Game\MissionFramework\GC_MissionAction.c:14:	[Attribute("Test complete", UIWidgets.EditBox, "The message to write to the Workbench log. This is a test message, not a message shown to players.")]
+scripts/Game\MissionFramework\GC_MissionAction.c-15-	string m_sMessage;
+scripts/Game\MissionFramework\GC_MissionAction.c-16-
+--
+scripts/Game\MissionFramework\GC_MissionAction.c-28-class GC_SetFlagAction : GC_MissionAction
+scripts/Game\MissionFramework\GC_MissionAction.c-29-{
+scripts/Game\MissionFramework\GC_MissionAction.c:30:	[Attribute("", UIWidgets.EditBox, "Give the flag a name. Other mission events can watch this same name. Mission Flags can set starting values; other flags start Off. Values reset each match.")]
+scripts/Game\MissionFramework\GC_MissionAction.c-31-	string m_sFlagName;
+scripts/Game\MissionFramework\GC_MissionAction.c-32-	[Attribute("1", UIWidgets.ComboBox, "On calls a declared Mission Flag and respects its conditions, count and Repeatable setting. Off clears its On/Off value without resetting its count. Undeclared flags keep simple On/Off behavior.", enums: {ParamEnum("On", "1"), ParamEnum("Off", "0")})]
+--
+scripts/Game\MissionFramework\GC_MissionAction.c-49-class GC_SendTestEventAction : GC_MissionAction
+scripts/Game\MissionFramework\GC_MissionAction.c-50-{
+scripts/Game\MissionFramework\GC_MissionAction.c:51:	[Attribute("", UIWidgets.EditBox, "Mission events waiting for this event name will run. An event is sent once; it is not remembered like a flag.")]
+scripts/Game\MissionFramework\GC_MissionAction.c-52-	string m_sEventName;
+scripts/Game\MissionFramework\GC_MissionAction.c-53-
+--
+scripts/Game\MissionFramework\GC_MissionAction.c-65-class GC_RandomFlagAction : GC_MissionAction
+scripts/Game\MissionFramework\GC_MissionAction.c-66-{
+scripts/Game\MissionFramework\GC_MissionAction.c:67:	[Attribute("", UIWidgets.EditBox, "The flag to set. Success sets it On; failure sets it Off.")]
+scripts/Game\MissionFramework\GC_MissionAction.c-68-	string m_sFlagName;
+scripts/Game\MissionFramework\GC_MissionAction.c:69:	[Attribute("50", UIWidgets.SpinBox, "Percent chance of On. 0 always sets Off; 100 always sets On.", "0 100 1")]
+scripts/Game\MissionFramework\GC_MissionAction.c:70:	float m_fChancePercent;
+scripts/Game\MissionFramework\GC_MissionAction.c-71-
+scripts/Game\MissionFramework\GC_MissionAction.c-72-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_MissionAction.c-84-class GC_SelectRandomFlagsAction : GC_MissionAction
+scripts/Game\MissionFramework\GC_MissionAction.c-85-{
+scripts/Game\MissionFramework\GC_MissionAction.c:86:	[Attribute("", UIWidgets.EditBox, "Possible flag names, such as route_north and route_south. Names must be unique. Selected flags turn On; the others turn Off.")]
+scripts/Game\MissionFramework\GC_MissionAction.c-87-	ref array<string> m_aFlagNames;
+scripts/Game\MissionFramework\GC_MissionAction.c:88:	[Attribute("1", UIWidgets.SpinBox, "How many different flags to turn On. Each flag can be selected only once per action.", "1 256 1")]
+scripts/Game\MissionFramework\GC_MissionAction.c-89-	int m_iSelectionCount;
+scripts/Game\MissionFramework\GC_MissionAction.c-90-
+--
+scripts/Game\MissionFramework\GC_MissionAction.c-105-class GC_CallFlagAction : GC_MissionAction
+scripts/Game\MissionFramework\GC_MissionAction.c-106-{
+scripts/Game\MissionFramework\GC_MissionAction.c:107:	[Attribute("", UIWidgets.EditBox, "The exact name in Mission Flags. If its conditions pass, increase its count, turn it On and check dependent events and flags. Repeatable flags reset to Off after the check cycle.")]
+scripts/Game\MissionFramework\GC_MissionAction.c-108-	string m_sFlagName;
+scripts/Game\MissionFramework\GC_MissionAction.c-109-
+--
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-30-	protected int m_iPreview;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-31-	protected int m_iIndexed = -1;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c:32:	protected float m_fRefresh;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-33-	protected string m_sPendingText;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c:34:	protected float m_fSearchDelay;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c:35:	protected float m_fFeedbackTime;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-36-	protected bool m_bFinished;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-37-	protected SCR_SpinBoxPagingComponent m_Paging;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c:38:	protected float m_fVicinityOpacity;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c:39:	protected float m_fOpenedOpacity;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-40-	protected bool m_bPagingActive;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-41-	protected ref array<SCR_ButtonBaseComponent> m_aButtons = {};
+--
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-48-	protected string m_sWeaponSlotType;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-49-	protected string m_sWeaponSignature;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c:50:	protected float m_fWeaponRefresh;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-51-	protected static const int PAGE_SIZE = 10;
+scripts/Game\Loadout\GC_InventoryCataloguePanel.c-52-
+--
+scripts/Game\Loadout\GC_ItemCatalogue.c-63-	protected int m_iFailed;
+scripts/Game\Loadout\GC_ItemCatalogue.c-64-	protected int m_iExcluded;
+scripts/Game\Loadout\GC_ItemCatalogue.c:65:	protected float m_fMaxTickMS;
+scripts/Game\Loadout\GC_ItemCatalogue.c:66:	protected float m_fStartedMS;
+scripts/Game\Loadout\GC_ItemCatalogue.c:67:	protected float m_fElapsedMS;
+scripts/Game\Loadout\GC_ItemCatalogue.c-68-	protected bool m_bStarted;
+scripts/Game\Loadout\GC_ItemCatalogue.c-69-	protected bool m_bDiscoveryFailed;
+--
+scripts/Game\MissionFramework\GC_MissionAreaTracker.c-32-	protected vector m_vMinimum;
+scripts/Game\MissionFramework\GC_MissionAreaTracker.c-33-	protected vector m_vMaximum;
+scripts/Game\MissionFramework\GC_MissionAreaTracker.c:34:	protected float m_fRadiusSquared;
+scripts/Game\MissionFramework\GC_MissionAreaTracker.c-35-	protected bool m_bRadius;
+scripts/Game\MissionFramework\GC_MissionAreaTracker.c-36-	protected bool m_bValid;
+--
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-5-	int m_iWho;
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-6-
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c:7:	[Attribute("", UIWidgets.EditBox, "Optional faction keys, such as US or USSR. Empty means all factions. Selected factions are counted together, using each character's current faction.")]
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-8-	ref array<string> m_aFactions;
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-9-
+--
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-45-class GC_LivingCharacterArea
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-46-{
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c:47:	[Attribute("", UIWidgets.EditBox, "Exact unique world name of a Radius Area or closed Polygon Area. The area supplies only its shape. Missing or invalid areas cannot pass, even inside a None group.")]
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-48-	string m_sName;
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-49-
+--
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-65-class GC_LivingProportion : GC_LivingRequirementBase
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-66-{
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c:67:	[Attribute("0.9", UIWidgets.Slider, "Minimum proportion on the selected side of Area: 0.9 means at least 90%, 1 means everyone, and 0 means any proportion of a nonempty population. The total includes all currently living characters matching Who and Factions, wherever they are. Deaths, respawns and faction changes update that total. No eligible living characters means false. Requires Area.", "0 1 0.01")]
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c:68:	float m_fRequiredProportion;
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-69-
+scripts/Game\MissionFramework\GC_LivingCharactersCondition.c-70-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Admin\GC_BoundaryAdmin.c-23-	protected string m_sAnnouncement;
+scripts/Game\Admin\GC_BoundaryAdmin.c-24-	protected ref array<string> m_aAnnouncementFactions = {};
+scripts/Game\Admin\GC_BoundaryAdmin.c:25:	protected float m_fAnnouncementDeadline;
+scripts/Game\Admin\GC_BoundaryAdmin.c-26-	protected bool m_bAnnouncing;
+scripts/Game\Admin\GC_BoundaryAdmin.c-27-
+--
+scripts/Game\Player\GC_BoundaryAdminController.c-5-	protected bool m_bGC_BoundaryMap;
+scripts/Game\Player\GC_BoundaryAdminController.c-6-	protected Widget m_GC_AnnouncementHud;
+scripts/Game\Player\GC_BoundaryAdminController.c:7:	protected float m_fGC_AnnouncementDeadline;
+scripts/Game\Player\GC_BoundaryAdminController.c:8:	protected float m_fGC_AnnouncementUpdated;
+scripts/Game\Player\GC_BoundaryAdminController.c-9-	protected bool m_bGC_AnnouncementSent;
+scripts/Game\Player\GC_BoundaryAdminController.c:10:	protected float m_fGC_AnnouncementSentDeadline;
+scripts/Game\Player\GC_BoundaryAdminController.c-11-	protected string m_sGC_AnnouncementSentTitle;
+scripts/Game\Player\GC_BoundaryAdminController.c-12-	protected int m_iGC_AnnouncementDisplayed = -1;
+--
+scripts/Game\MissionFramework\GC_MissionEventCondition.c-2-class GC_MissionEventCondition : GC_ConditionBase
+scripts/Game\MissionFramework\GC_MissionEventCondition.c-3-{
+scripts/Game\MissionFramework\GC_MissionEventCondition.c:4:	[Attribute("", UIWidgets.EditBox, "The exact unique name of a regular mission event or random event group. Checks its result without running its actions or checking its conditions again.")]
+scripts/Game\MissionFramework\GC_MissionEventCondition.c-5-	string m_sEventName;
+scripts/Game\MissionFramework\GC_MissionEventCondition.c-6-	[Attribute("0", UIWidgets.ComboBox, "True means the named event ran. Once events remember true. Every time events are true for their check cycle, then reset to false. A random group is true when it makes a selection. Missing or duplicate event names never pass, including Is false.", enums: {ParamEnum("Is true", "0"), ParamEnum("Is false", "1")})]
+--
+scripts/Game\Player\GC_AdminGearController.c-7-	protected RplId m_GC_GearCrate;
+scripts/Game\Player\GC_AdminGearController.c-8-	protected IEntity m_GC_NearestCrate;
+scripts/Game\Player\GC_AdminGearController.c:9:	protected float m_fGC_NearestDistance;
+scripts/Game\Player\GC_AdminGearController.c-10-	protected int m_iGC_GearAuditRequest;
+scripts/Game\Player\GC_AdminGearController.c-11-	protected bool m_bGC_GearAuditOpen;
+--
+scripts/Game\MissionFramework\GC_MissionFlag.c-2-class GC_MissionFlag
+scripts/Game\MissionFramework\GC_MissionFlag.c-3-{
+scripts/Game\MissionFramework\GC_MissionFlag.c:4:	[Attribute("", UIWidgets.EditBox, "A name for a fact your mission remembers, such as radio_destroyed. Use this same name in events, conditions and actions.")]
+scripts/Game\MissionFramework\GC_MissionFlag.c-5-	string m_sName;
+scripts/Game\MissionFramework\GC_MissionFlag.c-6-	[Attribute("0", UIWidgets.ComboBox, "The value before match-start mission events run. This starting value does not send a Flag changed event.", enums: {ParamEnum("Off", "0"), ParamEnum("On", "1")})]
+--
+scripts/Game\MissionFramework\GC_MissionFlag.c-25-	[Attribute("0", UIWidgets.ComboBox, "All actions uses the normal list order. One random action chooses a single action each time the mission event runs; no flags are needed.", enums: {ParamEnum("All actions", "0"), ParamEnum("One random action", "1")})]
+scripts/Game\MissionFramework\GC_MissionFlag.c-26-	int m_iActionSelection;
+scripts/Game\MissionFramework\GC_MissionFlag.c:27:	[Attribute("100", UIWidgets.SpinBox, "Percent chance each time the event happens and conditions pass. 0 never runs; 100 always runs. A failed chance waits for the next event.", "0 100 1")]
+scripts/Game\MissionFramework\GC_MissionFlag.c:28:	float m_fChancePercent;
+scripts/Game\MissionFramework\GC_MissionFlag.c:29:	[Attribute("0", UIWidgets.SpinBox, "Shortest extra wait after the event. Added to the mission event's fixed wait. Conditions are checked again when the wait ends.", "0 86400 0.1")]
+scripts/Game\MissionFramework\GC_MissionFlag.c:30:	float m_fMinimumSeconds;
+scripts/Game\MissionFramework\GC_MissionFlag.c:31:	[Attribute("0", UIWidgets.SpinBox, "Longest extra wait. Must be at least Minimum Seconds. The wait is chosen once per accepted event.", "0 86400 0.1")]
+scripts/Game\MissionFramework\GC_MissionFlag.c:32:	float m_fMaximumSeconds;
+scripts/Game\MissionFramework\GC_MissionFlag.c-33-
+scripts/Game\MissionFramework\GC_MissionFlag.c-34-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-36-	bool m_bPending;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-37-	int m_iRuns;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c:38:	float m_fDue;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c:39:	float m_fNextCheck;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-40-}
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-41-
+--
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-56-	protected bool m_bRunning;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-57-	protected bool m_bDispatching;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c:58:	protected float m_fNow;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-59-	protected ref array<ref GC_RandomConditionState> m_aRandomConditions = {};
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-60-	protected ref map<GC_RuleCondition, bool> m_mRandomResults = new map<GC_RuleCondition, bool>();
+--
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-62-	protected BaseWorld m_DamageWorld;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-63-	protected ref GC_MissionAreaTracker m_Areas;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c:64:	protected float m_fNextAreaCheck;
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-65-	protected ref map<GC_RuleCondition, ref GC_EntityDamageObservation> m_mDamage = new map<GC_RuleCondition, ref GC_EntityDamageObservation>();
+scripts/Game\MissionFramework\GC_MissionRuleEngine.c-66-	protected int m_iRuns;
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-36-class GC_LobbyParameterOption
+scripts/Game\Parameters\GC_LobbyParameters.c-37-{
+scripts/Game\Parameters\GC_LobbyParameters.c:38:	[Attribute("OPTION", UIWidgets.EditBox, "Player-facing option label")]
+scripts/Game\Parameters\GC_LobbyParameters.c-39-	string m_sLabel;
+scripts/Game\Parameters\GC_LobbyParameters.c-40-
+scripts/Game\Parameters\GC_LobbyParameters.c:41:	[Attribute("option", UIWidgets.EditBox, "Stable option key")]
+scripts/Game\Parameters\GC_LobbyParameters.c-42-	string m_sKey;
+scripts/Game\Parameters\GC_LobbyParameters.c-43-
+scripts/Game\Parameters\GC_LobbyParameters.c:44:	[Attribute("", UIWidgets.EditBox, "Opaque future script payload")]
+scripts/Game\Parameters\GC_LobbyParameters.c-45-	string m_sPayload;
+scripts/Game\Parameters\GC_LobbyParameters.c-46-
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-58-	static const int MAX_FACTION_KEYS = 16;
+scripts/Game\Parameters\GC_LobbyParameters.c-59-
+scripts/Game\Parameters\GC_LobbyParameters.c:60:	[Attribute("PARAMETER", UIWidgets.EditBox, "Player-facing parameter label")]
+scripts/Game\Parameters\GC_LobbyParameters.c-61-	protected string m_sLabel;
+scripts/Game\Parameters\GC_LobbyParameters.c-62-
+scripts/Game\Parameters\GC_LobbyParameters.c:63:	[Attribute("", UIWidgets.EditBoxMultiline, "Player-facing parameter description")]
+scripts/Game\Parameters\GC_LobbyParameters.c-64-	protected string m_sDescription;
+scripts/Game\Parameters\GC_LobbyParameters.c-65-
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-67-	protected GC_ELobbyParameterEffect m_eEffect;
+scripts/Game\Parameters\GC_LobbyParameters.c-68-
+scripts/Game\Parameters\GC_LobbyParameters.c:69:	[Attribute("", UIWidgets.EditBox, "Required authoritative owner faction key")]
+scripts/Game\Parameters\GC_LobbyParameters.c-70-	protected string m_sOwnerFactionKey;
+scripts/Game\Parameters\GC_LobbyParameters.c-71-
+scripts/Game\Parameters\GC_LobbyParameters.c:72:	[Attribute("", UIWidgets.EditBox, "Additional base-game faction keys allowed to view this parameter. Empty is owner-only")]
+scripts/Game\Parameters\GC_LobbyParameters.c-73-	protected ref array<string> m_aVisibleFactionKeys;
+scripts/Game\Parameters\GC_LobbyParameters.c-74-
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-120-class GC_LobbyIntegerParameterDefinition : GC_LobbyParameterDefinition
+scripts/Game\Parameters\GC_LobbyParameters.c-121-{
+scripts/Game\Parameters\GC_LobbyParameters.c:122:	[Attribute("0", UIWidgets.EditBox, "Default integer value")]
+scripts/Game\Parameters\GC_LobbyParameters.c-123-	protected int m_iDefaultValue;
+scripts/Game\Parameters\GC_LobbyParameters.c-124-
+scripts/Game\Parameters\GC_LobbyParameters.c:125:	[Attribute("0", UIWidgets.EditBox, "Minimum integer value")]
+scripts/Game\Parameters\GC_LobbyParameters.c-126-	protected int m_iMinimum;
+scripts/Game\Parameters\GC_LobbyParameters.c-127-
+scripts/Game\Parameters\GC_LobbyParameters.c:128:	[Attribute("100", UIWidgets.EditBox, "Maximum integer value")]
+scripts/Game\Parameters\GC_LobbyParameters.c-129-	protected int m_iMaximum;
+scripts/Game\Parameters\GC_LobbyParameters.c-130-
+scripts/Game\Parameters\GC_LobbyParameters.c:131:	[Attribute("1", UIWidgets.EditBox, "Integer step")]
+scripts/Game\Parameters\GC_LobbyParameters.c-132-	protected int m_iStep;
+scripts/Game\Parameters\GC_LobbyParameters.c-133-
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-145-class GC_LobbyFloatParameterDefinition : GC_LobbyParameterDefinition
+scripts/Game\Parameters\GC_LobbyParameters.c-146-{
+scripts/Game\Parameters\GC_LobbyParameters.c:147:	[Attribute("0", UIWidgets.EditBox, "Default floating-point value")]
+scripts/Game\Parameters\GC_LobbyParameters.c:148:	protected float m_fDefaultValue;
+scripts/Game\Parameters\GC_LobbyParameters.c-149-
+scripts/Game\Parameters\GC_LobbyParameters.c:150:	[Attribute("0", UIWidgets.EditBox, "Minimum floating-point value")]
+scripts/Game\Parameters\GC_LobbyParameters.c:151:	protected float m_fMinimum;
+scripts/Game\Parameters\GC_LobbyParameters.c-152-
+scripts/Game\Parameters\GC_LobbyParameters.c:153:	[Attribute("1", UIWidgets.EditBox, "Maximum floating-point value")]
+scripts/Game\Parameters\GC_LobbyParameters.c:154:	protected float m_fMaximum;
+scripts/Game\Parameters\GC_LobbyParameters.c-155-
+scripts/Game\Parameters\GC_LobbyParameters.c:156:	[Attribute("0.1", UIWidgets.EditBox, "Floating-point step")]
+scripts/Game\Parameters\GC_LobbyParameters.c:157:	protected float m_fStep;
+scripts/Game\Parameters\GC_LobbyParameters.c-158-
+scripts/Game\Parameters\GC_LobbyParameters.c:159:	[Attribute("2", UIWidgets.SpinBox, "Displayed decimal places")]
+scripts/Game\Parameters\GC_LobbyParameters.c-160-	protected int m_iPrecision;
+scripts/Game\Parameters\GC_LobbyParameters.c-161-
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-174-class GC_LobbyStringParameterDefinition : GC_LobbyParameterDefinition
+scripts/Game\Parameters\GC_LobbyParameters.c-175-{
+scripts/Game\Parameters\GC_LobbyParameters.c:176:	[Attribute("", UIWidgets.EditBox, "Default string value")]
+scripts/Game\Parameters\GC_LobbyParameters.c-177-	protected string m_sDefaultValue;
+scripts/Game\Parameters\GC_LobbyParameters.c-178-
+scripts/Game\Parameters\GC_LobbyParameters.c:179:	[Attribute("256", UIWidgets.SpinBox, "Maximum string length")]
+scripts/Game\Parameters\GC_LobbyParameters.c-180-	protected int m_iMaximumLength;
+scripts/Game\Parameters\GC_LobbyParameters.c-181-
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-187-class GC_LobbySelectionParameterDefinition : GC_LobbyParameterDefinition
+scripts/Game\Parameters\GC_LobbyParameters.c-188-{
+scripts/Game\Parameters\GC_LobbyParameters.c:189:	[Attribute("", UIWidgets.EditBox, "Default option key")]
+scripts/Game\Parameters\GC_LobbyParameters.c-190-	protected string m_sDefaultKey;
+scripts/Game\Parameters\GC_LobbyParameters.c-191-
+--
+scripts/Game\Parameters\GC_LobbyParameters.c-212-	protected bool m_bBoolValue;
+scripts/Game\Parameters\GC_LobbyParameters.c-213-	protected int m_iIntValue;
+scripts/Game\Parameters\GC_LobbyParameters.c:214:	protected float m_fFloatValue;
+scripts/Game\Parameters\GC_LobbyParameters.c-215-	protected string m_sStringValue;
+scripts/Game\Parameters\GC_LobbyParameters.c-216-	protected string m_sSelectionKey;
+--
+scripts/Game\Player\GC_JipController.c-1-modded class GC_LobbyPlayerController
+scripts/Game\Player\GC_JipController.c-2-{
+scripts/Game\Player\GC_JipController.c:3:	protected float m_fGC_LastJipPress = -1000;
+scripts/Game\Player\GC_JipController.c:4:	protected float m_fGC_LastJipRequest = -10000;
+scripts/Game\Player\GC_JipController.c-5-	protected string m_sGC_JipMessage;
+scripts/Game\Player\GC_JipController.c-6-	protected RplId m_GC_JipOfferCharacter = RplId.Invalid();
+--
+scripts/Game\Player\GC_LobbyPlayerController.c-30-	protected int m_iNetworkCameraUpdateRate;
+scripts/Game\Player\GC_LobbyPlayerController.c-31-	[Attribute("0.2", desc: "Seconds of travel represented by each live projectile segment and final-segment retention.")]
+scripts/Game\Player\GC_LobbyPlayerController.c:32:	protected float m_fProjectileTraceDuration;
+scripts/Game\Player\GC_LobbyPlayerController.c-33-
+scripts/Game\Player\GC_LobbyPlayerController.c-34-	protected GC_ELobbyPlayerState m_eLobbyPlayerState;
+--
+scripts/Game\Player\GC_LobbyPlayerController.c-42-	protected ref array<int> m_aNetworkCameraSpectators = new array<int>();
+scripts/Game\Player\GC_LobbyPlayerController.c-43-	protected bool m_bPublishNetworkCamera;
+scripts/Game\Player\GC_LobbyPlayerController.c:44:	protected float m_fNextNetworkCameraSampleTime;
+scripts/Game\Player\GC_LobbyPlayerController.c-45-	protected int m_iNetworkCameraSequence;
+scripts/Game\Player\GC_LobbyPlayerController.c-46-	protected bool m_bNetworkCameraDiagnosticsInitialized;
+--
+scripts/Game\Player\GC_LobbyPlayerController.c-116-	protected bool m_bLobbyDisabledNativeVoice;
+scripts/Game\Player\GC_LobbyPlayerController.c-117-	//! Server-only, session-local permission to receive new Admin-channel messages.
+scripts/Game\Player\GC_LobbyPlayerController.c:118:	protected float m_fAdminChatReceiveUntil;
+scripts/Game\Player\GC_LobbyPlayerController.c-119-
+scripts/Game\Player\GC_LobbyPlayerController.c-120-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_NumberConditions.c-9-	int m_iComparison;
+scripts/Game\MissionFramework\GC_NumberConditions.c-10-
+scripts/Game\MissionFramework\GC_NumberConditions.c:11:	[Attribute("1", UIWidgets.SpinBox, "The number to compare against. For conditions, use 0 to 256. For flag calls, use 0 to 1000000. Less than 5 on a repeatable flag allows five accepted calls.", "0 1000000 1")]
+scripts/Game\MissionFramework\GC_NumberConditions.c-12-	int m_iRequiredCount;
+scripts/Game\MissionFramework\GC_NumberConditions.c-13-
+scripts/Game\MissionFramework\GC_NumberConditions.c:14:	[Attribute("", UIWidgets.EditBox, "Only used for Mission flag calls. Enter the exact name from Mission Flags. To limit the flag containing this condition, enter that flag's name.")]
+scripts/Game\MissionFramework\GC_NumberConditions.c-15-	string m_sFlagName;
+scripts/Game\MissionFramework\GC_NumberConditions.c-16-
+--
+scripts/Game\MissionFramework\GC_RadiusAreaEntity.c-6-class GC_RadiusAreaEntity : GenericEntity
+scripts/Game\MissionFramework\GC_RadiusAreaEntity.c-7-{
+scripts/Game\MissionFramework\GC_RadiusAreaEntity.c:8:	[Attribute("10", UIWidgets.SpinBox, "Distance in metres from the area's centre. Includes height: this is a sphere, not an unlimited-height circle. The boundary itself counts as inside. Entity scaling does not change this metre value.", "0.1 100000 0.1")]
+scripts/Game\MissionFramework\GC_RadiusAreaEntity.c:9:	protected float m_fRadius;
+scripts/Game\MissionFramework\GC_RadiusAreaEntity.c-10-
+scripts/Game\MissionFramework\GC_RadiusAreaEntity.c-11-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Player\GC_LobbyPlayerController_MapShapes.c-7-	protected bool m_bGC_MapAdmin;
+scripts/Game\Player\GC_LobbyPlayerController_MapShapes.c-8-	protected bool m_bGC_MapSubscribed;
+scripts/Game\Player\GC_LobbyPlayerController_MapShapes.c:9:	protected float m_fGC_MapSubscribeAt;
+scripts/Game\Player\GC_LobbyPlayerController_MapShapes.c-10-
+scripts/Game\Player\GC_LobbyPlayerController_MapShapes.c-11-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_RuleCondition.c-18-class GC_RuleCondition
+scripts/Game\MissionFramework\GC_RuleCondition.c-19-{
+scripts/Game\MissionFramework\GC_RuleCondition.c:20:	[Attribute("Check", UIWidgets.EditBox, "A short name to help you find this check.")]
+scripts/Game\MissionFramework\GC_RuleCondition.c-21-	string m_sName;
+scripts/Game\MissionFramework\GC_RuleCondition.c-22-
+--
+scripts/Game\MissionFramework\GC_RuleCondition.c-27-	bool m_bReverseAnswer;
+scripts/Game\MissionFramework\GC_RuleCondition.c-28-
+scripts/Game\MissionFramework\GC_RuleCondition.c:29:	[Attribute("", UIWidgets.EditBox, "For Flag is yes: the exact flag name. Missing flags are no.")]
+scripts/Game\MissionFramework\GC_RuleCondition.c-30-	string m_sFlagName;
+scripts/Game\MissionFramework\GC_RuleCondition.c-31-
+--
+scripts/Game\MissionFramework\GC_RuleCondition.c-36-	GC_ERuleCheck m_eGroupNeeds;
+scripts/Game\MissionFramework\GC_RuleCondition.c-37-
+scripts/Game\MissionFramework\GC_RuleCondition.c:38:	[Attribute("1", UIWidgets.SpinBox, "Used by Exactly, At least, and At most. Zero is allowed.", "0 256 1")]
+scripts/Game\MissionFramework\GC_RuleCondition.c-39-	int m_iHowMany;
+scripts/Game\MissionFramework\GC_RuleCondition.c-40-
+--
+scripts/Game\MissionFramework\GC_RuleCondition.c-46-	int m_iFlagCount;
+scripts/Game\MissionFramework\GC_RuleCondition.c-47-	string m_sEventName;
+scripts/Game\MissionFramework\GC_RuleCondition.c:48:	float m_fRandomInterval;
+scripts/Game\MissionFramework\GC_RuleCondition.c:49:	float m_fRandomChance;
+scripts/Game\MissionFramework\GC_RuleCondition.c-50-	int m_iRandomBehavior;
+scripts/Game\MissionFramework\GC_RuleCondition.c-51-	ref array<string> m_aCasualtyFactions;
+scripts/Game\MissionFramework\GC_RuleCondition.c-52-	int m_iCasualtyCount;
+scripts/Game\MissionFramework\GC_RuleCondition.c:53:	float m_fCasualtyRatio;
+scripts/Game\MissionFramework\GC_RuleCondition.c-54-	int m_iDeathComparison;
+scripts/Game\MissionFramework\GC_RuleCondition.c-55-	int m_iRequiredDeaths;
+--
+scripts/Game\MissionFramework\GC_RuleCondition.c-57-	string m_sDamageArea;
+scripts/Game\MissionFramework\GC_RuleCondition.c-58-	int m_iDamageCheck;
+scripts/Game\MissionFramework\GC_RuleCondition.c:59:	float m_fDamageNeeded;
+scripts/Game\MissionFramework\GC_RuleCondition.c-60-	int m_iAreaTargets;
+scripts/Game\MissionFramework\GC_RuleCondition.c-61-	ref array<string> m_aAreaNames;
+--
+scripts/Game\MissionFramework\GC_RuleCondition.c-68-	bool m_bAreaAnywhere;
+scripts/Game\MissionFramework\GC_RuleCondition.c-69-	bool m_bAreaProportion;
+scripts/Game\MissionFramework\GC_RuleCondition.c:70:	float m_fAreaProportion;
+scripts/Game\MissionFramework\GC_RuleCondition.c-71-
+scripts/Game\MissionFramework\GC_RuleCondition.c-72-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c-2-{
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c-3-	ref ScriptInvoker m_OnSessionLogRows = new ScriptInvoker();
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c:4:	protected float m_fLogRequestTime = -1000;
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c:5:	protected float m_fLogDenialTime = -5000;
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c-6-	protected bool m_bLogAccessAudited;
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c:7:	protected float m_fGC_ViewDenialTime = -5000;
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c-8-
+scripts/Game\Player\GC_LobbyPlayerController_Logs.c-9-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-3-class GC_RandomChanceCondition : GC_ConditionBase
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-4-{
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c:5:	[Attribute("60", UIWidgets.SpinBox, "Seconds between random checks during Match. For example, 90 checks every 90 seconds. The first check waits one full interval after Match starts. No checks run before or after Match.", "0.1 86400 0.1")]
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c:6:	float m_fCheckInterval;
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-7-
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c:8:	[Attribute("1", UIWidgets.EditBox, "Chance from 0 to 1 for each scheduled check: 1 = 100%, 0.05 = 5%, 0.0005 = 0.05%, and 0 = never true. Other conditions do not reroll it. Before the first check its answer is false; All, Any and None combine that answer normally. Events run once unless Advanced > Run is Every time.")]
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c:9:	float m_fChance;
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-10-
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-11-	[Attribute("0", UIWidgets.ComboBox, "Keep rolling: make a new roll every Check Interval and keep each answer until the next roll. Roll once: after the first interval, keep that first answer for this Match, even if it is false. This controls the condition only; the event's Once or Every time setting controls its actions.", enums: {ParamEnum("Keep rolling", "0"), ParamEnum("Roll once", "1")})]
+--
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-30-{
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-31-	ref GC_RuleCondition m_Condition;
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c:32:	float m_fNextCheck;
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-33-	bool m_bHasRolled;
+scripts/Game\MissionFramework\GC_RandomChanceCondition.c-34-}
+--
+scripts/Game\Player\GC_SpectatorBodyFollowController.c-2-modded class GC_LobbyPlayerController
+scripts/Game\Player\GC_SpectatorBodyFollowController.c-3-{
+scripts/Game\Player\GC_SpectatorBodyFollowController.c:4:	protected float m_fGC_NextBodyFollowRequest;
+scripts/Game\Player\GC_SpectatorBodyFollowController.c:5:	protected float m_fGC_NextBodyFollowLog;
+scripts/Game\Player\GC_SpectatorBodyFollowController.c-6-
+scripts/Game\Player\GC_SpectatorBodyFollowController.c-7-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-3-class GC_TotalDeathsCondition : GC_ConditionBase
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-4-{
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c:5:	[Attribute("", UIWidgets.EditBox, "Spectator bodies never count, with any faction or Count setting. Faction keys to include, such as US or USSR. Leave empty for every faction. Deaths from selected factions are added together. Uses the character's faction when it dies.")]
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-6-	ref array<string> m_aFactions;
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-7-
+--
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-12-	int m_iComparison;
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-13-
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c:14:	[Attribute("0", UIWidgets.SpinBox, "Number of deaths to compare against. Each life counts once when it dies; the same player can add another death after respawning. Disconnecting or deleting a living character does not add a death. Starts at zero at Match start.", "0 1000000 1")]
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-15-	int m_iRequiredDeaths;
+scripts/Game\MissionFramework\GC_TotalDeathsCondition.c-16-
+--
+scripts/Game\UI\GC_AdminLogsComponent.c-14-	protected int m_iBefore;
+scripts/Game\UI\GC_AdminLogsComponent.c-15-	protected int m_iNext;
+scripts/Game\UI\GC_AdminLogsComponent.c:16:	protected float m_fRequestedAt = -1000;
+scripts/Game\UI\GC_AdminLogsComponent.c-17-	protected ref array<int> m_aBack = {};
+scripts/Game\UI\GC_AdminLogsComponent.c-18-	protected ref array<string> m_aDisplayed = {};
+--
+scripts/Game\UI\GC_AdminBoundariesComponent.c-22-	protected string m_sAnnouncement;
+scripts/Game\UI\GC_AdminBoundariesComponent.c-23-	protected string m_sAnnouncementFactions;
+scripts/Game\UI\GC_AdminBoundariesComponent.c:24:	protected float m_fAnnouncementRemaining;
+scripts/Game\UI\GC_AdminBoundariesComponent.c-25-
+scripts/Game\UI\GC_AdminBoundariesComponent.c-26-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Spectator\GC_SpectatorSample.c-8-	int m_iVersion = 3;
+scripts/Game\Spectator\GC_SpectatorSample.c-9-	int m_iSequence;
+scripts/Game\Spectator\GC_SpectatorSample.c:10:	float m_fSampleTime;
+scripts/Game\Spectator\GC_SpectatorSample.c-11-	int m_iStance;
+scripts/Game\Spectator\GC_SpectatorSample.c-12-	int m_iCommand;
+--
+scripts/Game\Spectator\GC_SpectatorSample.c-19-	vector m_vAimAngles;
+scripts/Game\Spectator\GC_SpectatorSample.c-20-	vector m_vLookAngles;
+scripts/Game\Spectator\GC_SpectatorSample.c:21:	float m_fLean;
+scripts/Game\Spectator\GC_SpectatorSample.c:22:	float m_fDynamicStance;
+scripts/Game\Spectator\GC_SpectatorSample.c:23:	float m_fMovement;
+scripts/Game\Spectator\GC_SpectatorSample.c-24-	//! ADS position is sight-local; other positions are world-aligned from root.
+scripts/Game\Spectator\GC_SpectatorSample.c-25-	//! Version 3 keeps the camera basis world-aligned in every state.
+--
+scripts/Game\Spectator\GC_SpectatorSample.c-28-	vector m_vCameraUp;
+scripts/Game\Spectator\GC_SpectatorSample.c-29-	vector m_vLensState;
+scripts/Game\Spectator\GC_SpectatorSample.c:30:	float m_fOpticReticleScale = 1;
+scripts/Game\Spectator\GC_SpectatorSample.c:31:	float m_fOpticEdgeScale = 1;
+scripts/Game\Spectator\GC_SpectatorSample.c-32-
+scripts/Game\Spectator\GC_SpectatorSample.c-33-	static const int VERSION = 3;
+--
+scripts/Game\Setup\GC_BoundaryWallComponent.c-8-	[Attribute("1", UIWidgets.CheckBox, "Show the boundary only to affected players near an edge.", category: "Boundary wall"), RplProp(onRplName: "ClearMesh")]
+scripts/Game\Setup\GC_BoundaryWallComponent.c-9-	protected bool m_bEnabled;
+scripts/Game\Setup\GC_BoundaryWallComponent.c:10:	[Attribute("10", UIWidgets.EditBox, "Show only wall portions within this horizontal radius of the player, in meters.", params: "1 100", category: "Boundary wall"), RplProp(onRplName: "ClearMesh")]
+scripts/Game\Setup\GC_BoundaryWallComponent.c:11:	protected float m_fRange;
+scripts/Game\Setup\GC_BoundaryWallComponent.c:12:	[Attribute("3", UIWidgets.EditBox, "Visible wall height centered at the local view altitude, in meters. Polygon elevation is ignored.", params: "0.5 20", category: "Boundary wall"), RplProp(onRplName: "ClearMesh")]
+scripts/Game\Setup\GC_BoundaryWallComponent.c:13:	protected float m_fHeight;
+scripts/Game\Setup\GC_BoundaryWallComponent.c-14-	[Attribute("0.578 0 0 0.35", UIWidgets.ColorPicker, "Wall color; alpha is maximum opacity at the boundary.", category: "Boundary wall")]
+scripts/Game\Setup\GC_BoundaryWallComponent.c-15-	protected ref Color m_Color;
+--
+scripts/Game\Setup\GC_BoundaryWallComponent.c-30-	protected bool m_bPositionValid;
+scripts/Game\Setup\GC_BoundaryWallComponent.c-31-	protected bool m_bFailed;
+scripts/Game\Setup\GC_BoundaryWallComponent.c:32:	protected float m_fOpacity = -1;
+scripts/Game\Setup\GC_BoundaryWallComponent.c:33:	protected float m_fMaximumOpacity;
+scripts/Game\Setup\GC_BoundaryWallComponent.c:34:	protected float m_fVisualElapsed;
+scripts/Game\Setup\GC_BoundaryWallComponent.c-35-	protected static int s_iMaterialSerial;
+scripts/Game\Setup\GC_BoundaryWallComponent.c-36-
+--
+scripts/Game\Setup\GC_SetupZoneEntity.c-12-	IEntity m_Mover;
+scripts/Game\Setup\GC_SetupZoneEntity.c-13-	vector m_aTransform[4];
+scripts/Game\Setup\GC_SetupZoneEntity.c:14:	float m_fOutsideDeadline;
+scripts/Game\Setup\GC_SetupZoneEntity.c-15-	bool m_bEnrolled;
+scripts/Game\Setup\GC_SetupZoneEntity.c-16-	bool m_bReturnFailed;
+--
+scripts/Game\Setup\GC_SetupZoneEntity.c-25-class GC_SetupZoneEntity : PolylineShapeEntity
+scripts/Game\Setup\GC_SetupZoneEntity.c-26-{
+scripts/Game\Setup\GC_SetupZoneEntity.c:27:	[Attribute("120", UIWidgets.EditBox, "Seconds from the start of GAME until release (1-3600).", category: "Setup")]
+scripts/Game\Setup\GC_SetupZoneEntity.c:28:	protected float m_fDuration;
+scripts/Game\Setup\GC_SetupZoneEntity.c:29:	[Attribute("SETUP", UIWidgets.EditBox, "Heading displayed beside the setup countdown. Keep it short to fit the compact HUD.", category: "Setup")]
+scripts/Game\Setup\GC_SetupZoneEntity.c-30-	protected string m_sDisplayText;
+scripts/Game\Setup\GC_SetupZoneEntity.c-31-	[Attribute("0", UIWidgets.ComboBox, "Soft: outside countdown then death. Hard: return to last safe position. Freeze: prevent movement until release.", enums: ParamEnumArray.FromEnum(GC_ESetupBehavior), category: "Setup")]
+scripts/Game\Setup\GC_SetupZoneEntity.c-32-	protected GC_ESetupBehavior m_eBehavior;
+scripts/Game\Setup\GC_SetupZoneEntity.c:33:	[Attribute("20", UIWidgets.EditBox, "Soft mode: continuous seconds outside before death (0.1-3600). Re-entry resets this countdown.", category: "Setup")]
+scripts/Game\Setup\GC_SetupZoneEntity.c:34:	protected float m_fGraceSeconds;
+scripts/Game\Setup\GC_SetupZoneEntity.c-35-	[Attribute("1", UIWidgets.CheckBox, "Block weapon fire, grenades, melee and turret fire for enrolled players until release.", category: "Setup")]
+scripts/Game\Setup\GC_SetupZoneEntity.c-36-	protected bool m_bSafeStart;
+--
+scripts/Game\Setup\GC_SetupZoneEntity.c-40-	protected ref map<int, ref GC_SetupPlayerState> m_mPlayers = new map<int, ref GC_SetupPlayerState>();
+scripts/Game\Setup\GC_SetupZoneEntity.c-41-	protected GC_LobbyGameMode m_Mode;
+scripts/Game\Setup\GC_SetupZoneEntity.c:42:	protected float m_fDeadline;
+scripts/Game\Setup\GC_SetupZoneEntity.c-43-	protected bool m_bStarted;
+scripts/Game\Setup\GC_SetupZoneEntity.c-44-	protected bool m_bFinished;
+--
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-18-	protected bool m_bWeaponADSTag;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-19-	protected bool m_bHasWeaponCommand;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c:20:	protected float m_fAimAngleLR;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c:21:	protected float m_fAimAngleUD;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-22-
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-23-	void Capture(IEntity character)
+--
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-80-{
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-81-	protected vector m_vRawAimingRotation;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c:82:	protected float m_fBaseRotation;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-83-	protected bool m_bWeaponADS;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-84-
+--
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-189-	protected vector m_vHitPosition;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-190-	protected int m_iStance;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c:191:	protected float m_fDynamicStance;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c:192:	protected float m_fKillerLean;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c:193:	protected float m_fVictimLean;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-194-	protected vector m_vKillerAimingAngles;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-195-	protected vector m_vVictimAimingAngles;
+--
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-213-	protected ref GC_KilledFromVehicleState m_VictimVehicle;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-214-	protected int m_iVictimStance;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c:215:	protected float m_fVictimDynamicStance;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-216-	protected int m_iVictimFlags;
+scripts/Game\Spectator\GC_KilledFromSnapshot.c-217-
+--
+scripts/Game\Setup\GC_SetupPlayerController.c-4-	protected GC_SetupZoneEntity m_GC_SetupZone;
+scripts/Game\Setup\GC_SetupPlayerController.c-5-	protected IEntity m_GC_SetupCharacter;
+scripts/Game\Setup\GC_SetupPlayerController.c:6:	protected float m_fGC_SetupDeadline;
+scripts/Game\Setup\GC_SetupPlayerController.c:7:	protected float m_fGC_SetupOutsideDeadline;
+scripts/Game\Setup\GC_SetupPlayerController.c:8:	protected float m_fGC_SetupUpdated;
+scripts/Game\Setup\GC_SetupPlayerController.c-9-	protected bool m_bGC_SetupSafeStart;
+scripts/Game\Setup\GC_SetupPlayerController.c-10-	protected bool m_bGC_SetupFrozen;
+--
+scripts/Game\Stats\GC_MissionHistory.c-18-	protected int m_iEndedAt;
+scripts/Game\Stats\GC_MissionHistory.c-19-	protected int m_iRevision;
+scripts/Game\Stats\GC_MissionHistory.c:20:	protected float m_fStarted;
+scripts/Game\Stats\GC_MissionHistory.c:21:	protected float m_fObserved;
+scripts/Game\Stats\GC_MissionHistory.c:22:	protected float m_fLastSample = -10;
+scripts/Game\Stats\GC_MissionHistory.c:23:	protected float m_fLastFlush = -30;
+scripts/Game\Stats\GC_MissionHistory.c-24-	protected bool m_bFinished;
+scripts/Game\Stats\GC_MissionHistory.c-25-	protected bool m_bClosed;
+--
+scripts/Game\Stats\GC_MissionHistory.c-359-{
+scripts/Game\Stats\GC_MissionHistory.c-360-	string m_sPhase;
+scripts/Game\Stats\GC_MissionHistory.c:361:	float m_fSeconds;
+scripts/Game\Stats\GC_MissionHistory.c-362-	int m_iAt;
+scripts/Game\Stats\GC_MissionHistory.c-363-
+--
+scripts/Game\Stats\GC_MissionHistory.c-377-	string m_sIdentity;
+scripts/Game\Stats\GC_MissionHistory.c-378-	string m_sName;
+scripts/Game\Stats\GC_MissionHistory.c:379:	float m_fFrom;
+scripts/Game\Stats\GC_MissionHistory.c:380:	float m_fUntil;
+scripts/Game\Stats\GC_MissionHistory.c-381-	bool m_bEnded;
+scripts/Game\Stats\GC_MissionHistory.c-382-
+--
+scripts/Game\UI\Briefing\GC_BriefingMapFocusController.c-8-	protected SCR_MapEntity m_MarkerFocusMap;
+scripts/Game\UI\Briefing\GC_BriefingMapFocusController.c-9-	protected vector m_vMarkerFocusWorld;
+scripts/Game\UI\Briefing\GC_BriefingMapFocusController.c:10:	protected float m_fMarkerFocusZoom;
+scripts/Game\UI\Briefing\GC_BriefingMapFocusController.c-11-	protected string m_sMarkerFocusName;
+scripts/Game\UI\Briefing\GC_BriefingMapFocusController.c-12-
+--
+scripts/Game\Stats\GC_MissionPerformance.c-3-{
+scripts/Game\Stats\GC_MissionPerformance.c-4-	int m_iSamples;
+scripts/Game\Stats\GC_MissionPerformance.c:5:	float m_fFpsSum;
+scripts/Game\Stats\GC_MissionPerformance.c:6:	float m_fMinimum;
+scripts/Game\Stats\GC_MissionPerformance.c:7:	float m_fMaximum;
+scripts/Game\Stats\GC_MissionPerformance.c-8-	int m_iBelow15;
+scripts/Game\Stats\GC_MissionPerformance.c-9-	int m_iPeakPlayers;
+scripts/Game\Stats\GC_MissionPerformance.c-10-	int m_iPeakAI;
+scripts/Game\Stats\GC_MissionPerformance.c:11:	float m_fLargestGap;
+scripts/Game\Stats\GC_MissionPerformance.c:12:	float m_fLastSample = -1;
+scripts/Game\Stats\GC_MissionPerformance.c-13-
+scripts/Game\Stats\GC_MissionPerformance.c-14-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\UI\GC_BriefingScrollComponent.c-3-class GC_BriefingScrollComponent : SCR_ScriptedWidgetComponent
+scripts/Game\UI\GC_BriefingScrollComponent.c-4-{
+scripts/Game\UI\GC_BriefingScrollComponent.c:5:	[Attribute("BriefingSectionContentSize", UIWidgets.EditBox, "Widget whose laid-out height determines whether this region overflows")]
+scripts/Game\UI\GC_BriefingScrollComponent.c-6-	protected string m_sContentWidgetName;
+scripts/Game\UI\GC_BriefingScrollComponent.c-7-
+scripts/Game\UI\GC_BriefingScrollComponent.c:8:	[Attribute("BriefingOverflowIndicator", UIWidgets.EditBox, "Indicator shown while more content remains below this region")]
+scripts/Game\UI\GC_BriefingScrollComponent.c-9-	protected string m_sOverflowIndicatorWidgetName;
+scripts/Game\UI\GC_BriefingScrollComponent.c-10-
+--
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-5-    protected static const string SCENARIO_ICON = "vegetation";
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-6-
+scripts/Game\UI\GC_BriefingTitleRowComponent.c:7:    [Attribute("0", UIWidgets.EditBox, "One-based order displayed with a leading zero; zero is blank until assigned")]
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-8-    protected int m_iOrder;
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-9-
+scripts/Game\UI\GC_BriefingTitleRowComponent.c:10:    [Attribute("", UIWidgets.EditBox, "Title displayed by this briefing row")]
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-11-    protected string m_sTitle;
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-12-
+--
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-14-    protected bool m_bSelected;
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-15-
+scripts/Game\UI\GC_BriefingTitleRowComponent.c:16:    [Attribute("scenarios", UIWidgets.EditBox, "Image name from the briefing icon set")]
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-17-    protected string m_sIconName;
+scripts/Game\UI\GC_BriefingTitleRowComponent.c-18-
+--
+scripts/Game\Stats\GC_MissionStatsComponent.c-17-	protected int m_iProjectileCursor;
+scripts/Game\Stats\GC_MissionStatsComponent.c-18-	protected GC_LobbyManager m_Manager;
+scripts/Game\Stats\GC_MissionStatsComponent.c:19:	protected float m_fLastSample;
+scripts/Game\Stats\GC_MissionStatsComponent.c:20:	protected float m_fStarted;
+scripts/Game\Stats\GC_MissionStatsComponent.c:21:	protected float m_fLastFlush;
+scripts/Game\Stats\GC_MissionStatsComponent.c-22-	protected int m_iDeathSequence;
+scripts/Game\Stats\GC_MissionStatsComponent.c-23-	protected bool m_bCollecting;
+--
+scripts/Game\UI\GC_BriefingViewComponent.c-75-	protected ref GC_BriefingRenderer m_Renderer = new GC_BriefingRenderer();
+scripts/Game\UI\GC_BriefingViewComponent.c-76-	protected ref GC_BriefingInteractiveRenderer m_InteractiveRenderer = new GC_BriefingInteractiveRenderer();
+scripts/Game\UI\GC_BriefingViewComponent.c:77:    protected float m_fExpandedWidth;
+scripts/Game\UI\GC_BriefingViewComponent.c:78:    protected float m_fMaxViewHeight;
+scripts/Game\UI\GC_BriefingViewComponent.c-79-	protected int m_iPlayerReadyAttempts;
+scripts/Game\UI\GC_BriefingViewComponent.c-80-    protected ref GC_BriefingMapFocusController m_MapFocusController = new GC_BriefingMapFocusController();
+--
+scripts/Game\Stats\GC_MissionStatsData.c-6-	int m_iSlotId;
+scripts/Game\Stats\GC_MissionStatsData.c-7-	int m_iSelections;
+scripts/Game\Stats\GC_MissionStatsData.c:8:	float m_fSeconds;
+scripts/Game\Stats\GC_MissionStatsData.c-9-
+scripts/Game\Stats\GC_MissionStatsData.c-10-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Stats\GC_MissionStatsData.c-21-class GC_StatsCounters
+scripts/Game\Stats\GC_MissionStatsData.c-22-{
+scripts/Game\Stats\GC_MissionStatsData.c:23:	float m_fPlaySeconds;
+scripts/Game\Stats\GC_MissionStatsData.c:24:	float m_fWalkMetres;
+scripts/Game\Stats\GC_MissionStatsData.c:25:	float m_fDriveMetres;
+scripts/Game\Stats\GC_MissionStatsData.c:26:	float m_fPilotMetres;
+scripts/Game\Stats\GC_MissionStatsData.c:27:	float m_fRadioSecondsReported;
+scripts/Game\Stats\GC_MissionStatsData.c-28-	int m_iShots;
+scripts/Game\Stats\GC_MissionStatsData.c-29-	int m_iGrenades;
+--
+scripts/Game\Stats\GC_MissionStatsData.c-147-	string m_sRole;
+scripts/Game\Stats\GC_MissionStatsData.c-148-	int m_iSlotId = -1;
+scripts/Game\Stats\GC_MissionStatsData.c:149:	float m_fFrom;
+scripts/Game\Stats\GC_MissionStatsData.c:150:	float m_fUntil;
+scripts/Game\Stats\GC_MissionStatsData.c-151-	ref array<ref GC_StatsAmmo> m_aAmmo = {};
+scripts/Game\Stats\GC_MissionStatsData.c-152-	//! Starting cumulative counters are bookkeeping, not serialized.
+--
+scripts/Game\Stats\GC_MissionStatsData.c-239-	int m_iDamageEventSequence;
+scripts/Game\Stats\GC_MissionStatsData.c-240-	int m_iSequence;
+scripts/Game\Stats\GC_MissionStatsData.c:241:	float m_fMissionSeconds;
+scripts/Game\Stats\GC_MissionStatsData.c-242-	string m_sVictim;
+scripts/Game\Stats\GC_MissionStatsData.c-243-	string m_sKiller;
+--
+scripts/Game\Stats\GC_MissionStatsData.c-246-	int m_iRelation;
+scripts/Game\Stats\GC_MissionStatsData.c-247-	string m_sWeapon;
+scripts/Game\Stats\GC_MissionStatsData.c:248:	float m_fDistance = -1;
+scripts/Game\Stats\GC_MissionStatsData.c-249-
+scripts/Game\Stats\GC_MissionStatsData.c-250-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Stats\GC_MissionStatsData.c-273-class GC_StatsPopulation
+scripts/Game\Stats\GC_MissionStatsData.c-274-{
+scripts/Game\Stats\GC_MissionStatsData.c:275:	float m_fFrom;
+scripts/Game\Stats\GC_MissionStatsData.c-276-	int m_iPlayers;
+scripts/Game\Stats\GC_MissionStatsData.c-277-
+--
+scripts/Game\Stats\GC_MissionStatsData.c-293-	bool m_bFinal;
+scripts/Game\Stats\GC_MissionStatsData.c-294-	bool m_bComplete = true;
+scripts/Game\Stats\GC_MissionStatsData.c:295:	float m_fDuration;
+scripts/Game\Stats\GC_MissionStatsData.c-296-	ref array<ref GC_StatsPlayer> m_aPlayers = {};
+scripts/Game\Stats\GC_MissionStatsData.c-297-	ref array<ref GC_StatsDeath> m_aDeaths = {};
+--
+scripts/Game\Stats\GC_PlayerHistory.c-5-	protected string m_sToken;
+scripts/Game\Stats\GC_PlayerHistory.c-6-	protected string m_sMission;
+scripts/Game\Stats\GC_PlayerHistory.c:7:	protected float m_fRequestedAt;
+scripts/Game\Stats\GC_PlayerHistory.c:8:	protected float m_fReceivedAt = -1000;
+scripts/Game\Stats\GC_PlayerHistory.c-9-	protected bool m_bUnavailableLogged;
+scripts/Game\Stats\GC_PlayerHistory.c-10-	protected ref map<string, float> m_mSeconds = new map<string, float>();
+--
+scripts/Game\Stats\GC_SessionEvent.c-3-{
+scripts/Game\Stats\GC_SessionEvent.c-4-	int m_iSequence;
+scripts/Game\Stats\GC_SessionEvent.c:5:	float m_fSeconds;
+scripts/Game\Stats\GC_SessionEvent.c-6-	string m_sType;
+scripts/Game\Stats\GC_SessionEvent.c-7-	string m_sActor;
+--
+scripts/Game\Stats\GC_SessionEvent.c-23-	string m_sMagazine;
+scripts/Game\Stats\GC_SessionEvent.c-24-	string m_sDetail;
+scripts/Game\Stats\GC_SessionEvent.c:25:	float m_fDamage;
+scripts/Game\Stats\GC_SessionEvent.c-26-	int m_iDamageType = -1;
+scripts/Game\Stats\GC_SessionEvent.c-27-	int m_iRelation;
+scripts/Game\Stats\GC_SessionEvent.c-28-	bool m_bFriendly;
+scripts/Game\Stats\GC_SessionEvent.c:29:	float m_fDistance = -1;
+scripts/Game\Stats\GC_SessionEvent.c-30-	string m_sDeathCause;
+scripts/Game\Stats\GC_SessionEvent.c-31-	string m_sCreditSource;
+--
+scripts/Game\Stats\GC_SessionLogComponent.c-12-	protected string m_sSessionId;
+scripts/Game\Stats\GC_SessionLogComponent.c-13-	protected int m_iStartedAt;
+scripts/Game\Stats\GC_SessionLogComponent.c:14:	protected float m_fStarted;
+scripts/Game\Stats\GC_SessionLogComponent.c-15-	protected int m_iSequence;
+scripts/Game\Stats\GC_SessionLogComponent.c-16-	protected int m_iSpectatorRevision;
+--
+scripts/Game\Stats\GC_StatsAIDamageTracker.c-6-	protected SCR_DamageManagerComponent m_Damage;
+scripts/Game\Stats\GC_StatsAIDamageTracker.c-7-	protected int m_iLastInstigator;
+scripts/Game\Stats\GC_StatsAIDamageTracker.c:8:	protected float m_fLastImpact = -1;
+scripts/Game\Stats\GC_StatsAIDamageTracker.c-9-
+scripts/Game\Stats\GC_StatsAIDamageTracker.c-10-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\UI\Context\GC_ContextMenuComponent.c-69-	protected GC_LobbyManager m_LobbyManager;
+scripts/Game\UI\Context\GC_ContextMenuComponent.c-70-	protected InputManager m_InputManager;
+scripts/Game\UI\Context\GC_ContextMenuComponent.c:71:	protected float m_fMenuHeight;
+scripts/Game\UI\Context\GC_ContextMenuComponent.c-72-
+scripts/Game\UI\Context\GC_ContextMenuComponent.c-73-	override void HandlerAttached(Widget w)
+--
+scripts/Game\UI\GC_HeaderButtonComponent.c-1-class GC_HeaderButtonComponent : SCR_ButtonTextComponent
+scripts/Game\UI\GC_HeaderButtonComponent.c-2-{
+scripts/Game\UI\GC_HeaderButtonComponent.c:3:    [Attribute("0", UIWidgets.EditBox, "State index owned by this header button")]
+scripts/Game\UI\GC_HeaderButtonComponent.c-4-    protected int m_iHeaderState;
+scripts/Game\UI\GC_HeaderButtonComponent.c-5-
+--
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c-7-    protected ItemPreviewWidget m_wCharacter;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c-8-	protected Widget m_wInteractionArea;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:9:    protected float m_fZoomInput;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c-10-    protected vector m_vRotationInput = vector.Zero;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:11:    protected float m_fLastPanX;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:12:    protected float m_fLastPanY;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:13:    protected float m_fLastZoom;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:14:    protected float m_fLastMouseX;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:15:    protected float m_fLastMouseY;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:16:    protected float m_fMouseDeltaX;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:17:    protected float m_fMouseDeltaY;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c:18:    protected float m_fWheelInput;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c-19-    protected bool m_bHasMouseSample;
+scripts/Game\UI\GC_LobbyCharacterPreviewHelper.c-20-
+--
+scripts/Game\Stats\GC_StatsCharacterTracker.c-16-	protected int m_iDamageInstigator;
+scripts/Game\Stats\GC_StatsCharacterTracker.c-17-	protected string m_sDamageWeapon;
+scripts/Game\Stats\GC_StatsCharacterTracker.c:18:	protected float m_fDamageImpactTime = -1;
+scripts/Game\Stats\GC_StatsCharacterTracker.c-19-	protected EntityID m_DamageCharacterId;
+scripts/Game\Stats\GC_StatsCharacterTracker.c-20-	protected EntityID m_RespawnVictim;
+--
+scripts/Game\Stats\GC_TelemetryActor.c-14-	protected int m_iCompartment = -2;
+scripts/Game\Stats\GC_TelemetryActor.c-15-	protected int m_iAppearanceRevision;
+scripts/Game\Stats\GC_TelemetryActor.c:16:	protected float m_fLastSample = -1000;
+scripts/Game\Stats\GC_TelemetryActor.c:17:	protected float m_fLastAppearance = -5000;
+scripts/Game\Stats\GC_TelemetryActor.c-18-	protected bool m_bEnded;
+scripts/Game\Stats\GC_TelemetryActor.c-19-	protected ref GC_SpectatorSample m_LastState;
+--
+scripts/Game\Stats\GC_TelemetryActor.c-25-	protected int m_iWeapon = -2;
+scripts/Game\Stats\GC_TelemetryActor.c-26-	protected int m_iSights = -2;
+scripts/Game\Stats\GC_TelemetryActor.c:27:	protected float m_fLastWritten = -5000;
+scripts/Game\Stats\GC_TelemetryActor.c-28-	protected vector m_vLastPosition;
+scripts/Game\Stats\GC_TelemetryActor.c-29-	protected int m_iVoiceMask;
+scripts/Game\Stats\GC_TelemetryActor.c-30-	protected int m_iVoicePlayer;
+scripts/Game\Stats\GC_TelemetryActor.c:31:	protected float m_fVoiceUntil;
+scripts/Game\Stats\GC_TelemetryActor.c-32-
+scripts/Game\Stats\GC_TelemetryActor.c-33-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c-6-class GC_StatsRadioReporterComponent : ScriptComponent
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c-7-{
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:8:	protected float m_fSampleElapsed;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:9:	protected float m_fReportElapsed;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:10:	protected float m_fRadioSeconds;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:11:	protected float m_fServerReported;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:12:	protected float m_fServerReceivedAt;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c-13-	protected bool m_bSentFinal;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c-14-	protected SCR_VoNComponent m_Capture;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c-15-	protected IEntity m_CaptureBody;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:16:	protected float m_fLocalUntil;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:17:	protected float m_fRadioUntil;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:18:	protected float m_fVoiceReportAt;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c:19:	protected float m_fVoiceReceivedAt = -1000;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c-20-	protected int m_iVoiceMask;
+scripts/Game\Stats\GC_StatsRadioReporterComponent.c-21-
+--
+scripts/Game\Stats\GC_TelemetryMap.c-5-	int m_iLineColor;
+scripts/Game\Stats\GC_TelemetryMap.c-6-	int m_iFillColor;
+scripts/Game\Stats\GC_TelemetryMap.c:7:	float m_fWidth;
+scripts/Game\Stats\GC_TelemetryMap.c-8-	bool m_bInverted;
+scripts/Game\Stats\GC_TelemetryMap.c-9-	bool m_bClosed = true;
+--
+scripts/Game\Stats\GC_TelemetryMap.c-29-	string m_sQuad;
+scripts/Game\Stats\GC_TelemetryMap.c-30-	int m_iColor = Color.WHITE;
+scripts/Game\Stats\GC_TelemetryMap.c:31:	float m_fRotation;
+scripts/Game\Stats\GC_TelemetryMap.c:32:	float m_fSize = 32;
+scripts/Game\Stats\GC_TelemetryMap.c:33:	float m_fMinSize;
+scripts/Game\Stats\GC_TelemetryMap.c-34-	bool m_bWorldScale;
+scripts/Game\Stats\GC_TelemetryMap.c-35-	int m_iNativeType = -1;
+--
+scripts/Game\Stats\GC_TelemetryMap.c-99-	protected ref GC_MapPlanDrawings m_Drawings = new GC_MapPlanDrawings();
+scripts/Game\Stats\GC_TelemetryMap.c-100-	protected int m_iFaction = -1;
+scripts/Game\Stats\GC_TelemetryMap.c:101:	protected float m_fNextCycle;
+scripts/Game\Stats\GC_TelemetryMap.c-102-
+scripts/Game\Stats\GC_TelemetryMap.c-103-	//------------------------------------------------------------------------------------------------
+--
+scripts/Game\Stats\GC_TelemetryRecorder.c-16-	protected ref GC_TelemetryBinaryBatch m_Binary = new GC_TelemetryBinaryBatch();
+scripts/Game\Stats\GC_TelemetryRecorder.c-17-	protected int m_iDropped;
+scripts/Game\Stats\GC_TelemetryRecorder.c:18:	protected float m_fBytes;
+scripts/Game\Stats\GC_TelemetryRecorder.c:19:	protected float m_fByteLimit;
+scripts/Game\Stats\GC_TelemetryRecorder.c-20-	protected int m_iActorSequence;
+scripts/Game\Stats\GC_TelemetryRecorder.c-21-	protected int m_iRetiredCursor;
+--
+scripts/Game\Stats\GC_TelemetryRecorder.c-27-	protected int m_iWriteMs;
+scripts/Game\Stats\GC_TelemetryRecorder.c-28-	protected int m_iMaxWriteMs;
+scripts/Game\Stats\GC_TelemetryRecorder.c:29:	protected float m_fFrom;
+scripts/Game\Stats\GC_TelemetryRecorder.c:30:	protected float m_fLastDiscovery = -1000;
+scripts/Game\Stats\GC_TelemetryRecorder.c:31:	protected float m_fLastFlush;
+scripts/Game\Stats\GC_TelemetryRecorder.c-32-	protected bool m_bRunning;
+scripts/Game\Stats\GC_TelemetryRecorder.c-33-	protected bool m_bSealed;
+--
+scripts/Game\Stats\GC_TelemetryRecorder.c-37-	protected ref array<AIAgent> m_aAgents = {};
+scripts/Game\Stats\GC_TelemetryRecorder.c-38-	protected int m_iAgentCursor;
+scripts/Game\Stats\GC_TelemetryRecorder.c:39:	protected float m_fLastAgentDiscovery = -1000;
+scripts/Game\Stats\GC_TelemetryRecorder.c-40-	protected ref array<ref GC_TelemetryActor> m_aActors = {};
+scripts/Game\Stats\GC_TelemetryRecorder.c-41-	protected ref map<EntityID, GC_TelemetryActor> m_mActors = new map<EntityID, GC_TelemetryActor>();
+--
+scripts/Game\UI\GC_LobbyInventoryCellPreview.c-3-	protected ItemPreviewWidget m_wItemPreview;
+scripts/Game\UI\GC_LobbyInventoryCellPreview.c-4-	protected ImageWidget m_wFallbackIcon;
+scripts/Game\UI\GC_LobbyInventoryCellPreview.c:5:	protected float m_fCameraZoomIncrement;
+scripts/Game\UI\GC_LobbyInventoryCellPreview.c-6-	protected ref array<IEntity> m_aZoomedItems = {};
+scripts/Game\UI\GC_LobbyInventoryCellPreview.c-7-
+--
+scripts/Game\UI\GC_SlideOutComponent.c-17-	protected GC_ESlideOutDirection m_eDirection;
+scripts/Game\UI\GC_SlideOutComponent.c-18-
+scripts/Game\UI\GC_SlideOutComponent.c:19:	[Attribute("56", UIWidgets.EditBox, "Visible handle size along the slide axis")]
+scripts/Game\UI\GC_SlideOutComponent.c:20:	protected float m_fHandleSize;
+scripts/Game\UI\GC_SlideOutComponent.c-21-
+scripts/Game\UI\GC_SlideOutComponent.c:22:	[Attribute("112", UIWidgets.EditBox, "Handle length perpendicular to the slide axis")]
+scripts/Game\UI\GC_SlideOutComponent.c:23:	protected float m_fHandleLength;
+scripts/Game\UI\GC_SlideOutComponent.c-24-
+scripts/Game\UI\GC_SlideOutComponent.c:25:	[Attribute("180", UIWidgets.EditBox, "Expand and collapse duration in milliseconds")]
+scripts/Game\UI\GC_SlideOutComponent.c-26-	protected int m_iAnimationDurationMs;
+scripts/Game\UI\GC_SlideOutComponent.c-27-
+scripts/Game\UI\GC_SlideOutComponent.c:28:	[Attribute("5", UIWidgets.EditBox, "Distance in handle widths over which the handle fades in")]
+scripts/Game\UI\GC_SlideOutComponent.c:29:	protected float m_fHandleRevealDistanceWidths;
+scripts/Game\UI\GC_SlideOutComponent.c-30-
+scripts/Game\UI\GC_SlideOutComponent.c:31:	[Attribute("2", UIWidgets.EditBox, "Distance in handle widths at which the handle is fully visible")]
+scripts/Game\UI\GC_SlideOutComponent.c:32:	protected float m_fHandleFullRevealDistanceWidths;
+scripts/Game\UI\GC_SlideOutComponent.c-33-
+scripts/Game\UI\GC_SlideOutComponent.c:34:	[Attribute("220", UIWidgets.EditBox, "Handle fade duration in milliseconds")]
+scripts/Game\UI\GC_SlideOutComponent.c-35-	protected int m_iHandleFadeDurationMs;
+scripts/Game\UI\GC_SlideOutComponent.c-36-
+scripts/Game\UI\GC_SlideOutComponent.c:37:	protected float m_fExpandedX;
+scripts/Game\UI\GC_SlideOutComponent.c:38:	protected float m_fExpandedY;
+scripts/Game\UI\GC_SlideOutComponent.c:39:	protected float m_fTravelDistance;
+scripts/Game\UI\GC_SlideOutComponent.c:40:	protected float m_fProgress;
+scripts/Game\UI\GC_SlideOutComponent.c:41:	protected float m_fTargetProgress;
+scripts/Game\UI\GC_SlideOutComponent.c:42:	protected float m_fDisplayedHandleOpacity;
+scripts/Game\UI\GC_SlideOutComponent.c-43-	protected bool m_bHovered;
+scripts/Game\UI\GC_SlideOutComponent.c-44-	protected bool m_bPinned;
+--
+scripts/Game\UI\GC_SlideOutComponent.c-455-	protected TextWidget m_wArrow;
+scripts/Game\UI\GC_SlideOutComponent.c-456-	protected bool m_bHovered;
+scripts/Game\UI\GC_SlideOutComponent.c:457:	protected float m_fProximityOpacity;
+scripts/Game\UI\GC_SlideOutComponent.c-458-
+scripts/Game\UI\GC_SlideOutComponent.c-459-	override void HandlerAttached(Widget w)
+--
+scripts/Game\UI\GC_SpectatorMapOverlay.c-19-	protected int m_iScreenX;
+scripts/Game\UI\GC_SpectatorMapOverlay.c-20-	protected int m_iScreenY;
+scripts/Game\UI\GC_SpectatorMapOverlay.c:21:	protected float m_fHoverRadius;
+scripts/Game\UI\GC_SpectatorMapOverlay.c:22:	protected float m_fAppliedSize = -1.0;
+scripts/Game\UI\GC_SpectatorMapOverlay.c-23-	protected bool m_bVisible;
+scripts/Game\UI\GC_SpectatorMapOverlay.c-24-	protected bool m_bHasWorldState;
+--
+scripts/Game\UI\GC_SpectatorMapOverlay.c-276-	protected IEntity m_HoveredEntity;
+scripts/Game\UI\GC_SpectatorMapOverlay.c-277-	protected bool m_bTooltipVisible;
+scripts/Game\UI\GC_SpectatorMapOverlay.c:278:	protected float m_fWorldStateSampleAccumulator;
+scripts/Game\UI\GC_SpectatorMapOverlay.c-279-	protected ref map<SCR_EditableEntityComponent, ref GC_SpectatorMapCharacterSymbol> m_mSymbols = new map<SCR_EditableEntityComponent, ref GC_SpectatorMapCharacterSymbol>();
+scripts/Game\UI\GC_SpectatorMapOverlay.c-280-	protected ref array<ref GC_SpectatorMapCharacterSymbol> m_aVisibleSymbols = {};
+--
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-23-	protected bool m_bHasLabel;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-24-	protected bool m_bHovered;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:25:	protected float m_fProximityNameOpacity;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-26-	protected bool m_bStateInitialized;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-27-	protected bool m_bDead;
+--
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-30-	protected int m_iFactionColor;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-31-	protected int m_iOutlineColor;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:32:	protected float m_fLastPresentationDistance = -1.0;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:33:	protected float m_fAppliedIconSize = -1.0;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:34:	protected float m_fAppliedLabelOpacity = -1.0;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-35-	protected bool m_bAppliedLabelVisible;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-36-	protected bool m_bLabelVisibilityInitialized;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:37:	protected float m_fCachedLabelWidth;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-38-	protected bool m_bLabelLayoutDirty = true;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-39-	protected Widget m_wHealthBar;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-40-	protected Widget m_wHealthFill;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-41-	protected int m_iHealthValue = -2;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:42:	protected float m_fNextHealthSample;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-43-	protected bool m_bHealthVisible;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-44-	protected bool m_bFocused;
+--
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-430-	protected VerticalLayoutWidget m_wMemberList;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-431-	protected SCR_AIGroup m_Group;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:432:	protected float m_fPopupHeight;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:433:	protected float m_fLastPresentationDistance = -1.0;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:434:	protected float m_fAppliedOpacity = -1.0;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-435-	protected bool m_bAppliedVisibility;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-436-	protected bool m_bPresentationInitialized;
+--
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-718-	protected GC_SpectatorGroupEditableEntityUIComponent m_GroupUI;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-719-	protected EEditableEntityType m_eType;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:720:	protected float m_fMaxDistance;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:721:	protected float m_fMaxDistanceSq;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:722:	protected float m_fVisibilityDistance;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c:723:	protected float m_fAppliedZDistance = -1.0;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-724-	protected bool m_bProjectionVisibilityInitialized;
+scripts/Game\UI\GC_SpectatorMarkerOverlay.c-725-	protected bool m_bProjectionVisible;
+--
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-7-	protected vector m_vStartPosition;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-8-	protected vector m_vEndPosition;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c:9:	protected float m_fInitialSpeed;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c:10:	protected float m_fCurrentSpeed;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c:11:	protected float m_fTrailDuration;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c:12:	protected float m_fFinishedElapsedTime;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-13-	protected bool m_bHasSegment;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-14-	protected bool m_bFinished;
+--
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-123-	protected WorkspaceWidget m_Workspace;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-124-	protected BaseWorld m_World;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c:125:	protected float m_fTrailDuration;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-126-	protected bool m_bEnabled;
+scripts/Game\UI\GC_SpectatorProjectileTracer.c-127-	protected ref map<IEntity, EventHandlerManagerComponent> m_mGrenadeEvents = new map<IEntity, EventHandlerManagerComponent>();
