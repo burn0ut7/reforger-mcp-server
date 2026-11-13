@@ -10,8 +10,9 @@ Use the [Reforger skill](skills/reforger/SKILL.md) for Reforger work, including 
 - This repository owns only the generic Reforger MCP server and its provider-independent tooling. Lobby2 features, GC Tools, GC-specific Workbench extensions, installers, and external dependencies belong to Lobby2, not this server. Website features belong to the website repository.
 - GC Tools and everything installed through it are Lobby2 products. They must not bundle, install, launch, reference, or compile source from Reforger MCP. Do not use the MCP executable as a GC installation/bootstrap helper or make MCP installation a prerequisite for Lobby2.
 - Reforger MCP must not depend on Lobby2 or the website. Using the generic MCP tools to develop or verify an external project does not make that project's implementation part of MCP.
+- General Workbench interaction/control, focus and assertion suppression, and automatic script authorization are MCP-only capabilities. Do not copy or package them into Lobby2's dropdown dependency or GC Tools installer.
 - Do not link source files across these repositories, publish one project's executable into another project's package, or treat similar branding/UI as shared application ownership. Exchange only explicitly defined integration data where a feature requires it.
-- Existing cross-project code and packages are migration debt, not precedent or permission to extend coupling. Preserve unfinished work when relocating it; do not claim separation is complete until independent builds and package contents are verified. See [current boundary violations](docs/project-boundaries.md).
+- Existing cross-project code and packages are migration debt, not precedent or permission to extend coupling. Preserve unfinished work when relocating it; do not claim separation is complete until independent builds and package contents are verified. See [boundary ownership and validation](docs/project-boundaries.md).
 
 ## Design
 

@@ -1,5 +1,11 @@
 # Dynamic Workbench choices
 
+Historical research, superseded for Lobby2 packaging on 2026-11-13. Lobby2 now
+owns its dropdown DLL, providers, loader and installer under `external/source`
+in the Lobby2 repository. The old shipping constraint and experimental commands
+below describe earlier investigations, not current installation instructions.
+Reforger MCP retains only generic tooling; it does not supply the GC dependency.
+
 The experimental editor extension fills native string dropdowns from the loaded
 world. Lobby2 uses it for **Flag Is Set**, required interaction flags, and scalar
 mission faction keys. Flag names remain strings in saved missions. Creating a flag

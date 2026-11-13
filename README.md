@@ -154,11 +154,10 @@ The Ghidra version and analysis profile (CPU count and analysis deadline) identi
 
 ## Development and validation
 
-The separate [Workbench integration](docs/workbench-authoring-extension.md)
-packages the native reference-picker DLL and optional Lobby2 Git helpers for
-Windows. It is installed outside the Workshop addon. Mission authoring references,
-server ingestion sources and optional addon integrations live in
-[Lobby2 companion components](companion/lobby2/README.md).
+Lobby2, its GC Tools and external dependencies, and the GC website are separate
+projects. They are not part of this server's source, build, or distribution.
+Generic Workbench automation, focus/assertion suppression, script authorization,
+and inspection remain MCP-only capabilities. See [project boundaries](docs/project-boundaries.md).
 
 The Rust Workbench reconstruction effort was discontinued on 2026-10-20. This project retains native-code inspection through the C# MCP server and its Ghidra adapter. Editor reconstruction, automatic translation to Rust, and mod compilation/packing orchestration are outside the current scope.
 

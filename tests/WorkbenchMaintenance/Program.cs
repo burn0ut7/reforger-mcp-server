@@ -7,7 +7,6 @@ if (args.Length > 0) {
     return;
 }
 PlayCallbackChecks.Run();
-await AuthoringStartupChecks.Run();
 RuntimeSetupChecks.Run();
 WorldCallbackChecks.Run();
 ExtensionCallbackChecks.Run();
