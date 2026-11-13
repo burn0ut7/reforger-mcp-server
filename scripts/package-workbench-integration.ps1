@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory)][string]$NativePackage,
     [Parameter(Mandatory)][string]$OutputDirectory,
+    [string]$LobbyDirectory,
     [string]$Dotnet = 'dotnet'
 )
 $ErrorActionPreference = 'Stop'
@@ -71,3 +72,15 @@ Compress-Archive -Path (Join-Path $destination '*') -DestinationPath ($destinati
 $hash = (Get-FileHash -LiteralPath ($destination + '.zip') -Algorithm SHA256).Hash
 Set-Content -LiteralPath ($destination + '.zip.sha256') -Value ($hash + '  ' + [IO.Path]::GetFileName($destination) + '.zip') -Encoding ASCII
 Write-Output ($destination + '.zip')
+if ($LobbyDirectory) {
+    $lobby = [IO.Path]::GetFullPath($LobbyDirectory)
+    if (!(Test-Path -LiteralPath (Join-Path $lobby 'addon.gproj'))) { throw 'LobbyDirectory must be the Lobby2 source addon.' }
+    $external = Join-Path $lobby 'external/workbench'
+    if (Test-Path -LiteralPath $external) { throw 'External package already exists; preserve or remove it explicitly before replacing.' }
+    New-Item -ItemType Directory -Path $external -Force | Out-Null
+    Copy-Item -LiteralPath ($destination + '.zip') -Destination (Join-Path $external 'GCWorkbench.zip')
+    Set-Content -LiteralPath (Join-Path $external 'GCWorkbench.zip.sha256') -Value ($hash + '  GCWorkbench.zip') -Encoding ASCII
+    foreach ($file in @('Install.js', 'Install.ps1')) {
+        Copy-Item -LiteralPath (Join-Path $root ('installer/workbench/external/' + $file)) -Destination $external
+    }
+}

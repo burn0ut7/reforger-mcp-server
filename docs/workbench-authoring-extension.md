@@ -24,6 +24,15 @@ open. Choose the existing Workbench executable and restart after installation.
 Git installation is optional and uses its official signed setup wizard.
 See `installer/workbench/README.txt` for user-facing instructions and limits.
 
+To ship the installer with a Lobby2 source checkout, pass
+`-LobbyDirectory <absolute-Lobby2-directory>` to the packaging script. It creates
+`external/workbench` with the complete compressed package, checksum and GUI
+launcher. The GC **Install External Dependencies** command launches that local
+installer without blocking Workbench (setup can reload scripts). Existing external
+packages are refused to prevent accidental replacement. Preserve the prior package
+before deliberately replacing it. Installer and native sources remain authoritative
+in this repository; the Lobby2 archive is a generated distribution artifact.
+
 The supported host is Workbench 1.9.0.37 with the checked Qt binary identities.
 Other versions are refused; matching Qt alone does not establish compatibility.
 End users do not need a .NET runtime, development tools or MCP client.

@@ -79,7 +79,7 @@ the two batch files.
 
 LOBBY2 GIT TOOLS
 The installer reuses Workbench's built-in compass icon for the GC plugin category.
-The category text remains GC. It applies only when the four GC commands match;
+The category text remains GC. It applies only when the five GC commands match;
 unrelated plugin menus retain their icons. The category icon requires the extension.
 The package also installs the Git update, branch and mission-submission helpers
 under GCWorkbench/tools in the active Workbench profile. Lobby2 supplies the
