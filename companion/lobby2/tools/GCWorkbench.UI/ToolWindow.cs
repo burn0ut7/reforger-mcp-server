@@ -98,7 +98,10 @@ public sealed class ToolWindow : Window
                     MessageBox.Show(this, "External dependencies not found.", "GC Tools", MessageBoxButton.OK, MessageBoxImage.Information);
                     if (!lifetime.IsCancellationRequested) await RefreshStatusAsync(false, "External dependencies");
                 }
-                else await Task.WhenAll(RefreshStatusAsync(false, "GitHub"), RefreshStatusAsync(false, "Update mods"));
+                else await Task.WhenAll(
+                    RefreshStatusAsync(false, "GitHub"),
+                    RefreshStatusAsync(false, "Update mods"),
+                    RefreshStatusAsync(false, "External dependencies"));
             };
         }
         Closed += (_, _) => lifetime.Cancel();

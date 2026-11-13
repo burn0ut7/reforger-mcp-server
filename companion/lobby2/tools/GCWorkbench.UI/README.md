@@ -109,7 +109,9 @@ account. Browser authorization itself requires a normal contributor acceptance p
 
 ## Mod update status
 
-Opening GC Tools starts the account and mod checks in the background. Each mod
+Opening GC Tools starts account, mod and dependency checks together in the background
+after the quick startup presence check. Missing dependencies instead open setup and
+check dependency status after the OK notice. Each mod
 appears as its check finishes, and ready mods can be selected while others finish.
 Switching pages reuses this window's results; Refresh explicitly checks again.
 Closing and reopening starts fresh checks. Process creation also runs off the UI
