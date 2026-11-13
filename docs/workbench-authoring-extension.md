@@ -110,8 +110,9 @@ The optional `menu-icons.json` beside the DLL maps a category plus its exact
 command set to the native icon of one of those commands. The Lobby2 companion package
 selects Spawn Mission Template's built-in compass icon for GC. No custom image is shipped. Generic installations need no icon mapping.
 Names and command behavior remain unchanged. The optional `bottomCommand` moves
-one existing action to the end of the matching category; Lobby2 selects Install
-External Dependencies. Other actions keep their relative order. Both presentation
+one existing action to the end of the matching category. Rules apply in file order;
+Lobby2 moves Open Wiki, then Install External Dependencies, to form the final two
+items. Other actions keep their relative order. Both presentation
 changes apply when the parent menu is shown, including after script Reload creates
 fresh actions. Without the extension, Workbench retains alphabetical ordering.
 

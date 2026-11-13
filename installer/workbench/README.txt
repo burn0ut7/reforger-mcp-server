@@ -81,7 +81,8 @@ LOBBY2 GIT TOOLS
 The installer reuses Workbench's built-in compass icon for the GC plugin category.
 The category text remains GC. It applies only when the six GC commands match;
 unrelated plugin menus retain their icons. The category icon requires the extension.
-The extension also keeps Install External Dependencies last in the GC category.
+The extension keeps Open Wiki second-last and Install External Dependencies last
+in the GC category.
 Without the extension loaded, Workbench uses its normal alphabetical order.
 The package also installs the Git update, branch and mission-submission helpers
 under GCWorkbench/tools in the active Workbench profile. Lobby2 supplies the
