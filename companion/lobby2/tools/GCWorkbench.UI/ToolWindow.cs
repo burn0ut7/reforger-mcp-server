@@ -31,6 +31,7 @@ public sealed class ToolWindow : Window
         this.tools = tools;
         this.observeStatus = observeStatus;
         Title = "GC Workbench";
+        Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/GCWorkbench.UI;component/Assets/GC.ico"));
         Width = preview || tools ? 880 : 680;
         Height = 560;
         MinWidth = preview || tools ? 760 : 540;
