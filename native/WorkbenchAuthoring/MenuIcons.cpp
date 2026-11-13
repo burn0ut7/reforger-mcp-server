@@ -31,6 +31,9 @@ QString MenuIcons::load(const QString &directory)
         Entry entry;
         entry.category = record.value("category").toString();
         entry.iconCommand = record.value("iconCommand").toString();
+        entry.bottomCommand = record.value("bottomCommand").toString();
+        if (record.contains("bottomCommand") && (!record.value("bottomCommand").isString() || entry.bottomCommand.isEmpty()))
+            return QStringLiteral("Invalid bottom command");
         if (entry.category.isEmpty() || entry.iconCommand.isEmpty())
             return QStringLiteral("Invalid menu icon entry");
         for (const auto &command : record.value("commands").toArray()) {
@@ -40,6 +43,8 @@ QString MenuIcons::load(const QString &directory)
         }
         if (!entry.commands.contains(entry.iconCommand))
             return QStringLiteral("Menu icon source is not an expected command");
+        if (!entry.bottomCommand.isEmpty() && !entry.commands.contains(entry.bottomCommand))
+            return QStringLiteral("Bottom command is not an expected command");
         loaded.append(entry);
     }
     entries = loaded;
@@ -52,7 +57,7 @@ bool MenuIcons::eventFilter(QObject *target, QEvent *event)
     if (event->type() != QEvent::Show) return false;
     auto *menu = qobject_cast<QMenu *>(target);
     if (!menu) return false;
-    // Workbench's category builder has no icon parameter. Inspect only the menu
+    // Workbench's category builder exposes no category icon or command order. Inspect only the menu
     // being shown, never the widget tree, and leave unrelated menus untouched.
     for (auto *action : menu->actions()) {
         auto *categoryMenu = action->menu();
@@ -61,9 +66,11 @@ bool MenuIcons::eventFilter(QObject *target, QEvent *event)
             if (action->text() != entry.category) continue;
             QStringList commands;
             QAction *iconSource = nullptr;
+            QAction *bottom = nullptr;
             for (auto *command : categoryMenu->actions()) {
                 if (!command->isSeparator()) commands.append(command->text());
                 if (command->text() == entry.iconCommand) iconSource = command;
+                if (!entry.bottomCommand.isEmpty() && command->text() == entry.bottomCommand) bottom = command;
             }
             if (commands.size() != entry.commands.size()) continue;
             bool matches = true;
@@ -71,6 +78,10 @@ bool MenuIcons::eventFilter(QObject *target, QEvent *event)
                 if (!commands.contains(expected)) { matches = false; break; }
             if (matches && iconSource && !iconSource->icon().isNull())
                 action->setIcon(iconSource->icon());
+            if (matches && bottom && categoryMenu->actions().last() != bottom) {
+                categoryMenu->removeAction(bottom);
+                categoryMenu->addAction(bottom);
+            }
         }
     }
     return false;

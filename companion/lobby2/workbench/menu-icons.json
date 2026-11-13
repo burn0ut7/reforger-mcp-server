@@ -4,7 +4,8 @@
     {
       "category": "GC",
       "commands": ["Create Mission Data", "Install External Dependencies", "Open Wiki", "Spawn Mission Template", "Submit Mission", "Update Mods"],
-      "iconCommand": "Spawn Mission Template"
+      "iconCommand": "Spawn Mission Template",
+      "bottomCommand": "Install External Dependencies"
     }
   ]
 }

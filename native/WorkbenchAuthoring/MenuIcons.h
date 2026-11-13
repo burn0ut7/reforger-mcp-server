@@ -4,7 +4,7 @@
 #include <QVector>
 
 namespace rst {
-// Optional category icon mapping. Native command icons remain owned by Workbench.
+// Optional category presentation. Native commands remain owned by Workbench.
 class MenuIcons final : public QObject
 {
 public:
@@ -15,7 +15,7 @@ protected:
     bool eventFilter(QObject *target, QEvent *event) override;
 
 private:
-    struct Entry { QString category; QStringList commands; QString iconCommand; };
+    struct Entry { QString category; QStringList commands; QString iconCommand; QString bottomCommand; };
     QVector<Entry> entries;
 };
 }

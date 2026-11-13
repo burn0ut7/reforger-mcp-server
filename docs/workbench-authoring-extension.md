@@ -109,13 +109,15 @@ its child. These are distinct from the live startup observations above.
 The optional `menu-icons.json` beside the DLL maps a category plus its exact
 command set to the native icon of one of those commands. The Lobby2 companion package
 selects Spawn Mission Template's built-in compass icon for GC. No custom image is shipped. Generic installations need no icon mapping.
-Names and behavior remain unchanged; only the matching category action's icon
-is set when its parent menu is shown. Script reloads create fresh menu actions,
-which receive the same icon on their next Show event.
+Names and command behavior remain unchanged. The optional `bottomCommand` moves
+one existing action to the end of the matching category; Lobby2 selects Install
+External Dependencies. Other actions keep their relative order. Both presentation
+changes apply when the parent menu is shown, including after script Reload creates
+fresh actions. Without the extension, Workbench retains alphabetical ordering.
 
 Workbench's category builder (`0x1402ca7d0` in the executable above) only calls
 `QMenu::addMenu(title)`; the script attribute's icon belongs to individual commands
-in `0x1402cb940`. There is no script category-icon parameter. This cosmetic feature
+in `0x1402cb940`. There is no script category-icon or ordering parameter. This cosmetic feature
 therefore uses Qt's menu Show event and inspects that menu's immediate actions,
 not a binary detour or a widget-tree search. A changed command set deliberately
 does not match and must be updated in the companion mapping.

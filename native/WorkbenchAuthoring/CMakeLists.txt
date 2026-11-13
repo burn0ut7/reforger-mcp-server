@@ -24,6 +24,11 @@ install(TARGETS rstauthoring RUNTIME DESTINATION generic LIBRARY DESTINATION gen
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(authoring_menu_test MenuIconsTest.cpp MenuIcons.cpp)
+    target_link_libraries(authoring_menu_test PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+    target_compile_options(authoring_menu_test PRIVATE /W4 /WX /permissive- /Zc:__cplusplus)
+    add_test(NAME menu_presentation COMMAND authoring_menu_test)
+    set_tests_properties(menu_presentation PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
     add_executable(authoring_array_command_test NativeArrayCommandsTest.cpp Compatibility.cpp)
     target_link_libraries(authoring_array_command_test PRIVATE Qt6::Core)
     target_compile_options(authoring_array_command_test PRIVATE /W4 /WX /permissive- /Zc:__cplusplus)
