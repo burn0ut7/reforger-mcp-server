@@ -37,17 +37,7 @@ function Get-OpenMissionPr($auth,$repo,$owner,$branch,$base) {
     $items | Where-Object { $_.head.repo.owner.login -eq $owner -and $_.head.ref -ceq $branch -and $_.base.ref -ceq $base } | Select-Object -First 1
 }
 
-function Get-SubmissionAuth {
-    $previous = $ErrorActionPreference
-    try {
-        $ErrorActionPreference = 'Continue'
-        $credential = "protocol=https`nhost=github.com`n`n" | git.exe credential fill 2>$null
-        if ($LASTEXITCODE -ne 0) { throw 'Sign in to GitHub and try again.' }
-        $password = $credential | Where-Object { $_ -clike 'password=*' } | Select-Object -First 1
-        if (!$password) { throw 'Sign in to GitHub and try again.' }
-        @{Authorization='Bearer '+$password.Substring(9); Accept='application/vnd.github+json'; 'User-Agent'='GC-Workbench'}
-    } finally { $ErrorActionPreference = $previous }
-}
+function Get-SubmissionAuth { Get-GcGitHubAuth }
 
 function Invoke-SubmissionApi($auth, $method, $path, $data, [switch]$AllowMissing) {
     $request = @{Uri="https://api.github.com/$path"; Headers=$auth; Method=$method; ErrorAction='Stop'; TimeoutSec=30}

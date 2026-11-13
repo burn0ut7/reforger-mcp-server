@@ -1,0 +1,29 @@
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text.Json;
+using GCWorkbench.UI;
+var root=Path.Combine(Path.GetTempPath(),"gc-status-"+Guid.NewGuid());
+var control=Path.Combine(root,"control");var install=Path.Combine(root,"installed");var profile=Path.Combine(root,"profile");var package=Path.Combine(root,"package");var ui=Path.Combine(root,"ui");
+foreach(var folder in new[]{control,install,profile,package,ui})Directory.CreateDirectory(folder);
+void Check(bool condition,string reason){if(!condition)throw new Exception(reason);}
+Check(ToolStatus.CheckWorkbench(control,package,ui).Status=="Not installed","Missing installation");
+File.WriteAllText(Path.Combine(control,"installation.json"),JsonSerializer.Serialize(new{destination=install,profileDirectory=profile}));
+Check(ToolStatus.CheckWorkbench(control,package,ui).Status=="Installation incomplete","Missing native DLL");
+var paths=new Dictionary<string,string>{["support/payload/generic/rstauthoring.dll"]=Path.Combine(install,"payload/generic/rstauthoring.dll"),["support/payload/helper/GCWorkbench.UI.dll"]=Path.Combine(ui,"GCWorkbench.UI.dll"),["support/payload/lobby2-tools/GC-GitHub.ps1"]=Path.Combine(profile,"GCWorkbench/tools/GC-GitHub.ps1")};
+foreach(var target in paths.Values){Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.WriteAllText(target,"expected");}
+var zipPath=Path.Combine(package,"GCWorkbench.zip");
+using(var zip=ZipFile.Open(zipPath,ZipArchiveMode.Create))using(var writer=new StreamWriter(zip.CreateEntry("support/files.json").Open()))writer.Write(JsonSerializer.Serialize(paths.Select(p=>new{path=p.Key,sha256=Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(p.Value)))})));
+File.WriteAllText(zipPath+".sha256",Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(zipPath)))+"  GCWorkbench.zip");
+Check(ToolStatus.CheckWorkbench(control,package,ui).Status=="Up to date","Matching package");
+File.WriteAllText(paths.Values.Last(),"old helper");
+Check(ToolStatus.CheckWorkbench(control,package,ui).Status=="Update or repair available","Changed helper");
+File.Delete(paths.Values.Last());
+Check(ToolStatus.CheckWorkbench(control,package,ui).Status.StartsWith("Installation incomplete"),"Missing helper");
+File.WriteAllText(zipPath+".sha256",new string('0',64));
+Check(ToolStatus.CheckWorkbench(control,package,ui).Status=="Dependency package needs repair","Corrupt package");
+Check(ToolStatus.ParseGitVersion("git version 2.54.0.windows.1")!>ToolStatus.ParseGitVersion("v2.54.0.windows.0"),"Windows revision comparison");
+Check(ToolStatus.ParseGitVersion("v2.55.0.windows.1")!>ToolStatus.ParseGitVersion("git version 2.54.9.windows.9"),"New version comparison");
+Check(ToolStatus.ParseGitVersion("unavailable")==null,"Invalid version");
+var missing=await ToolStatus.RunAsync(Path.Combine(root,"absent.exe"),[],1,CancellationToken.None);
+Check(missing.Code==-1,"Missing process not contained");
+Console.WriteLine("PASS: missing/incomplete/current/outdated/corrupt installation, Git version comparison, unavailable helper.");

@@ -3,7 +3,12 @@
 GC Tools > Submit mission prepares an approval request for contributors who have
 read access to GC Missions and a GitHub account, but no write access to the GC
 repository. The first use may require browser sign-in through Git Credential
-Manager. The user supplies a summary and testing/reviewer details; Git mechanics
+Manager. Credentials are stored in Windows Credential Manager; GC Tools never
+asks for a password or token. Its API requests use a credential briefly in memory,
+without persisting it to GC files or status output. The GitHub page verifies the
+account with `/user` and separately checks mission-repository read access. This
+does not guarantee permission to fork or submit; API errors remain authoritative.
+The user supplies a summary and testing/reviewer details; Git mechanics
 are handled by the tool.
 
 ## Submission ownership

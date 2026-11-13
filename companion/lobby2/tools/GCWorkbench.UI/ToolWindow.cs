@@ -12,19 +12,24 @@ public sealed class ToolWindow : Window
 {
     private readonly bool preview;
     private readonly bool tools;
+    private readonly bool observeStatus;
     private readonly Dictionary<string, Dictionary<string, object>> drafts = [];
     private readonly Grid body = new();
     private readonly Dictionary<string, FrameworkElement> inputs = [];
     private readonly Dictionary<string, TextBlock> errors = [];
     private readonly List<(Button Button, DialogSpec Spec)> navigation = [];
+    private readonly CancellationTokenSource lifetime = new();
+    private readonly Dictionary<string, DialogSpec> statusPages = [];
+    private readonly HashSet<string> checking = [];
     private DialogSpec spec;
     public DialogResult Result { get; private set; } = new("cancel", []);
 
-    public ToolWindow(DialogSpec specification, bool preview = false, bool tools = false)
+    public ToolWindow(DialogSpec specification, bool preview = false, bool tools = false, bool observeStatus = true)
     {
         spec = specification;
         this.preview = preview;
         this.tools = tools;
+        this.observeStatus = observeStatus;
         Title = "GC Workbench";
         Width = preview || tools ? 880 : 680;
         Height = 560;
@@ -78,6 +83,8 @@ public sealed class ToolWindow : Window
         root.Children.Add(body);
         Content = shell;
         Render(spec);
+        if (tools && observeStatus) Loaded += async (_, _) => await RefreshStatusAsync(false, "GitHub");
+        Closed += (_, _) => lifetime.Cancel();
         PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) { Close(); e.Handled = true; } };
     }
 
@@ -86,14 +93,19 @@ public sealed class ToolWindow : Window
         var panel = new StackPanel { Margin = new Thickness(12, 24, 12, 16) };
         foreach (var (name, example) in (tools ? ToolPages.All() : Examples.All()))
         {
-            var label = name switch { "dependencies" => "Dependencies", "updates" => "Update mods", _ => "Submit mission" };
+            var label = name switch { "dependencies" => "Dependencies", "updates" => "Update mods", "github" => "GitHub", _ => "Submit mission" };
             var button = new Button
             {
                 Content = label, HorizontalContentAlignment = HorizontalAlignment.Left,
                 Background = Brushes.Transparent, Foreground = Brush("#f0e9d5"), BorderBrush = Brushes.Transparent,
                 Margin = new Thickness(0, 0, 0, 6), Padding = new Thickness(12, 14, 12, 14)
             };
-            button.Click += (_, _) => { SaveDraft(); Render(example); };
+            button.Click += async (_, _) =>
+            {
+                SaveDraft();
+                Render(statusPages.GetValueOrDefault(example.Title, example));
+                if (tools && observeStatus && example.Title is "GitHub" or "External dependencies") await RefreshStatusAsync();
+            };
             navigation.Add((button, example));
             panel.Children.Add(button);
         }
@@ -150,8 +162,10 @@ public sealed class ToolWindow : Window
         var cancel = new Button { Content = spec.SecondaryAction, MinWidth = 92, Margin = new Thickness(0, 0, 10, 0) };
         cancel.Click += (_, _) => Close();
         var confirm = new Button { Content = spec.PrimaryAction, Background = Brush(spec.Accent), BorderBrush = Brush(spec.Accent), Foreground = Brush("#1b2119"), Margin = new Thickness(0) };
-        confirm.Click += (_, _) =>
+        confirm.IsEnabled = !checking.Contains(spec.Title);
+        confirm.Click += async (_, _) =>
         {
+            if (tools && spec.Title == "GitHub") { await RefreshStatusAsync(true); return; }
             var values = ReadValues();
             if (values is null) return;
             if (preview)
@@ -170,6 +184,12 @@ public sealed class ToolWindow : Window
             Result = new DialogResult(tools ? ToolPages.Action(spec.Title) : "confirm", values);
             Close();
         };
+        if (tools && spec.Title is "GitHub" or "External dependencies")
+        {
+            var refresh = new Button { Content = "Refresh", IsEnabled = !checking.Contains(spec.Title), Margin = new Thickness(0, 0, 10, 0) };
+            refresh.Click += async (_, _) => await RefreshStatusAsync();
+            buttons.Children.Add(refresh);
+        }
         if (spec.SecondaryAction.Length > 0) buttons.Children.Add(cancel);
         foreach (var action in spec.Actions)
         {
@@ -182,6 +202,28 @@ public sealed class ToolWindow : Window
         var footerBorder = new Border { Background = Background, Child = footer };
         Grid.SetRow(footerBorder, 2);
         body.Children.Add(footerBorder);
+    }
+
+    private async Task RefreshStatusAsync(bool signIn = false, string? title = null)
+    {
+        title ??= spec.Title;
+        if (!checking.Add(title)) return;
+        if (spec.Title == title) Render(spec with { Items = [new("Status", "", signIn ? "Waiting for GitHub sign-in..." : "Checking...")] });
+        DialogSpec result;
+        try
+        {
+            result = title == "GitHub" ? await ToolStatus.GitHubAsync(signIn, lifetime.Token) : await ToolStatus.DependenciesAsync(lifetime.Token);
+        }
+        catch (Exception)
+        {
+            result = (title == "GitHub" ? ToolPages.GitHub() : ToolPages.Dependencies()) with { Items = [new("Status", "", "Check unavailable \u00b7 try Refresh", "warning")] };
+        }
+        checking.Remove(title);
+        if (lifetime.IsCancellationRequested) return;
+        statusPages[title] = result;
+        if (title == "GitHub")
+            statusPages["Submit mission"] = ToolPages.Submission() with { Items = [.. ToolPages.Submission().Items, result.Items[0]] };
+        if (statusPages.TryGetValue(spec.Title, out var current)) Render(current);
     }
 
     private FrameworkElement StatusCard(StatusItem item)

@@ -7,6 +7,7 @@ param(
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 . (Join-Path $PSScriptRoot 'GC-Review.ps1')
+. (Join-Path $PSScriptRoot 'GC-GitHub.ps1')
 [Console]::OutputEncoding = New-Object Text.UTF8Encoding
 $env:LC_ALL = 'C'
 $env:GIT_TERMINAL_PROMPT = '0'
@@ -14,9 +15,13 @@ $env:GCM_INTERACTIVE = 'Never'
 
 function Git([string]$root, [string[]]$arguments) {
     $ErrorActionPreference = 'Continue'
-    $output = @(& git.exe -C $root @arguments 2>&1)
-    if ($LASTEXITCODE -ne 0) { throw "Git failed ($($arguments[0])) in $root. $($output -join [Environment]::NewLine)" }
-    $output | ForEach-Object { "$_" }
+    $oldStore=$env:GCM_CREDENTIAL_STORE;$oldTrace=$env:GCM_TRACE_SECRETS
+    try {
+        $env:GCM_CREDENTIAL_STORE='wincredman';$env:GCM_TRACE_SECRETS='0'
+        $output = @(& git.exe -c credential.helper= -c credential.helper=manager -c credential.credentialStore=wincredman -C $root @arguments 2>&1)
+        if ($LASTEXITCODE -ne 0) { throw "Git failed ($($arguments[0])) in $root. $($output -join [Environment]::NewLine)" }
+        $output | ForEach-Object { "$_" }
+    } finally {$env:GCM_CREDENTIAL_STORE=$oldStore;$env:GCM_TRACE_SECRETS=$oldTrace}
 }
 
 function Get-Checkout([string]$project, [string]$guid, [ref]$desktopPending) {
@@ -115,32 +120,9 @@ function Show-Message([string]$message, [string]$buttons = 'OK') {
 }
 
 function Connect-GitHub {
-    $setupUrl = 'https://docs.github.com/en/get-started/git-basics/caching-your-github-credentials-in-git'
-    $reason = 'Install Git for Windows with Git Credential Manager to connect an account.'
-    $previous = $env:GCM_INTERACTIVE
-    try {
-        $null = Get-Command git.exe -ErrorAction Stop
-        # Windows PowerShell treats native stderr as error records. GCM can write
-        # browser instructions there on success, so use its exit code for the result.
-        $ErrorActionPreference = 'Continue'
-        $null = & git.exe credential-manager github login --help 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            $reason = 'Sign-in cancelled.'
-            $env:GCM_INTERACTIVE = 'true'
-            $null = & git.exe credential-manager github login --browser 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                $null = Show-Message 'Signed in.'
-                return 0
-            }
-        }
-    } catch {
-        # Show setup guidance without exposing authentication output in Workbench.
-    } finally {
-        $env:GCM_INTERACTIVE = $previous
-    }
-    if ((Show-Message "$reason Open GitHub's setup guide?" 'YesNo') -eq 'Yes') {
-        Start-Process $setupUrl
-    }
+    $status=Connect-GcGitHub
+    if ($status.Connected) {return 0}
+    $null=Show-GcReview @{Title='GitHub';PrimaryAction='Close';SecondaryAction='';Items=@(@{Title='Connection';Status=$status.Status;State='warning'})}
     return 2
 }
 
@@ -175,17 +157,12 @@ function Invoke-ModWorkflow {
         }
         return 2
     }
-    $accounts = @()
-    try { $accounts = @(& git.exe credential-manager github list 2>$null) } catch {}
-    if ($LASTEXITCODE -ne 0 -or !$accounts.Count) {
-        if ($SubmitMission) {
-            $answer = Show-Message 'Sign in to GitHub to submit your mission?' 'YesNo'
-            if ($answer -ne 'Yes') { return 2 }
-        } else {
-            $answer = Show-Message 'Sign in to GitHub? Choose No to continue without signing in.' 'YesNoCancel'
+    if ($SubmitMission) {
+        $status=Get-GcGitHubStatus
+        if (!$status.Connected) {
+            $choice=Show-GcReview @{Title='GitHub';PrimaryAction='Sign in on GitHub';Items=@(@{Title='Connection';Status=$status.Status;State='warning'})}
+            if (!$choice -or (Connect-GitHub) -ne 0) {return 2}
         }
-        if ($answer -eq 'Cancel') { return 2 }
-        if ($answer -eq 'Yes' -and (Connect-GitHub) -ne 0) { return 2 }
     }
     # Workbench only resolves mounts loaded in the current project. Source checkouts
     # installed alongside Lobby2 can still be updated after their GUID is verified.

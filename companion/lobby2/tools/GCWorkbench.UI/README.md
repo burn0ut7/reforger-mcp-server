@@ -76,3 +76,33 @@ PowerShell, package hashing or extraction on the normal opening path. Installati
 registers the app in %LOCALAPPDATA%/GCWorkbench/ui-path.txt (UTF-16). An uninstalled
 source checkout prepares and registers a package-hash cache once. Preview retains
 the cache bootstrap path. Cache versions live under %LOCALAPPDATA%/GCWorkbench/ui.
+
+## Account and dependency status
+
+The GitHub page uses Git Credential Manager's browser OAuth flow. No embedded login,
+password field, token field, or custom token store is provided. The owning helper
+`GC-GitHub.ps1` forces Windows Credential Manager storage, verifies the token against
+GitHub `/user`, and checks mission-repository access separately. Only a safe status
+object crosses into the UI. Submission reuses this same credential implementation.
+Public mod updates do not require sign-in. API calls necessarily use the access
+token briefly in memory; it is never written into GC files or status results.
+
+All hub checks run asynchronously after opening. Refresh rechecks; closing cancels
+owned helper processes. Browser sign-in is started only on an explicit button press.
+There is no forced logout or automatic account switch.
+
+GC Workbench Tools compares installed payload/helper/profile-script hashes against
+`external/workbench/GCWorkbench.zip` from the launching Lobby checkout. The package
+checksum is checked first. This means current relative to that Lobby package, not
+a remote GC release channel. A changed payload is reported as Update or repair
+available; a missing payload is Installation incomplete. This checks installed
+files, not whether the native extension is currently loaded into Workbench.
+
+Git for Windows compares its installed Windows revision with the official latest
+release API and checks that Git Credential Manager is present. Network failures,
+missing source-package context, damaged manifests and unverified credentials are
+shown as unavailable/unknown; they are never reported as current or connected.
+
+Validation: `tests/GitHub.Tests.ps1`, `tests/Status/Status.csproj`, and the existing
+submission suite. The account check was also exercised read-only with the current
+account. Browser authorization itself requires a normal contributor acceptance pass.

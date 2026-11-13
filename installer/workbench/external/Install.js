@@ -4,6 +4,7 @@ var files = new ActiveXObject("Scripting.FileSystemObject");
 var script = files.BuildPath(files.GetParentFolderName(WScript.ScriptFullName), "Install.ps1");
 var executable = files.BuildPath(files.GetSpecialFolder(1), "WindowsPowerShell\\v1.0\\powershell.exe");
 shell.Environment("Process")("GC_WORKBENCH_INSTALL_SCRIPT") = script;
+shell.Environment("Process")("GC_WORKBENCH_PACKAGE") = files.GetParentFolderName(WScript.ScriptFullName);
 var tools = WScript.Arguments.length === 1 && WScript.Arguments(0) === "--tools";
 // Opening the tools is not an install operation. Launch the registered app directly.
 if (tools) {

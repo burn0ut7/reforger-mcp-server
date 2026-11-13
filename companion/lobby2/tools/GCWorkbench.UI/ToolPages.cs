@@ -10,15 +10,21 @@ internal static class ToolPages
 
     internal static DialogSpec Dependencies() => new()
     {
-        Title = "External dependencies", PrimaryAction = "Install dependencies", SecondaryAction = "Close",
-        Section = "Included",
-        Items = [new("GC Workbench Tools", "", "Workbench extension · Shared UI · Mission tools"), new("Git for Windows", "", "Mod updates · Mission submissions")]
+        Title = "External dependencies", PrimaryAction = "Install / update", SecondaryAction = "Close",
+        Items = [new("GC Workbench Tools", "", "Checking..."), new("Git for Windows", "", "Checking...")]
+    };
+
+    internal static DialogSpec GitHub() => new()
+    {
+        Title = "GitHub", PrimaryAction = "Sign in on GitHub", SecondaryAction = "Close",
+        Items = [new("Connection", "", "Checking…")]
     };
 
     internal static IEnumerable<(string Name, DialogSpec Spec)> All()
     {
         yield return ("submission", Submission());
         yield return ("updates", Examples.Updates() with { SecondaryAction = "Close" });
+        yield return ("github", GitHub());
         yield return ("dependencies", Dependencies());
     }
 
