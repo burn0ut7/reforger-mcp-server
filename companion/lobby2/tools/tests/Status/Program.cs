@@ -26,6 +26,13 @@ Check(ToolStatus.ParseGitVersion("v2.55.0.windows.1")!>ToolStatus.ParseGitVersio
 Check(ToolStatus.ParseGitVersion("unavailable")==null,"Invalid version");
 var missing=await ToolStatus.RunAsync(Path.Combine(root,"absent.exe"),[],1,CancellationToken.None);
 Check(missing.Code==-1,"Missing process not contained");
+using(var cancelled=new CancellationTokenSource()) {
+ cancelled.Cancel();
+ var stopped=await ToolStatus.RunAsync("git.exe",["--version"],1,cancelled.Token);
+ Check(stopped.Code==-1&&stopped.Output=="","Queued cancellation escaped status contract");
+}
+var slow=await ToolStatus.RunAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),"WindowsPowerShell/v1.0/powershell.exe"),["-NoProfile","-NonInteractive","-Command","Start-Sleep -Seconds 10"],1,CancellationToken.None);
+Check(slow.Code==-1,"Slow check did not time out safely");
 Console.WriteLine("PASS: missing/incomplete/current/outdated/corrupt installation, Git version comparison, unavailable helper.");
 var currentMod=ToolStatus.ModStatusField(new InputField{Id="lobby",Label="Lobby2",Kind="check",Checked=true},0,"{\"Status\":\"Up to date\",\"UpdateNeeded\":false}");
 Check(!currentMod.Enabled&&!currentMod.Checked,"Current mod eligibility");

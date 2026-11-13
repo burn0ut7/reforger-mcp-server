@@ -26,6 +26,27 @@ static class Checks {
   if(!install.IsEnabled)throw new Exception("Install blocked by background status check");
   install.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
   if(setup.Result.Action!="install")throw new Exception("Install action unavailable after notice");
+  var hub=new ToolWindow(spec,tools:true);
+  const System.Reflection.BindingFlags flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.DeclaredOnly;
+  var pages=(Dictionary<string,DialogSpec>)typeof(ToolWindow).GetField("statusPages",flags)!.GetValue(hub)!;
+  var pending=(HashSet<string>)typeof(ToolWindow).GetField("checking",flags)!.GetValue(hub)!;
+  var render=typeof(ToolWindow).GetMethod("Render",flags)!;
+  pages["Update mods"]=spec;
+  var timer=System.Diagnostics.Stopwatch.StartNew();
+  Find<Button>(hub).Single(b=>Equals(b.Content,"Submit mission")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+  Find<Button>(hub).Single(b=>Equals(b.Content,"Update mods")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+  if(pending.Count!=0||Find<CheckBox>(hub).Count()!=2)throw new Exception("Navigation discarded cached results or restarted checks");
+  Console.WriteLine($"Cached page round trip: {timer.Elapsed.TotalMilliseconds:F0} ms");
+  pending.Add("Update mods");
+  render.Invoke(hub,[spec]);
+  var ready=Find<CheckBox>(hub).Last();ready.IsChecked=true;
+  if(!Find<Button>(hub).Single(b=>Equals(b.Content,"Update selected")).IsEnabled)throw new Exception("Ready mod blocked by another pending check");
+  typeof(ToolWindow).GetMethod("SaveDraft",flags)!.Invoke(hub,null);
+  render.Invoke(hub,[spec]);
+  if(Find<CheckBox>(hub).Last().IsChecked!=true)throw new Exception("Progress discarded user selection");
+  Find<Button>(hub).Single(b=>Equals(b.Content,"Update selected")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+  if(hub.Result.Action!="update"||!(bool)hub.Result.Values["core"]||(bool)hub.Result.Values["lobby"])throw new Exception("Partial results dispatched unchecked or pending mods");
+  Console.WriteLine("PASS: cached navigation, partial-result action, selection retained across progress.");
   Console.WriteLine("PASS: current mods gray/unchecked/disabled, button follows eligible selection, disabled mods excluded from dispatch.");
  }
 }

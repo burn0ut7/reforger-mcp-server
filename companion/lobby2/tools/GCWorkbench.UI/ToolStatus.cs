@@ -40,7 +40,7 @@ internal static class ToolStatus
         return result.Code > 0;
     }
 
-    internal static async Task<DialogSpec> ModsAsync(CancellationToken cancellation)
+    internal static async Task<DialogSpec> ModsAsync(CancellationToken cancellation, IProgress<DialogSpec>? progress = null)
     {
         var script = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "lobby2-tools", "GC-ModStatus.ps1"));
         if (!File.Exists(script)) return ToolPages.Updates("Install the current GC Tools package");
@@ -55,10 +55,18 @@ internal static class ToolStatus
         }
         var powershell = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
         var page = ToolPages.Updates();
+        var completed = page.Fields.ToArray();
+        var gate = new object();
         var fields = await Task.WhenAll(page.Fields.Select(async (field, index) =>
         {
             var result = await RunAsync(powershell, [.. arguments, "-Mod", keys[index]], 20, cancellation);
-            return ModStatusField(field, result.Code, result.Output);
+            var checkedField = ModStatusField(field, result.Code, result.Output);
+            lock (gate)
+            {
+                completed[index] = checkedField;
+                progress?.Report(page with { Fields = completed.ToList() });
+            }
+            return checkedField;
         }));
         return page with { Fields = fields.ToList() };
     }
@@ -184,8 +192,13 @@ internal static class ToolStatus
         { return new("Git for Windows", result.Output.Trim().Replace("git version ", ""), "Installed \u00b7 update check unavailable", "warning"); }
     }
 
-    internal static async Task<(int Code, string Output)> RunAsync(string executable, string[] arguments, int seconds, CancellationToken cancellation)
+    // Process creation itself can block under antivirus scanning. Keep it off the dispatcher too.
+    internal static Task<(int Code, string Output)> RunAsync(string executable, string[] arguments, int seconds, CancellationToken cancellation) =>
+        Task.Run(() => RunProcessAsync(executable, arguments, seconds, cancellation));
+
+    private static async Task<(int Code, string Output)> RunProcessAsync(string executable, string[] arguments, int seconds, CancellationToken cancellation)
     {
+        if (cancellation.IsCancellationRequested) return (-1, "");
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
         limit.CancelAfter(TimeSpan.FromSeconds(seconds));
         var start = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };

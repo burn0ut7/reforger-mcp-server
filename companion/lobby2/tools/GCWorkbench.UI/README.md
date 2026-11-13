@@ -109,8 +109,11 @@ account. Browser authorization itself requires a normal contributor acceptance p
 
 ## Mod update status
 
-Opening Update mods or pressing Refresh checks all four mods independently, with
-bounded background checks. Workbench passes the loaded project paths to the hub;
+Opening GC Tools starts the account and mod checks in the background. Each mod
+appears as its check finishes, and ready mods can be selected while others finish.
+Switching pages reuses this window's results; Refresh explicitly checks again.
+Closing and reopening starts fresh checks. Process creation also runs off the UI
+thread. Workbench passes the loaded project paths to the hub;
 unloaded sibling projects use the same verified discovery map as the updater.
 
 Up to date includes personal branches already containing the shared default-branch

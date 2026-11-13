@@ -98,7 +98,7 @@ public sealed class ToolWindow : Window
                     MessageBox.Show(this, "External dependencies not found.", "GC Tools", MessageBoxButton.OK, MessageBoxImage.Information);
                     if (!lifetime.IsCancellationRequested) await RefreshStatusAsync(false, "External dependencies");
                 }
-                else await RefreshStatusAsync(false, "GitHub");
+                else await Task.WhenAll(RefreshStatusAsync(false, "GitHub"), RefreshStatusAsync(false, "Update mods"));
             };
         }
         Closed += (_, _) => lifetime.Cancel();
@@ -121,7 +121,7 @@ public sealed class ToolWindow : Window
             {
                 SaveDraft();
                 Render(statusPages.GetValueOrDefault(example.Title, example));
-                if (tools && observeStatus && example.Title is "GitHub" or "External dependencies" or "Update mods") await RefreshStatusAsync();
+                if (tools && observeStatus && !statusPages.ContainsKey(example.Title) && example.Title is "GitHub" or "External dependencies" or "Update mods") await RefreshStatusAsync();
             };
             navigation.Add((button, example));
             panel.Children.Add(button);
@@ -131,7 +131,6 @@ public sealed class ToolWindow : Window
 
     private void Render(DialogSpec next)
     {
-        if (tools && next.Title == "Update mods" && checking.Contains(next.Title)) next = ToolPages.Updates();
         next.Validate();
         spec = next;
         Resources["GcAccent"] = Brush(spec.Accent);
@@ -180,7 +179,7 @@ public sealed class ToolWindow : Window
         var cancel = new Button { Content = spec.SecondaryAction, MinWidth = 92, Margin = new Thickness(0, 0, 10, 0) };
         cancel.Click += (_, _) => Close();
         var confirm = new Button { Content = spec.PrimaryAction, Background = Brush(spec.Accent), BorderBrush = Brush(spec.Accent), Foreground = Brush("#1b2119"), Margin = new Thickness(0) };
-        void UpdateConfirm() => confirm.IsEnabled = (!checking.Contains(spec.Title) || spec.Title == "External dependencies") &&
+        void UpdateConfirm() => confirm.IsEnabled = (!checking.Contains(spec.Title) || spec.Title is "External dependencies" or "Update mods") &&
             (!tools || spec.Title != "Update mods" || inputs.Values.OfType<CheckBox>().Any(check => check.IsEnabled && check.IsChecked == true));
         foreach (var check in inputs.Values.OfType<CheckBox>())
         {
@@ -190,7 +189,7 @@ public sealed class ToolWindow : Window
         UpdateConfirm();
         confirm.Click += async (_, _) =>
         {
-            if (checking.Contains(spec.Title) && spec.Title != "External dependencies") return;
+            if (checking.Contains(spec.Title) && spec.Title is not ("External dependencies" or "Update mods")) return;
             if (tools && spec.Title == "GitHub") { await RefreshStatusAsync(true); return; }
             var values = ReadValues();
             if (values is null) return;
@@ -236,6 +235,7 @@ public sealed class ToolWindow : Window
         if (checking.Contains(title)) return;
         if (spec.Title == title) SaveDraft();
         checking.Add(title);
+        if (title == "Update mods") statusPages[title] = ToolPages.Updates();
         if (spec.Title == title) Render(title == "Update mods" ? ToolPages.Updates() : spec with { Items = [new("Status", "", signIn ? "Waiting for GitHub sign-in..." : "Checking...")] });
         DialogSpec result;
         try
@@ -243,7 +243,12 @@ public sealed class ToolWindow : Window
             result = title switch
             {
                 "GitHub" => await ToolStatus.GitHubAsync(signIn, lifetime.Token),
-                "Update mods" => await ToolStatus.ModsAsync(lifetime.Token),
+                "Update mods" => await ToolStatus.ModsAsync(lifetime.Token, new Progress<DialogSpec>(page =>
+                {
+                    if (lifetime.IsCancellationRequested || !checking.Contains("Update mods")) return;
+                    statusPages["Update mods"] = page;
+                    if (spec.Title == "Update mods") { SaveDraft(); Render(page); }
+                })),
                 _ => await ToolStatus.DependenciesAsync(lifetime.Token)
             };
         }
@@ -251,6 +256,7 @@ public sealed class ToolWindow : Window
         {
             result = (title == "GitHub" ? ToolPages.GitHub() : title == "Update mods" ? ToolPages.Updates("Unable to check - refresh") : ToolPages.Dependencies()) with { Items = [new("Status", "", "Check unavailable \u00b7 try Refresh", "warning")] };
         }
+        if (spec.Title == title) SaveDraft();
         checking.Remove(title);
         if (lifetime.IsCancellationRequested) return;
         statusPages[title] = result;
@@ -309,8 +315,10 @@ public sealed class ToolWindow : Window
 
     private void SaveDraft()
     {
-        if (checking.Contains(spec.Title)) return;
-        drafts[spec.Title] = inputs.Where(pair => pair.Value.IsEnabled).ToDictionary(pair => pair.Key, pair => pair.Value is CheckBox check ? (object)(check.IsChecked == true) : ((TextBox)pair.Value).Text);
+        if (checking.Contains(spec.Title) && spec.Title != "Update mods") return;
+        if (!drafts.TryGetValue(spec.Title, out var draft)) drafts[spec.Title] = draft = [];
+        foreach (var pair in inputs.Where(pair => pair.Value.IsEnabled))
+            draft[pair.Key] = pair.Value is CheckBox check ? (object)(check.IsChecked == true) : ((TextBox)pair.Value).Text;
     }
 
     private Dictionary<string, object>? ReadValues()
