@@ -5,6 +5,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
+. (Join-Path $PSScriptRoot 'GC-Review.ps1')
 [Console]::OutputEncoding = New-Object Text.UTF8Encoding
 $env:LC_ALL = 'C'
 $env:GIT_TERMINAL_PROMPT = '0'
@@ -27,84 +29,19 @@ function Get-Checkout([string]$project, [string]$guid, [ref]$desktopPending) {
         $path = Git $root @('rev-parse','--path-format=absolute','--git-path',$marker)
         if (Test-Path -LiteralPath $path) {
             if ($desktopPending) { $desktopPending.Value = $true }
-            if ($marker -eq 'MERGE_HEAD') { throw 'Finish the current merge first.' }
-            throw 'Finish the other Git task first.'
+            throw 'This mod has an unfinished update. Ask a mission reviewer to help finish it; your files have been preserved.'
         }
     }
     $root
 }
 
 function Confirm-Replacement($name, [string[]]$filesToReplace) {
-    $form = New-Object Windows.Forms.Form
-    try {
-        $form.Text = "Update $name?"
-        $form.StartPosition = 'CenterScreen'
-        $form.ClientSize = New-Object Drawing.Size(700,460)
-        $form.MinimumSize = New-Object Drawing.Size(540,380)
-        $description = New-Object Windows.Forms.Label
-        $description.Dock = 'Top'
-        $description.Height = 52
-        $description.Padding = New-Object Windows.Forms.Padding(10)
-        $description.Text = "The update would replace your edits to these files. Back them up and update?"
-        $files = New-Object Windows.Forms.TextBox
-        $files.Multiline = $true
-        $files.ReadOnly = $true
-        $files.WordWrap = $false
-        $files.ScrollBars = 'Both'
-        $files.Dock = 'Fill'
-        $files.Lines = $filesToReplace
-        $buttons = New-Object Windows.Forms.FlowLayoutPanel
-        $buttons.Dock = 'Bottom'
-        $buttons.FlowDirection = 'RightToLeft'
-        $buttons.Height = 42
-        $ignore = New-Object Windows.Forms.Button
-        $ignore.Text = 'Skip mod'
-        $ignore.DialogResult = 'Cancel'
-        $discard = New-Object Windows.Forms.Button
-        $discard.Text = 'Back up and update'
-        $discard.AutoSize = $true
-        $discard.DialogResult = 'Yes'
-        $buttons.Controls.AddRange(@($ignore,$discard))
-        $form.Controls.AddRange(@($files,$description,$buttons))
-        $form.AcceptButton = $ignore
-        $form.CancelButton = $ignore
-        $form.ActiveControl = $ignore
-        return $form.ShowDialog() -eq 'Yes'
-    } finally { $form.Dispose() }
-}
-
-function Open-BranchHelp($root, $branch, $before, $incoming, [ref]$filesChanged, [ref]$desktopPending) {
-    $desktop = Get-Command github.bat -ErrorAction SilentlyContinue
-    if (!$desktop) {
-        if ((Show-Message "Your edits need review. Get GitHub Desktop?" 'YesNo') -eq 'Yes') {
-            Start-Process 'https://desktop.github.com/download/'
-        }
-        return 'Skipped. Your edits are safe.'
+    $review=Show-GcReview @{
+        Title="Update $name"; Section='Local edits overlap this update'; SecondaryAction='Keep my files'
+        Fields=@(@{Id='files';Label='Files to replace';Kind='multiline';ReadOnly=$true;Value=($filesToReplace -join "`n")})
+        Actions=@(@{Id='backup';Label='Back up my files and update'})
     }
-    $dirty = @(Git $root @('status','--porcelain','--untracked-files=all')).Count -gt 0
-    $question = "This update conflicts with $branch. Resolve it in GitHub Desktop?"
-    if ($dirty) { $question = "Commit your edits before updating $branch. Open GitHub Desktop?" }
-    if ((Show-Message $question 'YesNo') -ne 'Yes') { return 'Skipped. Your edits are safe.' }
-    if ((Git $root @('symbolic-ref','--short','HEAD')) -cne $branch -or (Git $root @('rev-parse','HEAD')) -ne $before) { throw 'Mod changed. Try again.' }
-    if (!$dirty) {
-        if (Git $root @('status','--porcelain','--untracked-files=all')) { throw 'Mod changed. Try again.' }
-        try {
-            $null = Git $root @('merge','--ff','--no-squash','--commit','--no-edit','--no-autostash','--no-overwrite-ignore',$incoming)
-            $filesChanged.Value = $true
-            return 'Updated.'
-        } catch {
-            if (!(Git $root @('ls-files','--unmerged'))) { throw }
-            $filesChanged.Value = $true
-        }
-    }
-    $desktopPending.Value = $true
-    Push-Location -LiteralPath $root
-    try {
-        $null = & $desktop.Source
-        if ($LASTEXITCODE -ne 0) { throw "Open this folder in GitHub Desktop: $root" }
-    } finally { Pop-Location }
-    if ($dirty) { return 'Commit your edits in Desktop, then update again.' }
-    return 'Finish the merge in GitHub Desktop.'
+    return $review -and $review.Action -eq 'backup'
 }
 
 function Get-ModBase($root, $repo) {
@@ -133,16 +70,9 @@ function Update-Mod($addon, [ref]$filesChanged, [ref]$desktopPending, [switch]$F
         if (!$personal) { return 'Skipped to keep your saved work.' }
         # Merge the committed histories first, without touching the author's index or files.
         # Advancing to the resulting two-parent commit uses the same protected update below.
-        $ErrorActionPreference = 'Continue'
-        $tree = @(& git.exe -C $root merge-tree --write-tree --no-messages $before $target 2>&1)
-        $mergeResult = $LASTEXITCODE
-        $ErrorActionPreference = 'Stop'
-        if ($mergeResult -eq 1) {
-            if ($ForSubmission) { return 'Resolve the branch conflict first.' }
-            return Open-BranchHelp $root $branch $before $target $filesChanged $desktopPending
-        }
-        if ($mergeResult -ne 0 -or $tree.Count -ne 1 -or $tree[0] -notmatch '^[0-9a-f]{40,64}$') { throw 'Could not check this merge. Update Git for Windows and try again.' }
-        try { $target = Git $root @('commit-tree',$tree[0],'-p',$before,'-p',$target,'-m',"Merge $defaultBranch into $branch") }
+        $tree = Merge-GcReviewedTree $root $before $target $addon.Name
+        if (!$tree) { return 'Cancelled. Your files are unchanged.' }
+        try { $target = Git $root @('commit-tree',$tree,'-p',$before,'-p',$target,'-m',"Merge $defaultBranch into $branch") }
         catch { throw 'Could not save the merge. Check your Git name, email and signing settings.' }
     }
     $merge = @('-c','core.quotePath=false','merge','--ff-only','--no-squash','--no-autostash','--no-overwrite-ignore','--quiet',$target)
@@ -165,7 +95,6 @@ function Update-Mod($addon, [ref]$filesChanged, [ref]$desktopPending, [switch]$F
             !(Git $root @('--literal-pathspecs','status','--porcelain','--untracked-files=all','--',$path)) -or
             (Test-Path -LiteralPath (Join-Path $root $path) -PathType Container)) { return 'Skipped to protect your files.' }
     }
-    if ($personal) { return Open-BranchHelp $root $branch $before $incoming $filesChanged $desktopPending }
     if (!(Confirm-Replacement $addon.Name $paths)) { return 'Skipped. Your edits are safe.' }
     $null = Get-Checkout $addon.Project $addon.Guid
     if ((Git $root @('symbolic-ref','--short','HEAD')) -cne $branch -or (Git $root @('rev-parse','HEAD')) -ne $before) { throw 'Mod changed. Try again.' }
@@ -307,5 +236,13 @@ function Invoke-ModWorkflow {
 
 if ($MyInvocation.InvocationName -ne '.') {
     try { exit (Invoke-ModWorkflow) }
-    catch { $null = Show-Message "$_"; exit 2 }
+    catch {
+        $message=$_.Exception.Message
+        if ($message.StartsWith('Git failed')) { $message='Could not prepare the submission. Check your connection and try again.' }
+        if ($SubmitMission) {
+            try { $null=Show-GcReview @{Title='Submission paused';PrimaryAction='Close';SecondaryAction='';Items=@(@{Title='Your mission files are safe';Status=$message;State='warning'})} }
+            catch { $null=Show-Message $message }
+        } else { $null=Show-Message $message }
+        exit 2
+    }
 }

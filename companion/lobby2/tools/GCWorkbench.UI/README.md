@@ -4,9 +4,9 @@ A small reusable Windows presentation layer for the external GC tools. It uses
 WPF, whose runtime is already shipped in the Workbench integration package. No
 browser engine, UI framework installer, network connection or game addon is needed.
 
-This first version is a working **preview and form renderer**, not a replacement
-for the existing installation, update or submission handlers. Those workflows
-remain responsible for permissions, validation, file changes and verified outcomes.
+This is the shared presentation layer for the tools hub, mission submission and
+conflict review. The PowerShell workflows own permissions, validation, file changes
+and verified outcomes. Installation still uses its original wizard.
 The preview's statuses and mission names are illustrative, not machine observations.
 
 `--tools` opens the GC Tools sidebar and action panel and returns a selection:
@@ -53,7 +53,8 @@ file is never overwritten. Do not treat confirmation as completion of an operati
 
 `items` adds read-only status cards with `title`, `description`, `status` and
 `state` (`ready`, `pending`, `warning`, `error`). Text is plain text; requests cannot
-run commands or embed markup. Labels, helper text, sections, action text and accent
+run commands or embed markup. Set `readOnly: true` on text fields for selectable file previews and result links.
+Labels, helper text, sections, action text and accent
 are configurable. `ToolWindow` and `DialogSpec` can also be used directly from C#.
 Layout uses scalable Windows units, wraps descriptions, scrolls the form body and
 keeps actions visible. Field validation checks required values only; workflows

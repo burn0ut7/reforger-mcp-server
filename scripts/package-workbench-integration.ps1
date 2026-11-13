@@ -33,7 +33,7 @@ foreach ($file in @('Install.bat', 'Uninstall.bat', 'README.txt', 'support/Commo
 }
 $helper = Join-Path $support 'payload/helper'
 New-Item -ItemType Directory -Path (Join-Path $support 'payload/lobby2-tools'),(Join-Path $support 'payload/generic') -Force | Out-Null
-foreach ($file in @('GC-ModLauncher.js', 'GC-ModWorkflow.ps1', 'GC-SubmitMission.ps1')) {
+foreach ($file in @('GC-ModLauncher.js', 'GC-ModWorkflow.ps1', 'GC-SubmitMission.ps1', 'GC-Review.ps1')) {
     Copy-Item -LiteralPath (Join-Path $root ('companion/lobby2/tools/' + $file)) -Destination (Join-Path $support ('payload/lobby2-tools/' + $file))
 }
 & $Dotnet publish (Join-Path $root 'src/ReforgerMcp/ReforgerMcp.csproj') -c Release -r win-x64 --self-contained true -o $helper -p:OutputType=WinExe -p:DebugType=None -p:DebugSymbols=false

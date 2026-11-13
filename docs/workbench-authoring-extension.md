@@ -43,8 +43,7 @@ The package includes `GCWorkbench.UI.exe` beside the helper, sharing its bundled
 Windows desktop runtime. `external/workbench/Preview UI.js` opens three illustrative
 forms without installing, updating or submitting anything. Source and JSON form
 contract: `companion/lobby2/tools/GCWorkbench.UI/README.md`. Default examples use
-labels, statuses and actions only; explanatory copy is optional. Workflow migration
-is separate from this presentation kit. The existing installation wizard is still
+labels, statuses and actions only; explanatory copy is optional. Mission submission and conflict review now use this presentation kit. The existing installation wizard is still
 the production workflow and has not yet been replaced by the preview.
 
 The real **GC Tools** entry uses the shared window with a sidebar and action panel.
@@ -52,12 +51,20 @@ The real **GC Tools** entry uses the shared window with a sidebar and action pan
 100 + the selected-mod mask (Lobby2=1, Core=2, Units=4, Missions=8).
 The external launcher preserves that exit code. Workbench dispatches the existing
 owning handlers only after the picker closes, keeping mission save/export and
-Git checks intact. The install workflow remains asynchronous so it can reload
+the owning workflow checks intact. The install workflow remains asynchronous so it can reload
 Workbench. The picker itself never calls Workbench or changes repository files.
 
 The external launcher imports Utility and Archive from the running PowerShell's
 own module directory, so a Workbench process launched from PowerShell 7 cannot
 redirect its Windows PowerShell helper to incompatible modules.
+
+## Contributor submissions
+
+Submit mission automatically prepares a scoped mission branch in the contributor's
+fork and creates or updates an approval request. No upstream write permission or
+manual branch setup is required. The author checkout stays unchanged. Conflicting
+text files are compared inside GC Tools; unsupported conflicts stop safely.
+See `companion/lobby2/tools/Submission.md` for prototype scope and validation.
 
 ## Ownership and lifecycle
 

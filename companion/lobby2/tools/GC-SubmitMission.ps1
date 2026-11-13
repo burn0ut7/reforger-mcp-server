@@ -27,224 +27,14 @@ function Get-SubmissionMission($root, $world) {
     $header = $headers[0]
     $layers = $relative.Substring(0,$relative.Length-4) + '_Layers'
     $required = @($relative, "$relative.meta", $header.File, ($header.File+'.meta'))
-    @{Title=$header.Title; Required=$required; Scope=($required + @($layers))}
+    @{Title=$header.Title; Id=$resource.Substring(1,16).ToLowerInvariant(); Required=$required; Scope=($required + @($layers))}
 }
-
-# Prepare exactly the saved mission files in a temporary index. Unrelated staged
-# files stay in the author's index. The resulting tree pins the reviewed content.
-function Get-MissionPreview($root, $mission, $base, $tip) {
-    $local = @(Git $root @('-c','core.quotePath=false','diff','--name-only','--no-renames',$tip))
-    $local += @(Git $root @('-c','core.quotePath=false','ls-files','--others','--exclude-standard'))
-    $index = Join-Path ([IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString('N') + '.index')
-    $previous = $env:GIT_INDEX_FILE
-    try {
-        $env:GIT_INDEX_FILE = $index
-        $null = Git $root @('read-tree',$tip)
-        $files = @(Git $root (@('-c','core.quotePath=false','--literal-pathspecs','ls-files','--cached','--others','--exclude-standard','--') + $mission.Scope) | Sort-Object -Unique)
-        if ($files | Where-Object { $_.StartsWith('"') }) { throw 'A mission filename cannot be read. Rename it before submitting.' }
-        foreach ($path in $mission.Required) {
-            if ($files -cnotcontains $path) { throw "Missing mission file: $path" }
-        }
-        # Use the small set of directory/file pathspecs, including deleted tracked layers.
-        foreach ($path in $mission.Scope) {
-            if ($files -ccontains $path -or @($files | Where-Object { $_.StartsWith($path+'/',[StringComparison]::Ordinal) }).Count) {
-                $null = Git $root @('--literal-pathspecs','add','-A','--',$path)
-            }
-        }
-        $tree = Git $root @('write-tree')
-        $registered = @(Git $root (@('-c','core.quotePath=false','--literal-pathspecs','ls-tree','-r','--name-only',$tree,'--') + $mission.Required))
-        foreach ($path in $mission.Required) {
-            if ($registered -cnotcontains $path) { throw "Missing mission file: $path" }
-        }
-        $delta = @(Git $root @('-c','core.quotePath=false','diff','--no-renames','--name-only',$base,$tree))
-        if (!@($delta | Where-Object { $files -ccontains $_ }).Count) { throw 'This mission has no changes to submit.' }
-        $pending = @(Git $root @('-c','core.quotePath=false','diff','--no-renames','--name-only',$tip,$tree))
-        $excluded = @($local | Where-Object { $files -cnotcontains $_ } | Sort-Object -Unique)
-        @{Tree=$tree; Files=$delta; Pending=$pending; Excluded=$excluded}
-    } finally {
-        $env:GIT_INDEX_FILE = $previous
-        if ([IO.File]::Exists($index)) { [IO.File]::Delete($index) }
-    }
-}
-
-function Read-MissionSubmission($title,$destination,$template,$existing,$files,$excluded) {
-    $pattern='(?s)\A(?<heading>#[^\r\n]+)\r?\n(?<overview>.*?)(?<details>\r?\n##\s.*)\z'
-    $layout=[regex]::Match($template,$pattern)
-    if (!$layout.Success) { throw 'The GC pull request template changed. Check its format before submitting.' }
-    $source=$layout
-    if ($existing) {
-        $source=[regex]::Match([string]$existing.body,$pattern)
-        if (!$source.Success) { throw 'Edit this existing pull request on GitHub.' }
-    }
-    $form=New-Object Windows.Forms.Form
-    try {
-        $form.Text='Submit Mission'; $form.ClientSize=New-Object Drawing.Size(720,600)
-        $form.MinimumSize=New-Object Drawing.Size(540,450); $form.StartPosition='CenterScreen'
-        $grid=New-Object Windows.Forms.TableLayoutPanel
-        $grid.Dock='Fill'; $grid.Padding=10; $grid.ColumnCount=1; $grid.RowCount=8
-        $form.Controls.Add($grid)
-        foreach ($size in 48,23,70,23,-65,23,-35,42) {
-            $style=New-Object Windows.Forms.RowStyle
-            if ($size -lt 0) { $style.SizeType='Percent'; $style.Height=-$size } else { $style.SizeType='Absolute'; $style.Height=$size }
-            $null=$grid.RowStyles.Add($style)
-        }
-        function Add-Label($value,$row) {
-            $label=New-Object Windows.Forms.Label
-            $label.Text=$value; $label.Dock='Fill'; $grid.Controls.Add($label,0,$row)
-        }
-        function Add-Box($value,$row) {
-            $box=New-Object Windows.Forms.TextBox
-            $box.Dock='Fill'; $box.Multiline=$true; $box.ScrollBars='Vertical'; $box.AcceptsReturn=$true
-            $box.Text=$value -replace '\r?\n',"`r`n"
-            $grid.Controls.Add($box,0,$row)
-            return $box
-        }
-        Add-Label "$title`r`n$destination" 0
-        Add-Label 'Describe your mission or what changed (required)' 1
-        $overview=''
-        if ($existing) { $overview=$source.Groups['overview'].Value.Trim() }
-        $summary=Add-Box $overview 2
-        Add-Label 'Testing, reviewer notes and dependencies' 3
-        $details=Add-Box $source.Groups['details'].Value.TrimStart() 4
-        $fileLabel = 'Files in this pull request'
-        $display = @($files)
-        if ($excluded.Count) {
-            $fileLabel = "Files to submit ($($excluded.Count) local files excluded; see below)"
-            $display += @('','NOT INCLUDED - commit these first if your mission needs them:') + $excluded
-        }
-        Add-Label $fileLabel 5
-        $list=Add-Box ($display -join "`r`n") 6
-        $list.ReadOnly=$true
-        $buttons=New-Object Windows.Forms.FlowLayoutPanel
-        $buttons.Dock='Fill'; $buttons.FlowDirection='RightToLeft'
-        $submit=New-Object Windows.Forms.Button
-        $submit.Text=if ($existing) {'Update pull request'} else {'Submit mission'}
-        $submit.AutoSize=$true
-        $cancel=New-Object Windows.Forms.Button
-        $cancel.Text='Cancel'; $cancel.DialogResult='Cancel'
-        $submit.Add_Click({
-            if (!$summary.Text.Trim() -or $summary.Text.Trim() -eq $layout.Groups['overview'].Value.Trim()) {
-                $null=Show-Message 'Describe your mission first.'
-                $null=$summary.Focus()
-                return
-            }
-            foreach ($heading in [regex]::Matches($layout.Groups['details'].Value,'(?m)^## [^\r\n]+')) {
-                if ($details.Lines -cnotcontains $heading.Value) { $null=Show-Message "Keep this heading: $($heading.Value)"; return }
-            }
-            $form.DialogResult='OK'
-        })
-        $buttons.Controls.AddRange(@($submit,$cancel)); $grid.Controls.Add($buttons,0,7)
-        $form.CancelButton=$cancel; $form.ActiveControl=$summary
-        if ($form.ShowDialog() -eq 'OK') {
-            return $layout.Groups['heading'].Value + "`n" + $summary.Text.Trim() + "`n`n" + $details.Text.Trim()
-        }
-    } finally { $form.Dispose() }
-}
-
-function Save-SubmissionCommit($root,$preview,$title,$tip) {
-    if (!$preview.Pending.Count) { return $tip }
-    $spec=Join-Path ([IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString('N') + '.paths')
-    try {
-        $staged=@(Git $root @('-c','core.quotePath=false','diff','--cached','--name-only','--no-renames'))
-        $unstaged=@(Git $root @('-c','core.quotePath=false','diff','--name-only','--no-renames'))
-        foreach ($path in $preview.Pending) {
-            if ($staged -ccontains $path -and $unstaged -ccontains $path) { throw "Commit your staged edits to $path first." }
-        }
-        [IO.File]::WriteAllText($spec,($preview.Pending -join [char]0) + [char]0,(New-Object Text.UTF8Encoding($false)))
-        $selection=@("--pathspec-from-file=$spec",'--pathspec-file-nul')
-        $null=Git $root (@('--literal-pathspecs','add','-A') + $selection)
-        $null=Git $root (@('--literal-pathspecs','commit','--quiet','--only','-m',$title) + $selection)
-        $commit=Git $root @('rev-parse','HEAD')
-        if ((Git $root @('rev-parse',"$commit^")) -ne $tip -or (Git $root @('rev-parse',"$commit^{tree}")) -ne $preview.Tree) {
-            throw 'The commit changed during review. Check it before submitting again.'
-        }
-        return $commit
-    } finally { if ([IO.File]::Exists($spec)) { [IO.File]::Delete($spec) } }
-}
-
 
 function Get-OpenMissionPr($auth,$repo,$owner,$branch,$base) {
     $source=[Uri]::EscapeDataString("${owner}:$branch")
     $baseName=[Uri]::EscapeDataString($base)
     $items=Invoke-SubmissionApi $auth GET "repos/$repo/pulls?state=open&head=$source&base=$baseName"
     $items | Where-Object { $_.head.repo.owner.login -eq $owner -and $_.head.ref -ceq $branch -and $_.base.ref -ceq $base } | Select-Object -First 1
-}
-
-function Invoke-MissionSubmission($addons,$world) {
-    $missions=$addons | Where-Object Key -eq GlobalConflictsMissions
-    $repo=$missions.Repo
-    $root=Get-Checkout $missions.Project $missions.Guid
-    $mission=Get-SubmissionMission $root $world
-    $base=Get-ModBase $root $repo
-    $branch=Git $root @('symbolic-ref','--short','HEAD')
-    if ($branch -ceq $base.Name) {
-        if (!(New-MissionBranch $root $branch $world)) { return 2 }
-        $branch=Git $root @('symbolic-ref','--short','HEAD')
-        if ($branch -ceq $base.Name) { throw 'Choose a mission branch first.' }
-    }
-    $changed=$false; $desktop=$false
-    foreach ($addon in $addons) {
-        $result=Update-Mod $addon ([ref]$changed) ([ref]$desktop) -ForSubmission
-        if ($desktop -or $result -notin 'Up to date.','Updated.') {
-            throw "$($addon.Name): $result Run Update Mods before submitting."
-        }
-    }
-    if ($changed) { throw 'Mods updated. Reload Workbench, then submit again.' }
-    $tip=Git $root @('rev-parse','HEAD')
-    $preview=Get-MissionPreview $root $mission $base.Commit $tip
-    $template=(Git $root @('show',($base.Commit + ':.github/pull_request_template.md'))) -join "`n"
-    $auth=Get-SubmissionAuth
-    $owner=(Invoke-SubmissionApi $auth GET 'user').login
-    if (!$owner -or $owner -notmatch '^[A-Za-z0-9-]+$') { throw 'Sign in to GitHub first.' }
-    $name=($repo -split '/')[1]
-    $forkRepo="$owner/$name"
-    $fork=Invoke-SubmissionApi $auth GET "repos/$forkRepo" $null -AllowMissing
-    if ($fork -and (!$fork.fork -or $fork.parent.full_name -ine $repo)) { throw 'Your GitHub repository is not a fork of GC Missions.' }
-    if ($fork -and $fork.default_branch -ceq $branch) { throw 'Choose a separate mission branch first.' }
-    $existing=Get-OpenMissionPr $auth $repo $owner $branch $base.Name
-    $destination="$forkRepo ($branch)  ->  $repo ($($base.Name))"
-    if ($existing) { $destination+="  (PR #$($existing.number))" }
-    if (!$fork) { $destination+='  (creates your fork)' }
-    $body=Read-MissionSubmission $mission.Title $destination $template $existing $preview.Files $preview.Excluded
-    if (!$body) { return 2 }
-
-    # Recheck all four upstreams after the review window closes.
-    foreach ($addon in $addons) {
-        $checkout=Get-Checkout $addon.Project $addon.Guid
-        $latest=Get-ModBase $checkout $addon.Repo
-        if ((Git $checkout @('merge-base','HEAD',$latest.Commit)) -ne $latest.Commit) { throw "$($addon.Name) changed. Run Update Mods and retry." }
-        if (Git $checkout @('ls-files','--unmerged')) { throw "Resolve the conflict in $($addon.Name) first." }
-        if ($addon.Key -eq $missions.Key -and ($latest.Commit -ne $base.Commit -or $latest.Name -cne $base.Name)) { throw 'GC Missions changed. Review again.' }
-    }
-    if ((Git $root @('symbolic-ref','--short','HEAD')) -cne $branch -or (Git $root @('rev-parse','HEAD')) -ne $tip) { throw 'Your branch changed. Review again.' }
-    $currentMission=Get-SubmissionMission $root $world
-    if ($currentMission.Title -cne $mission.Title -or ($currentMission.Required -join "`n") -cne ($mission.Required -join "`n")) { throw 'Mission data changed. Review again.' }
-    $fresh=Get-MissionPreview $root $currentMission $base.Commit $tip
-    if ($fresh.Tree -ne $preview.Tree) { throw 'Your mission changed. Review again.' }
-    $currentPr=Get-OpenMissionPr $auth $repo $owner $branch $base.Name
-    if ($currentPr.number -ne $existing.number -or $currentPr.body -cne $existing.body -or $currentPr.title -cne $existing.title) {
-        throw 'The pull request changed on GitHub. Review it again.'
-    }
-    $commit=Save-SubmissionCommit $root $preview $mission.Title $tip
-    if (!$fork) {
-        $created=Invoke-SubmissionApi $auth POST "repos/$repo/forks" @{name=$name}
-        if ($created.full_name -ine $forkRepo) { throw 'Check your fork on GitHub, then retry.' }
-    }
-    $url="https://$owner@github.com/$forkRepo.git"
-    try { $null=Git $root @('push','--quiet','--no-follow-tags','--recurse-submodules=no',$url,"${commit}:refs/heads/$branch") }
-    catch { throw 'Your local commit is safe. Check your fork on GitHub, then retry Submit Mission.' }
-    $fields=@{title=$mission.Title; body=$body}
-    if ($existing) {
-        $pr=Invoke-SubmissionApi $auth PATCH "repos/$repo/pulls/$($existing.number)" $fields
-    } else {
-        $fields.head="${owner}:$branch"; $fields.base=$base.Name
-        $pr=Invoke-SubmissionApi $auth POST "repos/$repo/pulls" $fields
-    }
-    if (!$pr.number) { throw 'Check GitHub before submitting again.' }
-    if ((Show-Message "Mission submitted. Open pull request #$($pr.number)?" 'YesNo') -eq 'Yes') {
-        Start-Process "https://github.com/$repo/pull/$($pr.number)"
-    }
-    return 0
 }
 
 function Get-SubmissionAuth {
@@ -273,4 +63,206 @@ function Invoke-SubmissionApi($auth, $method, $path, $data, [switch]$AllowMissin
         throw "GitHub could not complete the request ($status). Retry Submit Mission."
     }
 
+}
+
+function New-SubmissionCommit($root, $tree, $parents, $title, $user) {
+    $arguments=@('-c',('user.name='+$user.login),'-c',('user.email='+$user.id+'+'+$user.login+'@users.noreply.github.com'),'-c','commit.gpgSign=false','commit-tree',$tree)
+    foreach ($parent in @($parents | Select-Object -Unique)) { $arguments+=@('-p',$parent) }
+    Git $root ($arguments+@('-m',$title))
+}
+
+function Get-SubmissionRef($root,$ref) {
+    $previous=$ErrorActionPreference
+    try {
+        $ErrorActionPreference='Continue'
+        $value=@(& git.exe -C $root rev-parse --verify --quiet $ref 2>$null)
+        if ($LASTEXITCODE -eq 0) { return [string]$value[0] }
+        if ($LASTEXITCODE -ne 1) { throw 'Could not read the saved submission.' }
+    } finally { $ErrorActionPreference=$previous }
+}
+
+function Test-MissionPath($mission,$path) {
+    foreach ($scope in $mission.Scope) {
+        if ($path -ceq $scope -or $path.StartsWith($scope+'/',[StringComparison]::Ordinal)) { return $true }
+    }
+    return $false
+}
+
+function Get-MissionSnapshot($root,$mission,$base,$tip) {
+    $index=Join-Path ([IO.Path]::GetTempPath()) ('gc-submit-'+[guid]::NewGuid()+'.index')
+    $previous=$env:GIT_INDEX_FILE
+    try {
+        $local=@(Git $root @('-c','core.quotePath=false','diff','--name-only','--no-renames',$base))
+        $local+=@(Git $root @('-c','core.quotePath=false','ls-files','--others','--exclude-standard'))
+        $env:GIT_INDEX_FILE=$index
+        $null=Git $root @('read-tree',$base)
+        foreach ($scope in $mission.Scope) {
+            $tracked=@(Git $root @('--literal-pathspecs','ls-files','--cached','--',$scope))
+            if ((Test-Path -LiteralPath (Join-Path $root $scope)) -or $tracked.Count) {
+                $null=Git $root @('--literal-pathspecs','add','-A','--',$scope)
+            }
+        }
+        $tree=Git $root @('write-tree')
+        Assert-MissionTree $root $mission $base $tree
+        $files=@(Git $root @('-c','core.quotePath=false','diff','--name-only','--no-renames',$base,$tree))
+        $excluded=@($local | Where-Object { !(Test-MissionPath $mission $_) } | Sort-Object -Unique)
+        @{Tree=$tree;Files=$files;Excluded=$excluded}
+    } finally {
+        $env:GIT_INDEX_FILE=$previous
+        if ([IO.File]::Exists($index)) { [IO.File]::Delete($index) }
+    }
+}
+
+function Assert-MissionTree($root,$mission,$base,$tree) {
+    foreach ($path in @(Git $root @('-c','core.quotePath=false','diff','--name-only','--no-renames',$base,$tree))) {
+        if (!(Test-MissionPath $mission $path)) { throw "Submission includes another mission's file: $path. Nothing was uploaded." }
+    }
+    foreach ($path in $mission.Required) {
+        $entry=@(Git $root @('--literal-pathspecs','ls-tree',$tree,'--',$path))
+        if ($entry.Count -ne 1 -or $entry[0] -notmatch '^100(644|755) blob ') { throw "The mission still needs this file: $path. Nothing was uploaded." }
+    }
+    $metadata=(Git $root @('show',($tree+':'+$mission.Required[1]))) -join "`n"
+    $header=(Git $root @('show',($tree+':'+$mission.Required[2]))) -join "`n"
+    if ($metadata -notmatch '(?m)^\s*Name\s+"(\{[0-9A-Fa-f]{16}\}[^"]+)"') { throw 'Mission registration is incomplete. Save your mission and try again.' }
+    $resource=$Matches[1]
+    if ($header -notmatch '(?m)^\s*World\s+"([^"]+)"' -or $Matches[1] -ine $resource) { throw 'These mission files do not match. Choose matching versions of the world and mission data.' }
+}
+
+function Read-MissionSubmission($mission,$existing,$files,$excluded) {
+    $fields=@(@{Id='summary';Label='What changed?';Kind='multiline';Required=$true},
+        @{Id='notes';Label='Reviewer notes';Kind='multiline'},@{Id='dependencies';Label='Other required mods';Kind='text'})
+    if ($existing) {
+        # Preserve all existing reviewer-facing content unless the author edits it.
+        $fields=@(@{Id='body';Label='Submission details';Kind='multiline';Required=$true;Value=[string]$existing.body})
+    } else {
+        foreach ($test in @(@('briefing','Briefing, map and slots'),@('timers','Timers and area limits'),@('prefabs','Custom prefabs'),@('events','Mission events'),@('ending','End conditions'),@('server','Dedicated server / peer test'))) {
+            $fields+=@{Id=$test[0];Label=$test[1];Kind='check'}
+        }
+    }
+    $fields+=@{Id='files';Label='Files to submit';Kind='multiline';ReadOnly=$true;Value=($files -join "`n")}
+    if ($excluded.Count) {
+        $fields+=@{Id='excluded';Label='Not included';Kind='multiline';ReadOnly=$true;Value=($excluded -join "`n")}
+        $fields+=@{Id='scope';Label='My mission does not need the excluded files';Kind='check';Required=$true}
+    }
+    $answer=Show-GcReview @{Title=$mission.Title;Section='Submit for approval';PrimaryAction=$(if($existing){'Update submission'}else{'Submit mission'});Fields=$fields}
+    if (!$answer) { return }
+    if ($existing) { return $answer.Values.body }
+    $v=$answer.Values
+    $testing=@()
+    foreach ($test in @(@('briefing','Briefing, map, slotting screen'),@('timers','Setup timers / AO Limits'),@('prefabs','Custom prefabs'),@('events','Key framework events and interactions'),@('ending','End conditions'),@('server','Playable in Dedicated Server Tool / Peer Tool'))) {
+        $mark=if($v.($test[0])){'x'}else{' '}
+        $testing+="- [$mark] $($test[1])"
+    }
+    "# Overview`n$($v.summary)`n`n## Testing`n$($testing -join "`n")`n`n## Comments for the reviewer`n$($v.notes)`n`n## Dependencies`n$($v.dependencies)"
+}
+
+function Invoke-MissionSubmission($addons,$world) {
+    $missions=$addons | Where-Object Key -eq GlobalConflictsMissions
+    $root=Get-Checkout $missions.Project $missions.Guid
+    $mission=Get-SubmissionMission $root $world
+    $mutex=New-Object Threading.Mutex($false,('Local\GCSubmission-'+$mission.Id))
+    $locked=$false
+    try {
+        try {$locked=$mutex.WaitOne(0)} catch [Threading.AbandonedMutexException] {$locked=$true}
+        if (!$locked) { throw 'This mission already has a submission window open.' }
+        Invoke-MissionSubmissionCore $root $missions.Repo $mission $world
+    } finally {
+        if ($locked) {$mutex.ReleaseMutex()}
+        $mutex.Dispose()
+    }
+}
+
+function Invoke-MissionSubmissionCore($root,$repo,$mission,$world) {
+    $auth=Get-SubmissionAuth
+    $user=Invoke-SubmissionApi $auth GET 'user'
+    $owner=$user.login
+    if ($owner -notmatch '^[A-Za-z0-9-]+$' -or [string]$user.id -notmatch '^\d+$') { throw 'Sign in to GitHub first.' }
+    $base=Get-ModBase $root $repo
+    $null=Git $root @('fetch','--quiet','--no-tags',"https://github.com/$repo.git",('refs/heads/'+$base.Name))
+    $tip=Git $root @('rev-parse','HEAD')
+    $ancestor=Git $root @('merge-base',$tip,$base.Commit)
+    $snapshot=Get-MissionSnapshot $root $mission $ancestor $tip
+    $prefix="refs/gc/submissions/$owner/$($mission.Id)"
+    $previousTip=Get-SubmissionRef $root "$prefix/tip"
+    $previousSource=Get-SubmissionRef $root "$prefix/source"
+    if ([bool]$previousTip -ne [bool]$previousSource) { throw 'Saved submission needs a mission reviewer. Your mission files are safe.' }
+    $branchKey="gcmission.$($mission.Id).branch"
+    $previousPreference=$ErrorActionPreference
+    try {$ErrorActionPreference='Continue';$branch=& git.exe -C $root config --local --get $branchKey 2>$null} finally {$ErrorActionPreference=$previousPreference}
+    if (!$branch) {
+        $slug=($mission.Title.ToLowerInvariant() -replace '[^a-z0-9]+','-').Trim('-')
+        if (!$slug) {$slug='mission'}
+        if ($slug.Length -gt 50) {$slug=$slug.Substring(0,50).TrimEnd('-')}
+        $branch="mission/$slug-$($mission.Id)"
+    }
+    $null=Git $root @('check-ref-format','--branch',$branch)
+    $name=($repo -split '/')[1];$forkRepo="$owner/$name"
+    $fork=Invoke-SubmissionApi $auth GET "repos/$forkRepo" $null -AllowMissing
+    if ($fork -and (!$fork.fork -or $fork.parent.full_name -ine $repo)) { throw 'A repository with this name already exists on your account. Ask a mission reviewer to help connect your fork.' }
+    if ($fork -and $fork.default_branch -ceq $branch) { throw 'This submission name is reserved. Ask a mission reviewer for help.' }
+    $url="https://$owner@github.com/$forkRepo.git"
+    $remoteTip=''
+    if ($fork) {
+        $remote=@(Git $root @('ls-remote','--heads',$url,"refs/heads/$branch"))
+        if ($remote.Count) {$remoteTip=($remote[0] -split '\s+')[0]}
+        if ($remoteTip -and (!$previousTip -or !(Get-SubmissionRef $root "$remoteTip^{commit}") -or (Git $root @('merge-base',$remoteTip,$previousTip)) -ne $remoteTip)) { throw 'This submission changed on another computer. Nothing was overwritten. Ask a mission reviewer to combine the versions.' }
+    }
+    $existing=Get-OpenMissionPr $auth $repo $owner $branch $base.Name
+    $source=New-SubmissionCommit $root $snapshot.Tree @($ancestor) $mission.Title $user
+    $candidate=$source
+    if ($previousTip) {
+        $tree=Merge-GcReviewedTree $root $source $previousTip $mission.Title $previousSource
+        if (!$tree) {return 2}
+        $candidate=New-SubmissionCommit $root $tree @($previousTip,$source) $mission.Title $user
+    }
+    $tree=Merge-GcReviewedTree $root $candidate $base.Commit $mission.Title
+    if (!$tree) {return 2}
+    Assert-MissionTree $root $mission $base.Commit $tree
+    $files=@(Git $root @('-c','core.quotePath=false','diff','--name-only','--no-renames',$base.Commit,$tree))
+    if (!$files.Count) { throw 'This mission already matches the shared version. Nothing to submit.' }
+    $body=Read-MissionSubmission $mission $existing $files $snapshot.Excluded
+    if (!$body) {return 2}
+    # Refuse stale reviews. No checkout, index, or working files have been changed.
+    $latest=Get-ModBase $root $repo
+    if ($latest.Commit -ne $base.Commit -or $latest.Name -cne $base.Name) { throw 'The shared missions changed during review. Submit again to compare the latest version.' }
+    if ((Git $root @('rev-parse','HEAD')) -ne $tip) { throw 'Your mission changed during review. Submit again.' }
+    $freshMission=Get-SubmissionMission $root $world
+    $fresh=Get-MissionSnapshot $root $freshMission $ancestor $tip
+    if ($fresh.Tree -ne $snapshot.Tree -or $freshMission.Title -cne $mission.Title) { throw 'Your mission changed during review. Submit again.' }
+    $currentPr=Get-OpenMissionPr $auth $repo $owner $branch $base.Name
+    if ($currentPr.number -ne $existing.number -or $currentPr.body -cne $existing.body -or $currentPr.title -cne $existing.title) { throw 'Your submission changed during review. Submit again.' }
+    if (!$fork) {
+        $created=Invoke-SubmissionApi $auth POST "repos/$repo/forks" @{name=$name;default_branch_only=$true}
+        if ($created.full_name -ine $forkRepo) { throw 'GitHub is preparing your account. Retry Submit Mission shortly.' }
+        # Fork creation is asynchronous. Read-only readiness polling is bounded.
+        $ready=$false
+        for ($attempt=0;$attempt -lt 10;$attempt++) {
+            $check=Invoke-SubmissionApi $auth GET "repos/$forkRepo" $null -AllowMissing
+            if ($check -and $check.fork -and $check.parent.full_name -ieq $repo) {$ready=$true;break}
+            Start-Sleep -Milliseconds 1000
+        }
+        if (!$ready) { throw 'GitHub is still preparing your account. Retry Submit Mission shortly.' }
+    }
+    $parents=@($base.Commit)
+    if ($previousTip) {$parents+=@($previousTip)}
+    $commit=New-SubmissionCommit $root $tree $parents $mission.Title $user
+    $null=Git $root @('config','--local',$branchKey,$branch)
+    # Preserve both reviewed content and source before network writes, including a
+    # push that succeeds remotely but loses its response. Retry never force-pushes.
+    $null=Git $root @('update-ref',"$prefix/tip",$commit)
+    $null=Git $root @('update-ref',"$prefix/source",$source)
+    try {$null=Git $root @('push','--quiet','--no-follow-tags','--recurse-submodules=no',$url,"${commit}:refs/heads/$branch")}
+    catch {throw 'Upload stopped. Your mission and prepared submission are safe. Retry Submit Mission; nothing will be force-overwritten.'}
+    $fields=@{title=$mission.Title;body=$body}
+    if ($existing) {$pr=Invoke-SubmissionApi $auth PATCH "repos/$repo/pulls/$($existing.number)" $fields}
+    else {
+        $fields.head="${owner}:$branch";$fields.base=$base.Name;$fields.maintainer_can_modify=$true
+        $pr=Invoke-SubmissionApi $auth POST "repos/$repo/pulls" $fields
+    }
+    if (!$pr.number) {throw 'Upload saved. Approval request could not be confirmed. Retry Submit Mission.'}
+    # GitHub may still be calculating mergeability; never call an unknown result clean.
+    $status=Invoke-SubmissionApi $auth GET "repos/$repo/pulls/$($pr.number)"
+    $state=if ($status.mergeable -eq $false) {'Needs conflict review'} elseif ($status.mergeable -eq $true) {'Awaiting approval'} else {'Awaiting approval - conflict check pending'}
+    $result=Show-GcReview @{Title='Mission submitted';PrimaryAction='Done';SecondaryAction='';Items=@(@{Title=$mission.Title;Status=$state;State=$(if($status.mergeable -eq $false){'warning'}else{'ready'})});Fields=@(@{Id='url';Label='Approval request';Value="https://github.com/$repo/pull/$($pr.number)";ReadOnly=$true})}
+    return 0
 }

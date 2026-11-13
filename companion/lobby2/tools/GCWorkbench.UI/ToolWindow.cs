@@ -136,12 +136,6 @@ public sealed class ToolWindow : Window
                 restored = field.Kind == "check" ? field with { Checked = (bool)value } : field with { Value = (string)value };
             content.Children.Add(Field(restored));
         }
-        foreach (var action in spec.Actions)
-        {
-            var button = new Button { Content = action.Label, Margin = new Thickness(0, 0, 0, 12) };
-            button.Click += (_, _) => { var values = ReadValues(); if (values is null) return; Result = new DialogResult(action.Id, values); Close(); };
-            content.Children.Add(button);
-        }
         var feedback = Text("", 13, "#a9b09b", margin: new Thickness(0, 14, 0, 0));
         feedback.Visibility = Visibility.Collapsed;
         AutomationProperties.SetLiveSetting(feedback, AutomationLiveSetting.Polite);
@@ -176,7 +170,13 @@ public sealed class ToolWindow : Window
             Result = new DialogResult(tools ? ToolPages.Action(spec.Title) : "confirm", values);
             Close();
         };
-        buttons.Children.Add(cancel);
+        if (spec.SecondaryAction.Length > 0) buttons.Children.Add(cancel);
+        foreach (var action in spec.Actions)
+        {
+            var button = new Button { Content = action.Label, Margin = new Thickness(0, 0, 10, 0) };
+            button.Click += (_, _) => { var values = ReadValues(); if (values is null) return; Result = new DialogResult(action.Id, values); Close(); };
+            buttons.Children.Add(button);
+        }
         if (spec.Actions.Count == 0) buttons.Children.Add(confirm);
         footer.Children.Add(buttons);
         var footerBorder = new Border { Background = Background, Child = footer };
@@ -210,6 +210,7 @@ public sealed class ToolWindow : Window
         {
             panel.Children.Add(Text(field.Label + (field.Required ? " *" : ""), 14, "#f0e9d5", bold: true, margin: new Thickness(0, 0, 0, 8)));
             var text = new TextBox { Text = field.Value, Foreground = Brush("#f0e9d5"), CaretBrush = Brush("#f0e9d5"), Padding = new Thickness(12, 10, 12, 10), BorderBrush = Brush("#404735"), Background = Brush("#242b20"), BorderThickness = new Thickness(1), MaxLength = 8192 };
+            text.IsReadOnly = field.ReadOnly;
             if (field.Kind == "multiline")
             {
                 text.AcceptsReturn = true;
@@ -271,6 +272,19 @@ public sealed class ToolWindow : Window
 
     private const string Styles = """
         <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+          <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Background" Value="#191e18"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ScrollBar">
+              <Grid Background="{TemplateBinding Background}">
+                <Track x:Name="PART_Track" IsDirectionReversed="True" Orientation="{TemplateBinding Orientation}">
+                  <Track.DecreaseRepeatButton><RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" Focusable="False"/></Track.DecreaseRepeatButton>
+                  <Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="#404735" CornerRadius="3" Margin="2"/></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                  <Track.IncreaseRepeatButton><RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" Focusable="False"/></Track.IncreaseRepeatButton>
+                </Track>
+              </Grid>
+            </ControlTemplate></Setter.Value></Setter>
+          </Style>
           <Style TargetType="TextBox">
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox">
               <Border x:Name="Frame" CornerRadius="3" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
