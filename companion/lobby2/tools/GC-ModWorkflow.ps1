@@ -143,14 +143,31 @@ function New-MissionBranch($root, $current, $world) {
     return $true
 }
 
-function Invoke-ModWorkflow {
-    Add-Type -AssemblyName System.Windows.Forms
+function Get-GcAddons($Lobby2,$GlobalConflictsCore,$GlobalConflictsUnits,$GlobalConflictsMissions) {
     $addons = @(
         @{Name='Lobby2'; Key='Lobby2'; Project=$Lobby2; Guid='6A115D5DFF7ED870'; Repo='burn0ut7/Lobby2'}
         @{Name='GC Core'; Key='GlobalConflictsCore'; Project=$GlobalConflictsCore; Guid='623555110E2B2CA0'; Repo='Global-Conflicts-ArmA/gc-reforger-core'}
         @{Name='GC Units'; Key='GlobalConflictsUnits'; Project=$GlobalConflictsUnits; Guid='6156F2F771D5D73D'; Repo='Global-Conflicts-ArmA/gc-reforger-units'}
         @{Name='GC Missions'; Key='GlobalConflictsMissions'; Project=$GlobalConflictsMissions; Guid='62D55563549DA97A'; Repo='Global-Conflicts-ArmA/gc-reforger-missions'}
     )
+    # Workbench only resolves mounts loaded in the current project. Source checkouts
+    # installed alongside Lobby2 can still be updated after their GUID is verified.
+    if (!$Lobby2 -or !(Test-Path -LiteralPath $Lobby2 -PathType Leaf)) {
+        throw 'Open the Lobby2 source project before using GC Git tools.'
+    }
+    $addonsDirectory = Split-Path -Parent (Split-Path -Parent ([IO.Path]::GetFullPath($Lobby2)))
+    foreach ($addon in $addons) {
+        if (!$addon.Project) {
+            $folder = ($addon.Repo -split '/')[-1]
+            $addon.Project = Join-Path $addonsDirectory "$folder/addon.gproj"
+        }
+    }
+    $addons
+}
+
+function Invoke-ModWorkflow {
+    Add-Type -AssemblyName System.Windows.Forms
+    $addons = @(Get-GcAddons $Lobby2 $GlobalConflictsCore $GlobalConflictsUnits $GlobalConflictsMissions)
     if (!(Get-Command git.exe -ErrorAction SilentlyContinue)) {
         if ((Show-Message 'Install Git for Windows?' 'YesNo') -eq 'Yes') {
             Start-Process 'https://git-scm.com/downloads/win'
@@ -162,18 +179,6 @@ function Invoke-ModWorkflow {
         if (!$status.Connected) {
             $choice=Show-GcReview @{Title='GitHub';PrimaryAction='Sign in on GitHub';Items=@(@{Title='Connection';Status=$status.Status;State='warning'})}
             if (!$choice -or (Connect-GitHub) -ne 0) {return 2}
-        }
-    }
-    # Workbench only resolves mounts loaded in the current project. Source checkouts
-    # installed alongside Lobby2 can still be updated after their GUID is verified.
-    if (!$Lobby2 -or !(Test-Path -LiteralPath $Lobby2 -PathType Leaf)) {
-        throw 'Open the Lobby2 source project before using GC Git tools.'
-    }
-    $addonsDirectory = Split-Path -Parent (Split-Path -Parent ([IO.Path]::GetFullPath($Lobby2)))
-    foreach ($addon in $addons) {
-        if (!$addon.Project) {
-            $folder = ($addon.Repo -split '/')[-1]
-            $addon.Project = Join-Path $addonsDirectory "$folder/addon.gproj"
         }
     }
     if ($SubmitMission) {

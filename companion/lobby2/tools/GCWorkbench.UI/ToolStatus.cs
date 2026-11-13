@@ -12,6 +12,43 @@ internal static class ToolStatus
 {
     private static readonly string Control = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GCWorkbench");
 
+    internal static async Task<DialogSpec> ModsAsync(CancellationToken cancellation)
+    {
+        var script = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "lobby2-tools", "GC-ModStatus.ps1"));
+        if (!File.Exists(script)) return ToolPages.Updates("Install the current GC Tools package");
+        var keys = new[] { "Lobby2", "GlobalConflictsCore", "GlobalConflictsUnits", "GlobalConflictsMissions" };
+        var arguments = new List<string> { "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script };
+        foreach (var key in keys)
+        {
+            var project = Environment.GetEnvironmentVariable("GC_WORKBENCH_MOD_" + key);
+            if (string.IsNullOrEmpty(project) && key == "Lobby2" && Environment.GetEnvironmentVariable("GC_WORKBENCH_PACKAGE") is { } package)
+                project = Path.GetFullPath(Path.Combine(package, "..", "..", "addon.gproj"));
+            if (!string.IsNullOrEmpty(project)) arguments.AddRange(["-" + key, project]);
+        }
+        var powershell = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
+        var page = ToolPages.Updates();
+        var fields = await Task.WhenAll(page.Fields.Select(async (field, index) =>
+        {
+            var result = await RunAsync(powershell, [.. arguments, "-Mod", keys[index]], 20, cancellation);
+            return ModStatusField(field, result.Code, result.Output);
+        }));
+        return page with { Fields = fields.ToList() };
+    }
+
+    internal static InputField ModStatusField(InputField field, int code, string output)
+    {
+        try
+        {
+            if (code != 0) throw new JsonException();
+            using var json = JsonDocument.Parse(output);
+            var needed = json.RootElement.GetProperty("UpdateNeeded").GetBoolean();
+            var status = json.RootElement.GetProperty("Status").GetString() ?? "Unable to check - refresh";
+            return field with { Enabled = needed, Checked = needed, Help = status };
+        }
+        catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException)
+        { return field with { Enabled = false, Checked = false, Help = "Unable to check - refresh" }; }
+    }
+
     internal static async Task<DialogSpec> GitHubAsync(bool signIn, CancellationToken cancellation)
     {
         var script = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "lobby2-tools", "GC-GitHub.ps1"));

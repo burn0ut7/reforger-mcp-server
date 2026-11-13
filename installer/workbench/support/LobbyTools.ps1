@@ -3,7 +3,7 @@ function Install-GcLobbyTools([string]$Destination, [string]$Profile) {
     $control = Assert-GcOwnedPath (Join-Path $env:LOCALAPPDATA 'GCWorkbench') $env:LOCALAPPDATA
     $record = Assert-GcOwnedPath (Join-Path $control 'lobby-tools.json') $control
     $folder = Assert-GcOwnedPath (Join-Path $Profile 'GCWorkbench/tools') $Profile
-    $names = @('GC-ModLauncher.js', 'GC-ModWorkflow.ps1', 'GC-SubmitMission.ps1', 'GC-Review.ps1', 'GC-GitHub.ps1')
+    $names = @('GC-ModLauncher.js', 'GC-ModWorkflow.ps1', 'GC-SubmitMission.ps1', 'GC-Review.ps1', 'GC-GitHub.ps1', 'GC-ModStatus.ps1')
     $previous = @()
     if (Test-Path -LiteralPath $record) {
         $installed = Get-Content -LiteralPath $record -Raw | ConvertFrom-Json
@@ -36,7 +36,7 @@ function Uninstall-GcLobbyTools([string]$Control) {
     $installed = Get-Content -LiteralPath $record -Raw | ConvertFrom-Json
     $folder = Assert-GcOwnedPath (Join-Path $installed.profile 'GCWorkbench/tools') $installed.profile
     foreach ($file in $installed.files) {
-        if ($file.name -notin @('GC-ModLauncher.js', 'GC-ModWorkflow.ps1', 'GC-SubmitMission.ps1', 'GC-Review.ps1', 'GC-GitHub.ps1')) { throw 'Unexpected Git helper in installation record.' }
+        if ($file.name -notin @('GC-ModLauncher.js', 'GC-ModWorkflow.ps1', 'GC-SubmitMission.ps1', 'GC-Review.ps1', 'GC-GitHub.ps1', 'GC-ModStatus.ps1')) { throw 'Unexpected Git helper in installation record.' }
         $target = Assert-GcOwnedPath (Join-Path $folder $file.name) $installed.profile
         if ((Test-Path -LiteralPath $target) -and (Get-FileHash -LiteralPath $target).Hash -ne $file.sha256) {
             throw "Modified Git helper preserved: $target"

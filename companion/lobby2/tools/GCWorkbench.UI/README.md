@@ -106,3 +106,25 @@ shown as unavailable/unknown; they are never reported as current or connected.
 Validation: `tests/GitHub.Tests.ps1`, `tests/Status/Status.csproj`, and the existing
 submission suite. The account check was also exercised read-only with the current
 account. Browser authorization itself requires a normal contributor acceptance pass.
+
+## Mod update status
+
+Opening Update mods or pressing Refresh checks all four mods independently, with
+bounded background checks. Workbench passes the loaded project paths to the hub;
+unloaded sibling projects use the same verified discovery map as the updater.
+
+Up to date includes personal branches already containing the shared default-branch
+tip. These rows are unchecked and disabled. Behind branches offer Update available;
+diverged personal branches offer an update with possible review. Diverged default
+branches require review and are disabled, matching the updater's preservation rule.
+Missing folders, failed checks and checks still in progress cannot be selected.
+The update button requires at least one enabled, selected row. Disabled rows are
+also filtered from result values, regardless of saved selection state.
+
+Checks may fetch Git objects for ancestry comparison but do not change HEAD, branches,
+the real index, working files or FETCH_HEAD. They never install an update. The actual
+updater still fetches/rechecks before applying changes; status is an observation, not
+a guarantee that remote state will remain unchanged.
+
+Tests: `tests/ModStatus.Tests.ps1`, `tests/ModSelection/ModSelection.csproj` and the
+status mapping checks in `tests/Status/Status.csproj`.

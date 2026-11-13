@@ -20,10 +20,16 @@ internal static class ToolPages
         Items = [new("Connection", "", "Checking…")]
     };
 
+    internal static DialogSpec Updates(string status = "Checking...") => Examples.Updates() with
+    {
+        SecondaryAction = "Close",
+        Fields = Examples.Updates().Fields.Select(field => field with { Checked = false, Enabled = false, Help = status }).ToList()
+    };
+
     internal static IEnumerable<(string Name, DialogSpec Spec)> All()
     {
         yield return ("submission", Submission());
-        yield return ("updates", Examples.Updates() with { SecondaryAction = "Close" });
+        yield return ("updates", Updates());
         yield return ("github", GitHub());
         yield return ("dependencies", Dependencies());
     }

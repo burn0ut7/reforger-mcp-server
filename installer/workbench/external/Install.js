@@ -5,9 +5,14 @@ var script = files.BuildPath(files.GetParentFolderName(WScript.ScriptFullName), 
 var executable = files.BuildPath(files.GetSpecialFolder(1), "WindowsPowerShell\\v1.0\\powershell.exe");
 shell.Environment("Process")("GC_WORKBENCH_INSTALL_SCRIPT") = script;
 shell.Environment("Process")("GC_WORKBENCH_PACKAGE") = files.GetParentFolderName(WScript.ScriptFullName);
-var tools = WScript.Arguments.length === 1 && WScript.Arguments(0) === "--tools";
+var tools = WScript.Arguments.length >= 1 && WScript.Arguments(0) === "--tools";
 // Opening the tools is not an install operation. Launch the registered app directly.
 if (tools) {
+    for (var argument = 1; argument < WScript.Arguments.length; argument += 2) {
+        var key = WScript.Arguments(argument);
+        if (!/^-(Lobby2|GlobalConflictsCore|GlobalConflictsUnits|GlobalConflictsMissions)$/.test(key) || argument + 1 >= WScript.Arguments.length) throw new Error("Invalid mod path argument.");
+        shell.Environment("Process")("GC_WORKBENCH_MOD_" + key.substring(1)) = WScript.Arguments(argument + 1);
+    }
     var registration = shell.ExpandEnvironmentStrings("%LOCALAPPDATA%") + "\\GCWorkbench\\ui-path.txt";
     if (files.FileExists(registration)) {
         var reader = files.OpenTextFile(registration, 1, false, -1);

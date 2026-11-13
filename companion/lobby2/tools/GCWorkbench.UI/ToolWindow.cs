@@ -104,7 +104,7 @@ public sealed class ToolWindow : Window
             {
                 SaveDraft();
                 Render(statusPages.GetValueOrDefault(example.Title, example));
-                if (tools && observeStatus && example.Title is "GitHub" or "External dependencies") await RefreshStatusAsync();
+                if (tools && observeStatus && example.Title is "GitHub" or "External dependencies" or "Update mods") await RefreshStatusAsync();
             };
             navigation.Add((button, example));
             panel.Children.Add(button);
@@ -114,6 +114,7 @@ public sealed class ToolWindow : Window
 
     private void Render(DialogSpec next)
     {
+        if (tools && next.Title == "Update mods" && checking.Contains(next.Title)) next = ToolPages.Updates();
         next.Validate();
         spec = next;
         Resources["GcAccent"] = Brush(spec.Accent);
@@ -145,7 +146,7 @@ public sealed class ToolWindow : Window
         {
             var restored = field;
             if (drafts.TryGetValue(spec.Title, out var draft) && draft.TryGetValue(field.Id, out var value))
-                restored = field.Kind == "check" ? field with { Checked = (bool)value } : field with { Value = (string)value };
+                restored = field.Kind == "check" ? field with { Checked = field.Enabled && (bool)value } : field with { Value = (string)value };
             content.Children.Add(Field(restored));
         }
         var feedback = Text("", 13, "#a9b09b", margin: new Thickness(0, 14, 0, 0));
@@ -162,9 +163,17 @@ public sealed class ToolWindow : Window
         var cancel = new Button { Content = spec.SecondaryAction, MinWidth = 92, Margin = new Thickness(0, 0, 10, 0) };
         cancel.Click += (_, _) => Close();
         var confirm = new Button { Content = spec.PrimaryAction, Background = Brush(spec.Accent), BorderBrush = Brush(spec.Accent), Foreground = Brush("#1b2119"), Margin = new Thickness(0) };
-        confirm.IsEnabled = !checking.Contains(spec.Title);
+        void UpdateConfirm() => confirm.IsEnabled = !checking.Contains(spec.Title) &&
+            (!tools || spec.Title != "Update mods" || inputs.Values.OfType<CheckBox>().Any(check => check.IsEnabled && check.IsChecked == true));
+        foreach (var check in inputs.Values.OfType<CheckBox>())
+        {
+            check.Checked += (_, _) => UpdateConfirm();
+            check.Unchecked += (_, _) => UpdateConfirm();
+        }
+        UpdateConfirm();
         confirm.Click += async (_, _) =>
         {
+            if (checking.Contains(spec.Title)) return;
             if (tools && spec.Title == "GitHub") { await RefreshStatusAsync(true); return; }
             var values = ReadValues();
             if (values is null) return;
@@ -184,7 +193,7 @@ public sealed class ToolWindow : Window
             Result = new DialogResult(tools ? ToolPages.Action(spec.Title) : "confirm", values);
             Close();
         };
-        if (tools && spec.Title is "GitHub" or "External dependencies")
+        if (tools && spec.Title is "GitHub" or "External dependencies" or "Update mods")
         {
             var refresh = new Button { Content = "Refresh", IsEnabled = !checking.Contains(spec.Title), Margin = new Thickness(0, 0, 10, 0) };
             refresh.Click += async (_, _) => await RefreshStatusAsync();
@@ -207,23 +216,30 @@ public sealed class ToolWindow : Window
     private async Task RefreshStatusAsync(bool signIn = false, string? title = null)
     {
         title ??= spec.Title;
-        if (!checking.Add(title)) return;
-        if (spec.Title == title) Render(spec with { Items = [new("Status", "", signIn ? "Waiting for GitHub sign-in..." : "Checking...")] });
+        if (checking.Contains(title)) return;
+        if (spec.Title == title) SaveDraft();
+        checking.Add(title);
+        if (spec.Title == title) Render(title == "Update mods" ? ToolPages.Updates() : spec with { Items = [new("Status", "", signIn ? "Waiting for GitHub sign-in..." : "Checking...")] });
         DialogSpec result;
         try
         {
-            result = title == "GitHub" ? await ToolStatus.GitHubAsync(signIn, lifetime.Token) : await ToolStatus.DependenciesAsync(lifetime.Token);
+            result = title switch
+            {
+                "GitHub" => await ToolStatus.GitHubAsync(signIn, lifetime.Token),
+                "Update mods" => await ToolStatus.ModsAsync(lifetime.Token),
+                _ => await ToolStatus.DependenciesAsync(lifetime.Token)
+            };
         }
         catch (Exception)
         {
-            result = (title == "GitHub" ? ToolPages.GitHub() : ToolPages.Dependencies()) with { Items = [new("Status", "", "Check unavailable \u00b7 try Refresh", "warning")] };
+            result = (title == "GitHub" ? ToolPages.GitHub() : title == "Update mods" ? ToolPages.Updates("Unable to check - refresh") : ToolPages.Dependencies()) with { Items = [new("Status", "", "Check unavailable \u00b7 try Refresh", "warning")] };
         }
         checking.Remove(title);
         if (lifetime.IsCancellationRequested) return;
         statusPages[title] = result;
         if (title == "GitHub")
             statusPages["Submit mission"] = ToolPages.Submission() with { Items = [.. ToolPages.Submission().Items, result.Items[0]] };
-        if (statusPages.TryGetValue(spec.Title, out var current)) Render(current);
+        if ((spec.Title == title || title == "GitHub" && spec.Title == "Submit mission") && statusPages.TryGetValue(spec.Title, out var current)) Render(current);
     }
 
     private FrameworkElement StatusCard(StatusItem item)
@@ -245,7 +261,7 @@ public sealed class ToolWindow : Window
             var label = new StackPanel();
             label.Children.Add(Text(field.Label, 15, "#f0e9d5", bold: true));
             if (field.Help.Length > 0) label.Children.Add(Text(field.Help, 12, "#a9b09b", margin: new Thickness(0, 5, 0, 0)));
-            input = new CheckBox { Content = label, IsChecked = field.Checked, VerticalContentAlignment = VerticalAlignment.Center, Padding = new Thickness(10, 2, 0, 2) };
+            input = new CheckBox { Content = label, IsChecked = field.Enabled && field.Checked, IsEnabled = field.Enabled, Opacity = field.Enabled ? 1 : 0.6, VerticalContentAlignment = VerticalAlignment.Center, Padding = new Thickness(10, 2, 0, 2) };
             panel.Children.Add(input);
         }
         else
@@ -276,7 +292,8 @@ public sealed class ToolWindow : Window
 
     private void SaveDraft()
     {
-        drafts[spec.Title] = inputs.ToDictionary(pair => pair.Key, pair => pair.Value is CheckBox check ? (object)(check.IsChecked == true) : ((TextBox)pair.Value).Text);
+        if (checking.Contains(spec.Title)) return;
+        drafts[spec.Title] = inputs.Where(pair => pair.Value.IsEnabled).ToDictionary(pair => pair.Key, pair => pair.Value is CheckBox check ? (object)(check.IsChecked == true) : ((TextBox)pair.Value).Text);
     }
 
     private Dictionary<string, object>? ReadValues()
@@ -286,7 +303,7 @@ public sealed class ToolWindow : Window
         foreach (var field in spec.Fields)
         {
             var control = inputs[field.Id];
-            object value = control is CheckBox check ? check.IsChecked == true : ((TextBox)control).Text.Trim();
+            object value = control is CheckBox check ? check.IsEnabled && check.IsChecked == true : ((TextBox)control).Text.Trim();
             values[field.Id] = value;
             bool missing = field.Required && (value is bool flag ? !flag : string.IsNullOrWhiteSpace((string)value));
             errors[field.Id].Text = missing ? "Please complete this field." : "";

@@ -46,6 +46,7 @@ public sealed record InputField
     public bool Checked { get; init; }
     public bool Required { get; init; }
     public bool ReadOnly { get; init; }
+    public bool Enabled { get; init; } = true;
 }
 
 public sealed record DialogResult(string Action, Dictionary<string, object> Values);
