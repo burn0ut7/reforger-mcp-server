@@ -125,4 +125,3 @@ try {$null=Invoke-MissionSubmission $addons $world;throw 'External submission ed
 Assert ((Git $forkPath @('rev-parse',$script:branch)) -eq $outside) 'External submission overwritten'
 Check-Isolation
 Write-Output "PASS: automatic fork/mission branch, scoped submission, unchanged checkout/index, existing PR update, cancellation, both conflict choices, retained resolutions, stale review, rejected push retry. Fixture: $fixture"
-
