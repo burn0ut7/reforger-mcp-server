@@ -37,6 +37,20 @@ The supported host is Workbench 1.9.0.37 with the checked Qt binary identities.
 Other versions are refused; matching Qt alone does not establish compatibility.
 End users do not need a .NET runtime, development tools or MCP client.
 
+## Shared tool UI preview
+
+The package includes `GCWorkbench.UI.exe` beside the helper, sharing its bundled
+Windows desktop runtime. `external/workbench/Preview UI.js` opens three illustrative
+forms without installing, updating or submitting anything. Source and JSON form
+contract: `companion/lobby2/tools/GCWorkbench.UI/README.md`. Default examples use
+labels, statuses and actions only; explanatory copy is optional. Workflow migration
+is separate from this presentation kit. The existing installation wizard is still
+the production workflow and has not yet been replaced by the preview.
+
+The external launcher imports Utility and Archive from the running PowerShell's
+own module directory, so a Workbench process launched from PowerShell 7 cannot
+redirect its Windows PowerShell helper to incompatible modules.
+
 ## Ownership and lifecycle
 
 The DLL and self-contained helper live in a new per-user version directory under

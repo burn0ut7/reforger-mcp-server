@@ -38,6 +38,9 @@ foreach ($file in @('GC-ModLauncher.js', 'GC-ModWorkflow.ps1', 'GC-SubmitMission
 }
 & $Dotnet publish (Join-Path $root 'src/ReforgerMcp/ReforgerMcp.csproj') -c Release -r win-x64 --self-contained true -o $helper -p:OutputType=WinExe -p:DebugType=None -p:DebugSymbols=false
 if ($LASTEXITCODE -ne 0) { throw 'Helper publish failed.' }
+# Share the already bundled Windows desktop runtime with the reusable tool UI.
+& $Dotnet publish (Join-Path $root 'companion/lobby2/tools/GCWorkbench.UI/GCWorkbench.UI.csproj') -c Release -r win-x64 --self-contained true -o $helper -p:DebugType=None -p:DebugSymbols=false
+if ($LASTEXITCODE -ne 0) { throw 'GC tool UI publish failed.' }
 Copy-Item -LiteralPath (Join-Path $native 'generic/rstauthoring.dll') -Destination (Join-Path $support 'payload/generic/rstauthoring.dll')
 Copy-Item -LiteralPath (Join-Path $root 'companion/lobby2/workbench/menu-icons.json') -Destination (Join-Path $support 'payload/generic/menu-icons.json')
 Copy-Item -LiteralPath (Join-Path $native 'manifest.json') -Destination (Join-Path $support 'payload/native-build.json')
@@ -80,7 +83,7 @@ if ($LobbyDirectory) {
     New-Item -ItemType Directory -Path $external -Force | Out-Null
     Copy-Item -LiteralPath ($destination + '.zip') -Destination (Join-Path $external 'GCWorkbench.zip')
     Set-Content -LiteralPath (Join-Path $external 'GCWorkbench.zip.sha256') -Value ($hash + '  GCWorkbench.zip') -Encoding ASCII
-    foreach ($file in @('Install.js', 'Install.ps1')) {
+    foreach ($file in @('Install.js', 'Install.ps1', 'Preview UI.js')) {
         Copy-Item -LiteralPath (Join-Path $root ('installer/workbench/external/' + $file)) -Destination $external
     }
 }
