@@ -7,9 +7,8 @@ internal static class Examples
         Title = "External dependencies",
         PrimaryAction = "Install",
         Items = [
-            new("Workbench extension", "", "Not installed"),
-            new("Git for Windows", "", "Installed", "ready"),
-            new("GC tools", "", "Not installed")
+            new("GC Workbench Tools", "", "Not installed"),
+            new("Git for Windows", "", "Installed", "ready")
         ]
     };
 

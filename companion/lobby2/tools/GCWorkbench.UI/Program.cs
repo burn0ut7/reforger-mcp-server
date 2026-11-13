@@ -16,26 +16,33 @@ internal static class Program
         try
         {
             var app = new Application();
+            if (args is ["--tools"])
+            {
+                var picker = new ToolWindow(ToolPages.Submission(), tools: true);
+                app.Run(picker);
+                // Contract with GC_ToolsPlugin: selection only, no operations in this window.
+                return picker.Result.Action switch { "submit" => 10, "update" => 100 + ToolPages.ModMask(picker.Result.Values), "install" => 12, _ => 2 };
+            }
             if (args is ["--preview"])
             {
                 app.Run(new ToolWindow(Examples.Dependencies(), preview: true));
                 return 0;
             }
-            if (args is ["--render", var folder] && Path.IsPathFullyQualified(folder))
+            if (args is ["--render" or "--render-tools", var folder] && Path.IsPathFullyQualified(folder))
             {
                 Directory.CreateDirectory(folder);
-                foreach (var (name, spec) in Examples.All())
+                foreach (var (name, spec) in (args[0] == "--render-tools" ? ToolPages.All() : Examples.All()))
                 {
-                    var window = new ToolWindow(spec, preview: true);
+                    var window = new ToolWindow(spec, preview: args[0] == "--render", tools: args[0] == "--render-tools");
                     var content = (FrameworkElement)window.Content;
                     window.Content = null;
                     content.Resources = window.Resources;
                     System.Windows.Documents.TextElement.SetFontFamily(content, window.FontFamily);
                     System.Windows.Documents.TextElement.SetFontSize(content, window.FontSize);
-                    content.Measure(new Size(880, 620));
-                    content.Arrange(new Rect(0, 0, 880, 620));
+                    content.Measure(new Size(880, 560));
+                    content.Arrange(new Rect(0, 0, 880, 560));
                     content.UpdateLayout();
-                    var bitmap = new RenderTargetBitmap(880, 620, 96, 96, PixelFormats.Pbgra32);
+                    var bitmap = new RenderTargetBitmap(880, 560, 96, 96, PixelFormats.Pbgra32);
                     bitmap.Render(content);
                     var encoder = new PngBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(bitmap));
@@ -55,7 +62,7 @@ internal static class Program
             app.Run(dialog);
             using var output = new FileStream(result, FileMode.CreateNew, FileAccess.Write);
             JsonSerializer.Serialize(output, dialog.Result, Json);
-            return dialog.Result.Action == "confirm" ? 0 : 2;
+            return dialog.Result.Action == "cancel" ? 2 : 0;
         }
         catch (Exception error)
         {

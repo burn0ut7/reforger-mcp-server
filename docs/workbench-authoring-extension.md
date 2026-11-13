@@ -27,7 +27,7 @@ See `installer/workbench/README.txt` for user-facing instructions and limits.
 To ship the installer with a Lobby2 source checkout, pass
 `-LobbyDirectory <absolute-Lobby2-directory>` to the packaging script. It creates
 `external/workbench` with the complete compressed package, checksum and GUI
-launcher. The GC **Install External Dependencies** command launches that local
+launcher. The **GC Tools > Install external dependencies** action launches that local
 installer without blocking Workbench (setup can reload scripts). Existing external
 packages are refused to prevent accidental replacement. Preserve the prior package
 before deliberately replacing it. Installer and native sources remain authoritative
@@ -46,6 +46,14 @@ contract: `companion/lobby2/tools/GCWorkbench.UI/README.md`. Default examples us
 labels, statuses and actions only; explanatory copy is optional. Workflow migration
 is separate from this presentation kit. The existing installation wizard is still
 the production workflow and has not yet been replaced by the preview.
+
+The real **GC Tools** entry uses the shared window with a sidebar and action panel.
+`--tools` returns 10 (submit), 12 (install), or 2 (close/cancel). Mod updates return
+100 + the selected-mod mask (Lobby2=1, Core=2, Units=4, Missions=8).
+The external launcher preserves that exit code. Workbench dispatches the existing
+owning handlers only after the picker closes, keeping mission save/export and
+Git checks intact. The install workflow remains asynchronous so it can reload
+Workbench. The picker itself never calls Workbench or changes repository files.
 
 The external launcher imports Utility and Archive from the running PowerShell's
 own module directory, so a Workbench process launched from PowerShell 7 cannot
@@ -125,7 +133,7 @@ command set to the native icon of one of those commands. The Lobby2 companion pa
 selects Spawn Mission Template's built-in compass icon for GC. No custom image is shipped. Generic installations need no icon mapping.
 Names and command behavior remain unchanged. The optional `bottomCommand` moves
 one existing action to the end of the matching category. Rules apply in file order;
-Lobby2 moves Open Wiki, then Install External Dependencies, to form the final two
+Lobby2 moves Open Wiki, then GC Tools, to form the final two
 items. Other actions keep their relative order. Both presentation
 changes apply when the parent menu is shown, including after script Reload creates
 fresh actions. Without the extension, Workbench retains alphabetical ordering.

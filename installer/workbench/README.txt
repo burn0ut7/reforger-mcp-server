@@ -79,11 +79,13 @@ the two batch files.
 
 LOBBY2 GIT TOOLS
 The installer reuses Workbench's built-in compass icon for the GC plugin category.
-The category text remains GC. It applies only when the six GC commands match;
+The category text remains GC. It applies only when the four GC commands match;
 unrelated plugin menus retain their icons. The category icon requires the extension.
-The extension keeps Open Wiki second-last and Install External Dependencies last
+The extension keeps Open Wiki second-last and GC Tools last
 in the GC category.
 Without the extension loaded, Workbench uses its normal alphabetical order.
+GC Tools opens one window for Submit mission, Update mods and Install external
+dependencies. Open Wiki uses Workbench's built-in book icon.
 The package also installs the Git update, branch and mission-submission helpers
 under GCWorkbench/tools in the active Workbench profile. Lobby2 supplies the
 native editor menus; these Windows files are not shipped inside the Workshop

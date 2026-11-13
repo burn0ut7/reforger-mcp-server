@@ -4,12 +4,15 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Shell;
 
 namespace GCWorkbench.UI;
 
 public sealed class ToolWindow : Window
 {
     private readonly bool preview;
+    private readonly bool tools;
+    private readonly Dictionary<string, Dictionary<string, object>> drafts = [];
     private readonly Grid body = new();
     private readonly Dictionary<string, FrameworkElement> inputs = [];
     private readonly Dictionary<string, TextBlock> errors = [];
@@ -17,56 +20,84 @@ public sealed class ToolWindow : Window
     private DialogSpec spec;
     public DialogResult Result { get; private set; } = new("cancel", []);
 
-    public ToolWindow(DialogSpec specification, bool preview = false)
+    public ToolWindow(DialogSpec specification, bool preview = false, bool tools = false)
     {
         spec = specification;
         this.preview = preview;
+        this.tools = tools;
         Title = "GC Workbench";
-        Width = preview ? 880 : 680;
-        Height = 620;
-        MinWidth = preview ? 760 : 540;
-        MinHeight = 580;
+        Width = preview || tools ? 880 : 680;
+        Height = 560;
+        MinWidth = preview || tools ? 760 : 540;
+        MinHeight = 500;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         FontFamily = new FontFamily("Segoe UI");
         FontSize = 14;
-        Background = Brush("#F5F6F8");
-        Foreground = Brush("#17212B");
+        Background = Brush("#191e18");
+        Foreground = Brush("#f0e9d5");
         UseLayoutRounding = true;
         Resources = (ResourceDictionary)XamlReader.Parse(Styles);
-        var root = new Grid { Background = Background };
-        if (preview)
+        WindowStyle = WindowStyle.None;
+        WindowChrome.SetWindowChrome(this, new WindowChrome { CaptionHeight = 40, ResizeBorderThickness = new Thickness(6), GlassFrameThickness = new Thickness(0), CornerRadius = new CornerRadius(0) });
+        var shell = new Grid { Background = Background };
+        shell.RowDefinitions.Add(new RowDefinition { Height = new GridLength(40) });
+        shell.RowDefinitions.Add(new RowDefinition());
+        var chrome = new DockPanel { LastChildFill = false, Background = Background };
+        var controls = new StackPanel { Orientation = Orientation.Horizontal };
+        foreach (var (label, name, action) in new (string, string, Action)[] {
+            ("\u2212", "Minimize", () => WindowState = WindowState.Minimized),
+            ("\u25a1", "Maximize or restore", () => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized),
+            ("\u00d7", "Close", Close) })
         {
-            root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(190) });
+            var control = new Button { Content = label, Width = 44, MinHeight = 0, Padding = new Thickness(0), Background = Brushes.Transparent, BorderThickness = new Thickness(0), FontSize = 18 };
+            AutomationProperties.SetName(control, name);
+            WindowChrome.SetIsHitTestVisibleInChrome(control, true);
+            control.Click += (_, _) => action();
+            controls.Children.Add(control);
+        }
+        DockPanel.SetDock(controls, Dock.Right);
+        chrome.Children.Add(controls);
+        var brand = new Border
+        {
+            Width = preview || tools ? 216 : 200, Background = preview || tools ? Brush("#242b20") : Background,
+            Child = Text(preview ? "GC TOOLS / PREVIEW" : "GC TOOLS", 12, "#f0e9d5", bold: true, margin: new Thickness(24, 12, 0, 0))
+        };
+        DockPanel.SetDock(brand, Dock.Left);
+        chrome.Children.Add(brand);
+        shell.Children.Add(chrome);
+        var root = new Grid { Background = Background };
+        Grid.SetRow(root, 1);
+        shell.Children.Add(root);
+        if (preview || tools)
+        {
+            root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(216) });
             root.ColumnDefinitions.Add(new ColumnDefinition());
             root.Children.Add(PreviewNavigation());
             Grid.SetColumn(body, 1);
         }
         root.Children.Add(body);
-        Content = root;
+        Content = shell;
         Render(spec);
         PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) { Close(); e.Handled = true; } };
     }
 
     private FrameworkElement PreviewNavigation()
     {
-        var panel = new StackPanel { Margin = new Thickness(20, 28, 20, 20) };
-        panel.Children.Add(Text("GC", 27, "#F2C94C", bold: true));
-        panel.Children.Add(Text("WORKBENCH TOOLS", 10, "#B4BDC8", margin: new Thickness(0, 6, 0, 38)));
-        foreach (var (name, example) in Examples.All())
+        var panel = new StackPanel { Margin = new Thickness(12, 24, 12, 16) };
+        foreach (var (name, example) in (tools ? ToolPages.All() : Examples.All()))
         {
             var label = name switch { "dependencies" => "Dependencies", "updates" => "Update mods", _ => "Submit mission" };
             var button = new Button
             {
                 Content = label, HorizontalContentAlignment = HorizontalAlignment.Left,
-                Background = Brush("#293440"), Foreground = Brushes.White, BorderBrush = Brush("#3C4753"),
-                Margin = new Thickness(0, 0, 0, 10), Padding = new Thickness(12)
+                Background = Brushes.Transparent, Foreground = Brush("#f0e9d5"), BorderBrush = Brushes.Transparent,
+                Margin = new Thickness(0, 0, 0, 6), Padding = new Thickness(12, 14, 12, 14)
             };
-            button.Click += (_, _) => Render(example);
+            button.Click += (_, _) => { SaveDraft(); Render(example); };
             navigation.Add((button, example));
             panel.Children.Add(button);
         }
-        panel.Children.Add(Text("PREVIEW ONLY", 10, "#F2C94C", margin: new Thickness(0, 32, 0, 8)));
-        return new Border { Background = Brush("#1D2732"), Child = panel };
+        return new Border { Background = Brush("#242b20"), Child = panel };
     }
 
     private void Render(DialogSpec next)
@@ -77,9 +108,10 @@ public sealed class ToolWindow : Window
         foreach (var (button, page) in navigation)
         {
             bool selected = page.Title == spec.Title;
-            button.Background = Brush(selected ? "#364658" : "#293440");
-            button.BorderBrush = Brush(selected ? spec.Accent : "#3C4753");
-            AutomationProperties.SetHelpText(button, selected ? "Current preview" : "Open preview");
+            button.Background = Brush(selected ? "#191e18" : "#242b20");
+            button.BorderBrush = selected ? Brush(spec.Accent) : Brushes.Transparent;
+            button.BorderThickness = new Thickness(3, 0, 0, 0);
+            AutomationProperties.SetHelpText(button, selected ? "Selected" : "");
         }
         inputs.Clear();
         errors.Clear();
@@ -89,17 +121,28 @@ public sealed class ToolWindow : Window
         body.RowDefinitions.Add(new RowDefinition());
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-        var header = new StackPanel { Margin = new Thickness(32, 30, 32, 22) };
-        header.Children.Add(Text(preview ? "GC TOOLS  /  PREVIEW" : "GC TOOLS", 11, "#66717D", bold: true));
-        header.Children.Add(Text(spec.Title, 28, "#17212B", bold: true, margin: new Thickness(0, 12, 0, 8)));
-        if (spec.Description.Length > 0) header.Children.Add(Text(spec.Description, 14, "#586575"));
+        var header = new StackPanel { Margin = new Thickness(24, 24, 24, 16) };
+        header.Children.Add(Text(spec.Title, 28, "#f0e9d5", bold: true, margin: new Thickness(0, 0, 0, 8)));
+        if (spec.Description.Length > 0) header.Children.Add(Text(spec.Description, 14, "#a9b09b"));
         body.Children.Add(header);
 
-        var content = new StackPanel { Margin = new Thickness(32, 0, 32, 24) };
-        if (spec.Section.Length > 0) content.Children.Add(Text(spec.Section, 14, "#17212B", bold: true, margin: new Thickness(0, 0, 0, 12)));
+        var content = new StackPanel { Margin = new Thickness(24, 0, 24, 16) };
+        if (spec.Section.Length > 0) content.Children.Add(Text(spec.Section, 14, "#f0e9d5", bold: true, margin: new Thickness(0, 0, 0, 12)));
         foreach (var item in spec.Items) content.Children.Add(StatusCard(item));
-        foreach (var field in spec.Fields) content.Children.Add(Field(field));
-        var feedback = Text("", 13, "#276347", margin: new Thickness(0, 14, 0, 0));
+        foreach (var field in spec.Fields)
+        {
+            var restored = field;
+            if (drafts.TryGetValue(spec.Title, out var draft) && draft.TryGetValue(field.Id, out var value))
+                restored = field.Kind == "check" ? field with { Checked = (bool)value } : field with { Value = (string)value };
+            content.Children.Add(Field(restored));
+        }
+        foreach (var action in spec.Actions)
+        {
+            var button = new Button { Content = action.Label, Margin = new Thickness(0, 0, 0, 12) };
+            button.Click += (_, _) => { var values = ReadValues(); if (values is null) return; Result = new DialogResult(action.Id, values); Close(); };
+            content.Children.Add(button);
+        }
+        var feedback = Text("", 13, "#a9b09b", margin: new Thickness(0, 14, 0, 0));
         feedback.Visibility = Visibility.Collapsed;
         AutomationProperties.SetLiveSetting(feedback, AutomationLiveSetting.Polite);
         content.Children.Add(feedback);
@@ -107,12 +150,12 @@ public sealed class ToolWindow : Window
         Grid.SetRow(scroll, 1);
         body.Children.Add(scroll);
 
-        var footer = new StackPanel { Margin = new Thickness(32, 20, 32, 24) };
-        if (spec.Note.Length > 0) footer.Children.Add(Text(spec.Note, 12, "#586575", margin: new Thickness(0, 0, 0, 18)));
+        var footer = new StackPanel { Margin = new Thickness(24, 16, 24, 24) };
+        if (spec.Note.Length > 0) footer.Children.Add(Text(spec.Note, 12, "#a9b09b", margin: new Thickness(0, 0, 0, 18)));
         var buttons = new WrapPanel { HorizontalAlignment = HorizontalAlignment.Right };
-        var cancel = new Button { Content = spec.SecondaryAction, MinWidth = 92, Margin = new Thickness(0, 0, 10, 8) };
+        var cancel = new Button { Content = spec.SecondaryAction, MinWidth = 92, Margin = new Thickness(0, 0, 10, 0) };
         cancel.Click += (_, _) => Close();
-        var confirm = new Button { Content = spec.PrimaryAction, Background = Brush(spec.Accent), BorderBrush = Brush(spec.Accent), Foreground = Brush("#17212B"), Margin = new Thickness(0, 0, 0, 8) };
+        var confirm = new Button { Content = spec.PrimaryAction, Background = Brush(spec.Accent), BorderBrush = Brush(spec.Accent), Foreground = Brush("#1b2119"), Margin = new Thickness(0) };
         confirm.Click += (_, _) =>
         {
             var values = ReadValues();
@@ -124,13 +167,19 @@ public sealed class ToolWindow : Window
                 feedback.BringIntoView();
                 return;
             }
-            Result = new DialogResult("confirm", values);
+            if (tools && spec.Title == "Update mods" && !values.Values.OfType<bool>().Any(value => value))
+            {
+                feedback.Text = "Select at least one mod.";
+                feedback.Visibility = Visibility.Visible;
+                return;
+            }
+            Result = new DialogResult(tools ? ToolPages.Action(spec.Title) : "confirm", values);
             Close();
         };
         buttons.Children.Add(cancel);
-        buttons.Children.Add(confirm);
+        if (spec.Actions.Count == 0) buttons.Children.Add(confirm);
         footer.Children.Add(buttons);
-        var footerBorder = new Border { Background = Brushes.White, BorderBrush = Brush("#DFE4EA"), BorderThickness = new Thickness(0, 1, 0, 0), Child = footer };
+        var footerBorder = new Border { Background = Background, Child = footer };
         Grid.SetRow(footerBorder, 2);
         body.Children.Add(footerBorder);
     }
@@ -138,9 +187,9 @@ public sealed class ToolWindow : Window
     private FrameworkElement StatusCard(StatusItem item)
     {
         var panel = new StackPanel();
-        var color = item.State switch { "ready" => "#276347", "error" => "#A73535", "warning" => "#8A600E", _ => "#596879" };
-        panel.Children.Add(Text(item.Title, 15, "#17212B", bold: true));
-        if (item.Description.Length > 0) panel.Children.Add(Text(item.Description, 13, "#586575", margin: new Thickness(0, 5, 0, 0)));
+        var color = item.State switch { "ready" => "#a9b09b", "error" => "#e5a198", "warning" => "#d4b874", _ => "#a9b09b" };
+        panel.Children.Add(Text(item.Title, 15, "#f0e9d5", bold: true));
+        if (item.Description.Length > 0) panel.Children.Add(Text(item.Description, 13, "#a9b09b", margin: new Thickness(0, 5, 0, 0)));
         panel.Children.Add(Text(item.Status, 12, color, bold: true, margin: new Thickness(0, 8, 0, 0)));
         return Card(panel);
     }
@@ -152,15 +201,15 @@ public sealed class ToolWindow : Window
         if (field.Kind == "check")
         {
             var label = new StackPanel();
-            label.Children.Add(Text(field.Label, 15, "#17212B", bold: true));
-            if (field.Help.Length > 0) label.Children.Add(Text(field.Help, 12, "#586575", margin: new Thickness(0, 5, 0, 0)));
+            label.Children.Add(Text(field.Label, 15, "#f0e9d5", bold: true));
+            if (field.Help.Length > 0) label.Children.Add(Text(field.Help, 12, "#a9b09b", margin: new Thickness(0, 5, 0, 0)));
             input = new CheckBox { Content = label, IsChecked = field.Checked, VerticalContentAlignment = VerticalAlignment.Center, Padding = new Thickness(10, 2, 0, 2) };
             panel.Children.Add(input);
         }
         else
         {
-            panel.Children.Add(Text(field.Label + (field.Required ? " *" : ""), 14, "#17212B", bold: true, margin: new Thickness(0, 0, 0, 8)));
-            var text = new TextBox { Text = field.Value, Padding = new Thickness(12, 10, 12, 10), BorderBrush = Brush("#BAC4CF"), Background = Brushes.White, BorderThickness = new Thickness(1), MaxLength = 8192 };
+            panel.Children.Add(Text(field.Label + (field.Required ? " *" : ""), 14, "#f0e9d5", bold: true, margin: new Thickness(0, 0, 0, 8)));
+            var text = new TextBox { Text = field.Value, Foreground = Brush("#f0e9d5"), CaretBrush = Brush("#f0e9d5"), Padding = new Thickness(12, 10, 12, 10), BorderBrush = Brush("#404735"), Background = Brush("#242b20"), BorderThickness = new Thickness(1), MaxLength = 8192 };
             if (field.Kind == "multiline")
             {
                 text.AcceptsReturn = true;
@@ -170,16 +219,21 @@ public sealed class ToolWindow : Window
             }
             panel.Children.Add(text);
             input = text;
-            if (field.Help.Length > 0) panel.Children.Add(Text(field.Help, 12, "#586575", margin: new Thickness(0, 7, 0, 0)));
+            if (field.Help.Length > 0) panel.Children.Add(Text(field.Help, 12, "#a9b09b", margin: new Thickness(0, 7, 0, 0)));
         }
         AutomationProperties.SetName(input, field.Label);
         AutomationProperties.SetHelpText(input, field.Help);
         inputs.Add(field.Id, input);
-        var error = Text("", 12, "#A73535", margin: new Thickness(0, 8, 0, 0));
+        var error = Text("", 12, "#e5a198", margin: new Thickness(0, 8, 0, 0));
         error.Visibility = Visibility.Collapsed;
         errors.Add(field.Id, error);
         panel.Children.Add(error);
         return field.Kind == "check" ? Card(panel) : new Border { Child = panel, Margin = new Thickness(0, 0, 0, 20) };
+    }
+
+    private void SaveDraft()
+    {
+        drafts[spec.Title] = inputs.ToDictionary(pair => pair.Key, pair => pair.Value is CheckBox check ? (object)(check.IsChecked == true) : ((TextBox)pair.Value).Text);
     }
 
     private Dictionary<string, object>? ReadValues()
@@ -204,8 +258,8 @@ public sealed class ToolWindow : Window
 
     private static Border Card(UIElement content) => new()
     {
-        Child = content, Padding = new Thickness(18, 16, 18, 16), Margin = new Thickness(0, 0, 0, 10),
-        Background = Brushes.White, BorderBrush = Brush("#DFE4EA"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8)
+        Child = content, Padding = new Thickness(0, 16, 0, 16),
+        Background = Brushes.Transparent, BorderBrush = Brush("#404735"), BorderThickness = new Thickness(0, 0, 0, 1)
     };
 
     private static SolidColorBrush Brush(string hex) => new((Color)ColorConverter.ConvertFromString(hex));
@@ -219,10 +273,10 @@ public sealed class ToolWindow : Window
         <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
           <Style TargetType="TextBox">
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox">
-              <Border x:Name="Frame" CornerRadius="6" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+              <Border x:Name="Frame" CornerRadius="3" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
                 <ScrollViewer x:Name="PART_ContentHost"/>
               </Border>
-              <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Frame" Property="BorderBrush" Value="#355E95"/></Trigger></ControlTemplate.Triggers>
+              <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Frame" Property="BorderBrush" Value="#d4b874"/></Trigger></ControlTemplate.Triggers>
             </ControlTemplate></Setter.Value></Setter>
           </Style>
           <Style TargetType="CheckBox">
@@ -230,33 +284,34 @@ public sealed class ToolWindow : Window
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="CheckBox">
               <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="22"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                <Border x:Name="Box" Width="20" Height="20" VerticalAlignment="Center" Background="White" BorderBrush="#8998A8" BorderThickness="1" CornerRadius="4">
-                  <Path x:Name="Tick" Visibility="Collapsed" Data="M 3,9 L 7,13 L 15,4" Stroke="#17212B" StrokeThickness="2"/>
+                <Border x:Name="Box" Width="20" Height="20" VerticalAlignment="Center" Background="#242b20" BorderBrush="#a9b09b" BorderThickness="1" CornerRadius="4">
+                  <Path x:Name="Tick" Visibility="Collapsed" Data="M 3,9 L 7,13 L 15,4" Stroke="#1b2119" StrokeThickness="2"/>
                 </Border>
                 <ContentPresenter Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True"/>
               </Grid>
               <ControlTemplate.Triggers>
-                <Trigger Property="IsChecked" Value="True"><Setter TargetName="Tick" Property="Visibility" Value="Visible"/><Setter TargetName="Box" Property="Background" Value="{DynamicResource GcAccent}"/><Setter TargetName="Box" Property="BorderBrush" Value="#8998A8"/></Trigger>
-                <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="#355E95"/><Setter TargetName="Box" Property="BorderThickness" Value="2"/></Trigger>
+                <Trigger Property="IsChecked" Value="True"><Setter TargetName="Tick" Property="Visibility" Value="Visible"/><Setter TargetName="Box" Property="Background" Value="{DynamicResource GcAccent}"/><Setter TargetName="Box" Property="BorderBrush" Value="#a9b09b"/></Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="#d4b874"/><Setter TargetName="Box" Property="BorderThickness" Value="2"/></Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate></Setter.Value></Setter>
           </Style>
           <Style TargetType="Button">
+            <Setter Property="Foreground" Value="#f0e9d5"/>
             <Setter Property="Padding" Value="18,11"/>
             <Setter Property="MinHeight" Value="42"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#BAC4CF"/>
+            <Setter Property="Background" Value="#242b20"/>
+            <Setter Property="BorderBrush" Value="#404735"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
               <Setter.Value><ControlTemplate TargetType="Button">
-                <Border x:Name="Frame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                <Border x:Name="Frame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" Padding="{TemplateBinding Padding}">
                   <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" RecognizesAccessKey="True"/>
                 </Border>
                 <ControlTemplate.Triggers>
                   <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Frame" Property="Opacity" Value="0.8"/></Trigger>
-                  <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Frame" Property="BorderBrush" Value="#355E95"/><Setter TargetName="Frame" Property="BorderThickness" Value="2"/></Trigger>
+                  <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Frame" Property="BorderBrush" Value="#d4b874"/></Trigger>
                   <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Frame" Property="Opacity" Value="0.45"/></Trigger>
                 </ControlTemplate.Triggers>
               </ControlTemplate></Setter.Value>

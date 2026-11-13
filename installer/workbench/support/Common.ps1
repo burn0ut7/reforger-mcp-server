@@ -124,6 +124,8 @@ class GC_WorkbenchStartup : WorkbenchPlugin
 "@
     New-Item -ItemType Directory -Path (Split-Path $script -Parent) -Force | Out-Null
     Install-GcLobbyTools $Destination $profile
+    $uiPath = Assert-GcOwnedPath (Join-Path $control 'ui-path.txt') $control
+    [IO.File]::WriteAllText($uiPath, (Join-Path $Destination 'payload/helper/GCWorkbench.UI.exe'), [Text.Encoding]::Unicode)
     # Deactivate the previous version before replacing its bootstrap. No sign-in task is installed.
     Remove-GcLegacyStartup
     $active = Assert-GcOwnedPath (Join-Path $control 'active.json') $control

@@ -9,9 +9,10 @@ public sealed record DialogSpec
     public string PrimaryAction { get; init; } = "Continue";
     public string SecondaryAction { get; init; } = "Cancel";
     public string Note { get; init; } = "";
-    public string Accent { get; init; } = "#F2C94C";
+    public string Accent { get; init; } = "#d4b874";
     public List<StatusItem> Items { get; init; } = [];
     public List<InputField> Fields { get; init; } = [];
+    public List<ToolAction> Actions { get; init; } = [];
 
     public void Validate()
     {
@@ -28,6 +29,9 @@ public sealed record DialogSpec
         foreach (var item in Items)
             if (item.State is not ("ready" or "pending" or "warning" or "error"))
                 throw new ArgumentException("Unsupported status state.");
+        if (Actions.Select(a => a.Id).Distinct().Count() != Actions.Count ||
+            Actions.Any(a => string.IsNullOrWhiteSpace(a.Id) || string.IsNullOrWhiteSpace(a.Label) || a.Id == "cancel"))
+            throw new ArgumentException("Actions need unique IDs and labels; cancel is reserved.");
     }
 }
 
@@ -44,3 +48,4 @@ public sealed record InputField
 }
 
 public sealed record DialogResult(string Action, Dictionary<string, object> Values);
+public sealed record ToolAction(string Id, string Label);
