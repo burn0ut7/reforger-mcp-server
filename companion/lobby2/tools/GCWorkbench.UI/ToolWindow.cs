@@ -24,7 +24,7 @@ public sealed class ToolWindow : Window
     private DialogSpec spec;
     public DialogResult Result { get; private set; } = new("cancel", []);
 
-    public ToolWindow(DialogSpec specification, bool preview = false, bool tools = false, bool observeStatus = true)
+    public ToolWindow(DialogSpec specification, bool preview = false, bool tools = false, bool observeStatus = true, bool dependenciesMissing = false)
     {
         spec = specification;
         this.preview = preview;
@@ -83,7 +83,24 @@ public sealed class ToolWindow : Window
         root.Children.Add(body);
         Content = shell;
         Render(spec);
-        if (tools && observeStatus) Loaded += async (_, _) => await RefreshStatusAsync(false, "GitHub");
+        if (tools && observeStatus)
+        {
+            bool initialized = false;
+            ContentRendered += async (_, _) =>
+            {
+                if (initialized) return;
+                initialized = true;
+                bool missing = dependenciesMissing || await ToolStatus.MissingCredentialManagerAsync(lifetime.Token);
+                if (lifetime.IsCancellationRequested) return;
+                if (missing)
+                {
+                    Render(ToolPages.Dependencies());
+                    MessageBox.Show(this, "External dependencies not found.", "GC Tools", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (!lifetime.IsCancellationRequested) await RefreshStatusAsync(false, "External dependencies");
+                }
+                else await RefreshStatusAsync(false, "GitHub");
+            };
+        }
         Closed += (_, _) => lifetime.Cancel();
         PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) { Close(); e.Handled = true; } };
     }
@@ -163,7 +180,7 @@ public sealed class ToolWindow : Window
         var cancel = new Button { Content = spec.SecondaryAction, MinWidth = 92, Margin = new Thickness(0, 0, 10, 0) };
         cancel.Click += (_, _) => Close();
         var confirm = new Button { Content = spec.PrimaryAction, Background = Brush(spec.Accent), BorderBrush = Brush(spec.Accent), Foreground = Brush("#1b2119"), Margin = new Thickness(0) };
-        void UpdateConfirm() => confirm.IsEnabled = !checking.Contains(spec.Title) &&
+        void UpdateConfirm() => confirm.IsEnabled = (!checking.Contains(spec.Title) || spec.Title == "External dependencies") &&
             (!tools || spec.Title != "Update mods" || inputs.Values.OfType<CheckBox>().Any(check => check.IsEnabled && check.IsChecked == true));
         foreach (var check in inputs.Values.OfType<CheckBox>())
         {
@@ -173,7 +190,7 @@ public sealed class ToolWindow : Window
         UpdateConfirm();
         confirm.Click += async (_, _) =>
         {
-            if (checking.Contains(spec.Title)) return;
+            if (checking.Contains(spec.Title) && spec.Title != "External dependencies") return;
             if (tools && spec.Title == "GitHub") { await RefreshStatusAsync(true); return; }
             var values = ReadValues();
             if (values is null) return;

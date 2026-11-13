@@ -2,6 +2,8 @@ namespace GCWorkbench.UI;
 
 internal static class ToolPages
 {
+    internal static DialogSpec Initial(bool missingDependencies) => missingDependencies ? Dependencies() : Submission();
+
     internal static DialogSpec Submission() => new()
     {
         Title = "Submit mission", PrimaryAction = "Review submission", SecondaryAction = "Close",

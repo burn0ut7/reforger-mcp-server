@@ -18,7 +18,8 @@ internal static class Program
             var app = new Application();
             if (args is ["--tools"])
             {
-                var picker = new ToolWindow(ToolPages.Submission(), tools: true);
+                bool missingDependencies = ToolStatus.MissingStartupDependencies();
+                var picker = new ToolWindow(ToolPages.Initial(missingDependencies), tools: true, dependenciesMissing: missingDependencies);
                 app.Run(picker);
                 // Contract with GC_ToolsPlugin: selection only, no operations in this window.
                 return picker.Result.Action switch { "submit" => 10, "update" => 100 + ToolPages.ModMask(picker.Result.Values), "install" => 12, _ => 2 };

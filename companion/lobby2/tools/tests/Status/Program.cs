@@ -33,3 +33,17 @@ var oldMod=ToolStatus.ModStatusField(currentMod,0,"{\"Status\":\"Update availabl
 Check(oldMod.Enabled&&oldMod.Checked,"Outdated mod eligibility");
 Check(!ToolStatus.ModStatusField(oldMod,-1,"").Enabled,"Failed mod check eligibility");
 Console.WriteLine("PASS: per-mod status eligibility mapping.");
+// First-launch routing uses local presence, not network/update-check results.
+Check(ToolPages.Initial(true).Title=="External dependencies","Missing dependency start page");
+Check(ToolPages.Initial(false).Title=="Submit mission","Installed start page");
+Check(ToolStatus.MissingStartupDependencies(control,""),"Missing Git or helpers not detected");
+var helper=Path.Combine(install,"payload/helper/ReforgerMcp.exe");Directory.CreateDirectory(Path.GetDirectoryName(helper)!);File.WriteAllText(helper,"installed older version");
+foreach(var name in new[]{"GC-ModLauncher.js","GC-ModWorkflow.ps1","GC-SubmitMission.ps1","GC-Review.ps1","GC-GitHub.ps1","GC-ModStatus.ps1"})File.WriteAllText(Path.Combine(profile,"GCWorkbench/tools",name),"installed");
+var gitFolder=Path.Combine(root,"git bin");Directory.CreateDirectory(gitFolder);File.WriteAllText(Path.Combine(gitFolder,"git.exe"),"installed");
+Check(!ToolStatus.MissingStartupDependencies(control,gitFolder),"Present components mistaken for missing because updates exist");
+Check(ToolStatus.MissingStartupDependencies(control,""),"Missing Git not detected");
+File.Delete(Path.Combine(profile,"GCWorkbench/tools/GC-ModStatus.ps1"));
+Check(ToolStatus.MissingStartupDependencies(control,gitFolder),"Missing profile helper not detected");
+File.WriteAllText(Path.Combine(control,"installation.json"),"broken record");
+Check(ToolStatus.MissingStartupDependencies(control,gitFolder),"Broken install not routed to dependencies");
+Console.WriteLine("PASS: first-launch routing, present/older components, missing Git/helper, damaged installation.");

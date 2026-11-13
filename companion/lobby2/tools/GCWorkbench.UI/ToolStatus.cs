@@ -12,6 +12,34 @@ internal static class ToolStatus
 {
     private static readonly string Control = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GCWorkbench");
 
+    // Local presence only: no network, archive extraction, or full payload hashing at startup.
+    internal static bool MissingStartupDependencies(string? controlDirectory = null, string? searchPath = null)
+    {
+        try
+        {
+            var installation = Path.Combine(controlDirectory ?? Control, "installation.json");
+            if (!File.Exists(installation)) return true;
+            using var record = JsonDocument.Parse(File.ReadAllText(installation));
+            var destination = record.RootElement.GetProperty("destination").GetString()!;
+            var profile = record.RootElement.GetProperty("profileDirectory").GetString()!;
+            foreach (var file in new[] { "payload/generic/rstauthoring.dll", "payload/helper/ReforgerMcp.exe" })
+                if (!File.Exists(Path.Combine(destination, file))) return true;
+            foreach (var file in new[] { "GC-ModLauncher.js", "GC-ModWorkflow.ps1", "GC-SubmitMission.ps1", "GC-Review.ps1", "GC-GitHub.ps1", "GC-ModStatus.ps1" })
+                if (!File.Exists(Path.Combine(profile, "GCWorkbench", "tools", file))) return true;
+            return !(searchPath ?? Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator)
+                .Any(folder => !string.IsNullOrWhiteSpace(folder) && File.Exists(Path.Combine(folder.Trim().Trim('"'), "git.exe")));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException or ArgumentException)
+        { return true; }
+    }
+
+    internal static async Task<bool> MissingCredentialManagerAsync(CancellationToken cancellation)
+    {
+        var result = await RunAsync("git.exe", ["credential-manager", "--version"], 5, cancellation);
+        // A timeout is unknown, not proof that something is uninstalled.
+        return result.Code > 0;
+    }
+
     internal static async Task<DialogSpec> ModsAsync(CancellationToken cancellation)
     {
         var script = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "lobby2-tools", "GC-ModStatus.ps1"));

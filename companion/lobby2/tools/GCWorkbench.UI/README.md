@@ -128,3 +128,17 @@ a guarantee that remote state will remain unchanged.
 
 Tests: `tests/ModStatus.Tests.ps1`, `tests/ModSelection/ModSelection.csproj` and the
 status mapping checks in `tests/Status/Status.csproj`.
+
+## First launch
+
+GC Tools uses a quick local dependency-presence check before choosing its initial
+page. Missing installation files, profile helpers or Git open External dependencies
+immediately. A bounded local Credential Manager check also catches that missing
+component. The window shows one owned 'External dependencies not found.' notice
+with OK. Dismissing it never dispatches installation; users press Install / update.
+The install button remains available while detailed dependency checks run.
+
+Existing installations with updates available retain the normal starting page.
+Startup presence checks do not query the network or hash the package. An uncertain
+Credential Manager timeout does not falsely report a missing dependency. The
+notice is shown once per window opening while dependencies remain missing.
