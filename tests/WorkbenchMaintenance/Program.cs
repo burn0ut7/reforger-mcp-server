@@ -13,6 +13,18 @@ ExtensionCallbackChecks.Run();
 ArrayAddCallbackChecks.Run();
 PickerCallbackChecks.Run();
 FinishEditCallbackChecks.Run();
+MultiplayerCallbackChecks.Run();
+if (Workbench.ValidateAddons(null).Length != 0 ||
+    !Workbench.ValidateAddons(["RHS_Core", "rhs_core", "595F2BF2F44836FB"]).SequenceEqual(new[] { "RHS_Core", "595F2BF2F44836FB" }))
+    throw new Exception("Explicit addon defaults/deduplication failed");
+foreach (var invalid in new[] { new[] { "" }, new[] { "RHS_Core,Other" }, new[] { "bad name" },
+    new[] { "\" -server bad" }, new[] { new string('x', 129) }, Enumerable.Repeat("Addon", 257).ToArray() })
+{
+    var rejected = false;
+    try { Workbench.ValidateAddons(invalid); } catch (ArgumentException) { rejected = true; }
+    if (!rejected) throw new Exception("Invalid explicit addon accepted");
+}
+Console.WriteLine("PASS explicit addon defaults, deduplication and invalid arguments");
 
 var allocations = new List<nint>();
 nint Alloc(int size) { var p = Marshal.AllocHGlobal(size); Marshal.Copy(new byte[size],0,p,size); allocations.Add(p); return p; }

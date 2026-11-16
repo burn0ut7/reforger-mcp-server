@@ -49,11 +49,12 @@ public sealed class Workbench(Configuration configuration) : IDisposable
         }
     }
 
-    public object OpenProject(string projectPath, CancellationToken cancellationToken)
+    public object OpenProject(string projectPath, CancellationToken cancellationToken, string[]? addons = null)
     {
         lock (gate)
         {
             var config = configuration.Workbench ?? throw new InvalidOperationException("Workbench is not configured.");
+            var selectedAddons = ValidateAddons(addons);
             if (string.IsNullOrWhiteSpace(projectPath) || !Path.IsPathFullyQualified(projectPath))
                 throw new ArgumentException("projectPath must be an absolute path to an existing .gproj file.");
             projectPath = Path.GetFullPath(projectPath);
@@ -85,6 +86,11 @@ public sealed class Workbench(Configuration configuration) : IDisposable
                 start.ArgumentList.Add("-gproj");
                 start.ArgumentList.Add(projectPath);
                 start.ArgumentList.Add("-scriptAuthorizeAll");
+                if (selectedAddons.Length > 0)
+                {
+                    start.ArgumentList.Add("-addons");
+                    start.ArgumentList.Add(string.Join(",", selectedAddons));
+                }
                 if (config.AddonDirectories.Length > 0)
                 {
                     start.ArgumentList.Add("-addonsDir");
@@ -108,6 +114,15 @@ public sealed class Workbench(Configuration configuration) : IDisposable
             }
             finally { if (acquired) launchMutex.ReleaseMutex(); }
         }
+    }
+
+    internal static string[] ValidateAddons(string[]? addons)
+    {
+        if (addons is null) return [];
+        if (addons.Length > 256 || addons.Any(a => string.IsNullOrWhiteSpace(a) || a.Length > 128 ||
+            a.Any(c => !char.IsAsciiLetterOrDigit(c) && c is not ('_' or '-' or '.'))))
+            throw new ArgumentException("addons must contain at most 256 addon IDs or GUIDs, using letters, digits, underscores, hyphens or periods.");
+        return addons.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
     private static string[] MissingInputs(WorkbenchConfiguration config) =>

@@ -97,9 +97,9 @@ internal static partial class NativeWorkbench
         var supportedWorld = world?.EndsWith(".ent", StringComparison.OrdinalIgnoreCase) == true;
         if (ui?.Action == "activate" && (!profile.Limited || ui.WindowHandle == 0))
             throw new InvalidOperationException("Native picker activation requires the validated 1.9 profile and an observed window.");
-        if (profile.Limited && !(projectContext || resourceLeakAssertion is not null || scriptAuthorization is not null || runtimeSetup is not null || extension is not null || runReload || play is not null || supportedWorld || ui is not null && profile.SupportsUi(ui.Action)))
+        if (profile.Limited && !(projectContext || resourceLeakAssertion is not null || scriptAuthorization is not null || runtimeSetup is not null || extension is not null || runReload || play is not null || plugin is not null || supportedWorld || ui is not null && profile.SupportsUi(ui.Action)))
             throw new InvalidOperationException("Workbench 1.9 native profile does not support this editor operation yet. No call dispatched.");
-        if (profile.Limited && (world is not null && !supportedWorld || ui is not null && !profile.SupportsUi(ui.Action) || plugin is not null ||
+        if (profile.Limited && (world is not null && !supportedWorld || ui is not null && !profile.SupportsUi(ui.Action) ||
             entity is not null || childPrefab is not null || choices is not null))
             throw new InvalidOperationException("Workbench 1.9 request includes an unported editor capability. No call dispatched.");
         FocusPolicy(process, "ensure");
@@ -170,7 +170,7 @@ internal static partial class NativeWorkbench
                 if (play is not null)
                     foreach (var rva in new[] { profile.EditorGetter, profile.PlayAction, profile.PlayCore }) CheckCode(exe, rva);
                 if (plugin is not null)
-                    foreach (var rva in new[] { 0x20ea70, 0x2eae90, 0x2e9060, 0x2e9510, 0x2e9770, 0x1e9d100, 0x1f6f0b0, 0x1f6e490, 0x1f6ea40 }) CheckCode(exe, rva);
+                    foreach (var rva in profile.Multiplayer.Code.Prepend(profile.EditorGetter)) CheckCode(exe, rva);
                 // Automatic choices already observed their owning World Editor
                 // window. Process.MainWindowHandle can transiently be zero when
                 // Qt opens/closes a popup; use the exact owner for this operation.
@@ -328,7 +328,7 @@ internal static partial class NativeWorkbench
                 else if (projectContext) EmitProjectContext(cb, exe.BaseAddress, profile);
                 else if (childPrefab is not null) EmitChildPrefab(cb, exe.BaseAddress);
                 else if (entity is not null) EmitEntity(cb, exe.BaseAddress, entity);
-                else if (plugin is not null) EmitPlugin(cb, exe.BaseAddress, plugin);
+                else if (plugin is not null) EmitPlugin(cb, exe.BaseAddress, plugin, profile);
                 else if (play is not null) EmitPlay(cb, exe.BaseAddress, play, profile);
                 else EmitOpenWorld(cb, exe.BaseAddress, world?.EndsWith(".et", StringComparison.OrdinalIgnoreCase) == true, profile);
                 cb.B(0x83, 0x7b, 72, 0); cb.J(0x85, "return");
@@ -630,20 +630,21 @@ internal static partial class NativeWorkbench
         }
         e.Label("uiDone");
     }
-    private static void EmitPlugin(E e, nint image, PluginCommand command)
+    private static void EmitPlugin(E e, nint image, PluginCommand command, MaintenanceProfile profile)
     {
+        var multiplayer = profile.Multiplayer;
         void Call(int rva) { e.B(0x48, 0xb8); e.Q(image + rva); e.B(0xff, 0xd0); }
         // Resolve the existing World Editor and its own loaded plugin instances.
         // No creation, menu traversal, registry substitution, or cached object pointer.
-        e.B(0x48, 0x8b, 0x4b, 16, 0x48, 0xba); e.Q(image + 0x2ba4318); Call(0x20ea70);
+        e.B(0x48, 0x8b, 0x4b, 16, 0x48, 0xba); e.Q(image + profile.EditorName); Call(profile.EditorGetter);
         e.B(0x48, 0x85, 0xc0); e.J(0x84, "pluginDone");
         e.B(0x83, 0x78, 0x24, 1); e.J(0x85, "pluginDone");
         e.B(0x48, 0x89, 0xc1, 0x48, 0x8b, 0x00, 0x31, 0xd2, 0xff, 0x90, 0xd8, 0, 0, 0);
         e.B(0x48, 0x85, 0xc0); e.J(0x84, "pluginDone");
-        e.B(0x48, 0xba); e.Q(image + 0x2ba8d78);
+        e.B(0x48, 0xba); e.Q(image + profile.EditorVtable);
         e.B(0x48, 0x39, 0x10); e.J(0x85, "pluginIncompatible");
         e.B(0x48, 0x8b, 0x40, 0x78, 0x48, 0x85, 0xc0); e.J(0x84, "pluginDone");
-        e.B(0x48, 0xba); e.Q(image + 0x2bab900);
+        e.B(0x48, 0xba); e.Q(image + multiplayer.MenuVtable);
         e.B(0x48, 0x39, 0x10); e.J(0x85, "pluginIncompatible");
         e.B(0x44, 0x8b, 0x58, 0x6c, 0x41, 0x81, 0xfb, 0, 2, 0, 0); e.J(0x87, "pluginIncompatible");
         e.B(0x4c, 0x8b, 0x50, 0x60, 0x45, 0x31, 0xc9);
@@ -665,12 +666,12 @@ internal static partial class NativeWorkbench
             for (var i = 0; i < field.Path.Length; i++)
             {
                 // Engine reflection returns the field storage and its type descriptor.
-                e.B(0x48, 0x8d, 0x93, 0x40, 1, 0, 0, 0x4c, 0x8d, 0x83); e.B(BitConverter.GetBytes(512 + i * 128)); Call(0x1e9d100);
+                e.B(0x48, 0x8d, 0x93, 0x40, 1, 0, 0, 0x4c, 0x8d, 0x83); e.B(BitConverter.GetBytes(512 + i * 128)); Call(multiplayer.Field);
                 e.B(0x48, 0x8b, 0x8b, 0x40, 1, 0, 0, 0x48, 0x85, 0xc9); e.J(0x84, "pluginDone");
                 e.B(0x48, 0x8b, 0x93, 0x48, 1, 0, 0, 0x48, 0x85, 0xd2); e.J(0x84, "pluginDone");
                 if (i < field.Path.Length - 1)
                 {
-                    Call(0x1f6f0b0); e.B(0x48, 0x89, 0xc1, 0x48, 0x85, 0xc9); e.J(0x84, "pluginDone");
+                    Call(multiplayer.Object); e.B(0x48, 0x89, 0xc1, 0x48, 0x85, 0xc9); e.J(0x84, "pluginDone");
                     if (field.PeerIndex is { } index)
                     {
                         e.B(0x83, 0x79, 0x34, (byte)index); e.J(0x86, "pluginDone");
@@ -687,12 +688,12 @@ internal static partial class NativeWorkbench
             e.B(0x8b, 0x42, 16, 0x89, 0x43, 104);
             if (field.Kind == "string")
             {
-                e.B(0x48, 0x89, 0xd1); Call(0x1f6e490); e.B(0x84, 0xc0); e.J(0x84, "pluginDone");
+                e.B(0x48, 0x89, 0xd1); Call(multiplayer.IsString); e.B(0x84, 0xc0); e.J(0x84, "pluginDone");
                 if (command.Action == "set")
                 {
                     // Engine-owned string assignment copies the input and manages lifetime.
                     e.B(0x48, 0x8d, 0x8b, 0, 4, 0, 0, 0x48, 0x8b, 0x93, 0x48, 1, 0, 0,
-                        0x4c, 0x8b, 0x83, 0x40, 1, 0, 0, 0x41, 0xb9, 1, 0, 0, 0); Call(0x1f6ea40);
+                        0x4c, 0x8b, 0x83, 0x40, 1, 0, 0, 0x41, 0xb9, 1, 0, 0, 0); Call(multiplayer.AssignString);
                 }
                 e.B(0x48, 0x8b, 0x83, 0x40, 1, 0, 0, 0x48, 0x8b, 0x00, 0x48, 0x85, 0xc0); e.J(0x84, "fieldSuccess");
                 e.B(0x45, 0x31, 0xc9);
@@ -705,7 +706,7 @@ internal static partial class NativeWorkbench
             {
                 if (field.Kind == "process")
                 {
-                    e.B(0x3d, 0xad, 1, 0, 0x20); e.J(0x85, "pluginDone");
+                    e.B(0x3d); e.B(BitConverter.GetBytes(multiplayer.ProcessType)); e.J(0x85, "pluginDone");
                     e.B(0x48, 0x8b, 0x01, 0x48, 0x89, 0x43, 112);
                     if (command.Action == "clear_closed_server")
                     {
@@ -719,7 +720,7 @@ internal static partial class NativeWorkbench
                 }
                 else if (field.Kind == "array")
                 {
-                    Call(0x1f6f0b0); e.B(0x48, 0x85, 0xc0); e.J(0x84, "fieldSuccess");
+                    Call(multiplayer.Object); e.B(0x48, 0x85, 0xc0); e.J(0x84, "fieldSuccess");
                     e.B(0x48, 0x89, 0x43, 112, 0x8b, 0x40, 0x34, 0x89, 0x43, 108);
                 }
                 else
@@ -741,10 +742,10 @@ internal static partial class NativeWorkbench
             // Only this plugin receives the event; no editor Play state is changed.
             e.B(0x48, 0x8d, 0x93, 0, 1, 0, 0, 0x4c, 0x8d, 0x83, 8, 1, 0, 0, 0x45, 0x31, 0xc9,
                 0x48, 0x8d, 0x83, 0x20, 1, 0, 0, 0x48, 0x89, 0x44, 0x24, 0x20, 0x48, 0x89, 0x44, 0x24, 0x28);
-            Call(0x2e9770);
+            Call(multiplayer.Start);
         }
         else if (command.Action != "status")
-            Call(command.Action switch { "run" => 0x2eae90, "configure" => 0x2e9060, "stop" => 0x2e9510, _ => throw new ArgumentException("Invalid plugin action") });
+            Call(command.Action switch { "run" => multiplayer.Run, "configure" => multiplayer.Configure, "stop" => multiplayer.Stop, _ => throw new ArgumentException("Invalid plugin action") });
         e.B(0xc7, 0x43, 68, 1, 0, 0, 0); e.J(0x84, "pluginDone", true);
         e.Label("pluginNext"); e.B(0x41, 0xff, 0xc1); e.J(0x84, "pluginLoop", true);
         e.Label("pluginIncompatible"); e.B(0xc7, 0x43, 72, 4, 0, 0, 0);

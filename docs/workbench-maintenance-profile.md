@@ -1,5 +1,7 @@
 # Workbench 1.9 maintenance profile
 
+Dedicated/Peer Tool dispatch and reflected settings now use the versioned multiplayer profile. See [multiplayer provenance and current-version validation](workbench-multiplayer.md#workbench-19037) for exact RVAs, layout evidence, local dedicated-server/two-client results and remaining Peer Tool coverage limits.
+
 The exact 1.9.0.37 executable (SHA256 456a3e4e3b55f47d89c09e4364df78d9a0b1f7348bdc2354cce3b34e1db70b28) supports project context, focus policy, script authorization and the resource-leak assertion policy. The editor migration below adds individually verified capabilities; the complete legacy 1.8 profile remains separate. Unported editor operations reject dispatch.
 
 ## Editor migration

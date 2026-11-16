@@ -15,6 +15,7 @@ internal static partial class NativeWorkbench
     {
         internal int ReloadBlockedOffset => Limited ? 0x1656 : 0x164e;
         internal ArrayAddProfile Arrays => Limited ? ArrayAddProfile.Current : ArrayAddProfile.Legacy;
+        internal MultiplayerProfile Multiplayer => Limited ? MultiplayerProfile.Current : MultiplayerProfile.Legacy;
         // Array add additionally uses this exact binary's validated RTTI/owner profile.
         internal bool SupportsUi(string action) => !Limited || action is
             "close" or "invoke" or "menu" or "toggle" or "set_text" or "finish_edit" or

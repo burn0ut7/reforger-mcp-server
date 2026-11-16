@@ -34,8 +34,10 @@ public sealed class WorkbenchTools(Workbench workbench, PakStore store)
     public object Terminate(int processId) => Report(() => workbench.Terminate(processId));
 
     [McpServerTool(Name = "workbench_open_project", ReadOnly = false, Destructive = false, OpenWorld = true)]
-    [Description("Launch existing absolute .gproj with -scriptAuthorizeAll (Yes to All for protected script operations); refuses if Workbench is running. Started process does not establish project readiness.")]
+    [Description("Launch existing absolute .gproj with -scriptAuthorizeAll; optional addons supplies explicit additional addon IDs/GUIDs without editing project dependencies. Refuses if Workbench is running. Started process does not establish project readiness.")]
     public object OpenProject(
         [Description("Absolute path to the addon .gproj file; paths with spaces are supported.")] string projectPath,
-        CancellationToken cancellationToken = default) => Report(() => workbench.OpenProject(projectPath, cancellationToken));
+        CancellationToken cancellationToken = default,
+        [Description("Optional additional addon IDs or GUIDs passed as -addons. Must be available in configured addonDirectories; native dependencies still apply.")] string[]? addons = null)
+        => Report(() => workbench.OpenProject(projectPath, cancellationToken, addons));
 }
