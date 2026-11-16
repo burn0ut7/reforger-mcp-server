@@ -131,7 +131,8 @@ public sealed class WorkbenchWindows(Configuration configuration)
         if (hasMenu && (type == ControlType.MenuItem || type == ControlType.Button)) actions.Add("menu");
         else if ((type == ControlType.Button || type == ControlType.MenuItem || type == ControlType.Hyperlink) &&
             e.TryGetCurrentPattern(InvokePattern.Pattern, out _)) actions.Add("invoke");
-        if (type == ControlType.CheckBox && e.TryGetCurrentPattern(TogglePattern.Pattern, out _)) actions.Add("toggle");
+        if ((type == ControlType.CheckBox || type == ControlType.RadioButton) &&
+            e.TryGetCurrentPattern(TogglePattern.Pattern, out _)) actions.Add("toggle");
         if (type == ControlType.TreeItem)
         {
             if (e.TryGetCurrentPattern(SelectionItemPattern.Pattern, out _)) actions.Add("select");
